@@ -1,6 +1,6 @@
 package chat.rocket.common.util
 
-class Logger(var platformLogger: PlatformLogger) {
+class Logger(val platformLogger: PlatformLogger) {
 
     val enabled: Boolean = true
 

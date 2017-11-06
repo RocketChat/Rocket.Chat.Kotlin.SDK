@@ -1,12 +1,11 @@
 package rocket.chat.kotlin.sample
 
+import chat.rocket.common.model.BaseRoom
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenProvider
-import chat.rocket.core.internal.rest.login
-import chat.rocket.core.internal.rest.pinMessage
-import chat.rocket.core.internal.rest.serverInfo
+import chat.rocket.core.internal.rest.*
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -34,13 +33,13 @@ fun main(args:Array<String>) {
 
     val client = RocketChatClient.create {
         httpClient = okHttpClient
-        restUrl = HttpUrl.parse("https://demo.rocket.chat/")!!
-        websocketUrl = "wss://demo.rocket.chat/websocket"
-        tokenProvider = MyTokenProvider()
+        restUrl = HttpUrl.parse("http://localhost:3000/")!!
+        websocketUrl = "ws://localhost:3000/websocket"
+        tokenProvider = SimpleTokenProvider()
         platformLogger = logger
     }
 
-    client.login("username", "password", success = {
+    client.login("testuser", "testpass", success = {
         logger.debug("Login: ${it.userId} - ${it.authToken}")
         pinMessage(client)
     }, error = {
@@ -60,9 +59,15 @@ fun pinMessage(client: RocketChatClient) {
     }, error = {
         println(it.message!!)
     })
+
+    client.getRoomFavoriteMessages("GENERAL", BaseRoom.RoomType.PUBLIC, 0, success = {
+        messages, _ -> for (message in messages) println(message)
+    }, error = {
+        println(it.message!!)
+    })
 }
 
-class MyTokenProvider : TokenProvider {
+class SimpleTokenProvider : TokenProvider {
     var savedToken: Token? = null
     override fun save(token: Token) {
         savedToken = token

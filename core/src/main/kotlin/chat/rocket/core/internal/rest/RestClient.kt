@@ -3,6 +3,7 @@ package chat.rocket.core.internal.rest
 import chat.rocket.common.*
 import chat.rocket.common.internal.AuthenticationErrorMessage
 import chat.rocket.common.internal.ErrorMessage
+import chat.rocket.common.model.BaseRoom
 import chat.rocket.common.model.ServerInfo
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.Logger
@@ -21,7 +22,15 @@ fun RocketChatClient.serverInfo(success: (ServerInfo) -> Unit, error: (RocketCha
 
     val request = Request.Builder().url(url).get().build()
 
-    handleSimpleRestCall(this, request, ServerInfo::class.java, success, error)
+    handleRestCall(this, request, ServerInfo::class.java, success, error)
+}
+
+internal fun getRestApiMethodNameByRoomType(roomType: BaseRoom.RoomType, method: String): String {
+    when (roomType) {
+        BaseRoom.RoomType.PUBLIC -> return "channels." + method
+        BaseRoom.RoomType.PRIVATE -> return "groups." + method
+        else -> return "dm." + method
+    }
 }
 
 internal fun requestUrl(baseUrl: HttpUrl, method: String): HttpUrl.Builder {
@@ -43,9 +52,9 @@ fun RocketChatClient.requestBuilder(httpUrl: HttpUrl): Request.Builder {
     return builder
 }
 
-internal fun <T> handleSimpleRestCall(client: RocketChatClient, request: Request,
-                                      type: Type, valueCallback: (T) -> Unit,
-                                      errorCallback: (RocketChatException) -> Unit) {
+internal fun <T> handleRestCall(client: RocketChatClient, request: Request,
+                                type: Type, valueCallback: (T) -> Unit,
+                                errorCallback: (RocketChatException) -> Unit) {
     client.httpClient.newCall(request).enqueue(object : okhttp3.Callback {
         override fun onFailure(call: Call, e: IOException) {
             errorCallback.invoke(RocketChatNetworkErrorException("network error", e))
