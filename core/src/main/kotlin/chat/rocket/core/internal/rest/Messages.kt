@@ -1,9 +1,9 @@
 package chat.rocket.core.internal.rest
 
 import chat.rocket.common.RocketChatException
-import chat.rocket.common.internal.RestResult
 import chat.rocket.common.model.BaseRoom
 import chat.rocket.core.RocketChatClient
+import chat.rocket.core.internal.RestResult
 import chat.rocket.core.model.Message
 import com.squareup.moshi.Types
 import okhttp3.FormBody

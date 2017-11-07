@@ -1,9 +1,11 @@
-package chat.rocket.common.internal;
+package chat.rocket.core.internal;
 
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonReader;
 import com.squareup.moshi.JsonWriter;
 import com.squareup.moshi.Moshi;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -19,7 +21,7 @@ public class RestResult<T> {
     @Nullable private Long offset = null;
     @Nullable private Long count = null;
 
-    RestResult(T data, Long total, Long offset, Long count) {
+    RestResult(T data, @Nullable Long total, @Nullable Long offset, @Nullable Long count) {
         this._result = data;
         this.total = total;
         this.offset = offset;
@@ -49,7 +51,8 @@ public class RestResult<T> {
     }
 
     public static class MoshiJsonAdapter<T> extends JsonAdapter<RestResult<T>> {
-        private static final String[] NAMES = new String[] {"status", "success", "total", "offset", "count"};
+        private static final String[] NAMES = new String[] {"status", "success", "total",
+                "offset", "count"};
         private static final JsonReader.Options OPTIONS = JsonReader.Options.of(NAMES);
         private final JsonAdapter<T> tAdaptper;
 
@@ -59,7 +62,7 @@ public class RestResult<T> {
 
         @Nullable
         @Override
-        public RestResult<T> fromJson(JsonReader reader) throws IOException {
+        public RestResult<T> fromJson(@NotNull JsonReader reader) throws IOException {
             reader.beginObject();
             T result = null;
             Long total = null;
@@ -69,7 +72,7 @@ public class RestResult<T> {
                 switch (reader.selectName(OPTIONS)) {
                     case 0:
                     case 1: {
-                        // Just ignore status or success value, since this is for parsing 200 OK messages
+                        // Just ignore status or success value, we are parsing 200 OK messages
                         reader.skipValue();
                         break;
                     }
@@ -88,7 +91,8 @@ public class RestResult<T> {
                     case -1: {
                         reader.nextName();
                         JsonReader.Token token = reader.peek();
-                        if (token == JsonReader.Token.BEGIN_ARRAY || token == JsonReader.Token.BEGIN_OBJECT) {
+                        if (token == JsonReader.Token.BEGIN_ARRAY
+                                || token == JsonReader.Token.BEGIN_OBJECT) {
                             result = this.tAdaptper.fromJson(reader);
                         } else {
                             reader.skipValue();
@@ -101,7 +105,8 @@ public class RestResult<T> {
         }
 
         @Override
-        public void toJson(JsonWriter writer, @Nullable RestResult<T> value) throws IOException {
+        public void toJson(@NotNull JsonWriter writer, @Nullable RestResult<T> value)
+                throws IOException {
 
         }
 
@@ -113,12 +118,15 @@ public class RestResult<T> {
     public static class JsonAdapterFactory implements JsonAdapter.Factory {
         @Nullable
         @Override
-        public JsonAdapter<?> create(Type type, Set<? extends Annotation> annotations, Moshi moshi) {
+        public JsonAdapter<?> create(@NotNull Type type,
+                                     @NotNull Set<? extends Annotation> annotations,
+                                     @NotNull Moshi moshi) {
             if (!annotations.isEmpty()) return null;
             if (type instanceof ParameterizedType) {
                 Type rawType = ((ParameterizedType) type).getRawType();
                 if (rawType.equals(RestResult.class)) {
-                    return new RestResult.MoshiJsonAdapter(moshi, ((ParameterizedType) type).getActualTypeArguments());
+                    return new RestResult.MoshiJsonAdapter(moshi,
+                            ((ParameterizedType) type).getActualTypeArguments());
                 }
             }
             return null;

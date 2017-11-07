@@ -4,7 +4,6 @@ import com.squareup.moshi.Json
 
 interface BaseUser {
     val username: String?
-    val roles: List<String>?
 
     enum class Status {
         @Json(name = "online")

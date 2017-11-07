@@ -7,10 +7,15 @@ import chat.rocket.common.model.BaseRoom
 import chat.rocket.common.model.ServerInfo
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.Logger
+import chat.rocket.common.util.ifNull
 import chat.rocket.core.RocketChatClient
 import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
-import okhttp3.*
+import okhttp3.Call
+import okhttp3.HttpUrl
+import okhttp3.Request
+import okhttp3.Response
 import java.io.IOException
 import java.lang.reflect.Type
 
@@ -60,18 +65,34 @@ internal fun <T> handleRestCall(client: RocketChatClient, request: Request,
             errorCallback.invoke(RocketChatNetworkErrorException("network error", e))
         }
 
-        @Throws(IOException::class) override fun onResponse(call: Call, response: Response) {
+        @Throws(IOException::class)
+        override fun onResponse(call: Call, response: Response) {
             if (!response.isSuccessful) {
                 errorCallback.invoke(processCallbackError(client.moshi, response, client.logger))
                 return
             }
 
             try {
-                val adapter: JsonAdapter<T>? = client.moshi.adapter(type)
-                val data : T = adapter!!.fromJson(response.body()!!.source())!!
-                valueCallback.invoke(data)
-            } catch (e: IOException) {
-                errorCallback.invoke(RocketChatInvalidResponseException(e.message!!, e))
+                // Override nullability, if there is no adapter, moshi will throw...
+                val adapter: JsonAdapter<T> = client.moshi.adapter(type)!!
+
+                response.body()?.let {
+                    it.source()
+                }?.let {
+                    adapter.fromJson(it)
+                }?.let(valueCallback).ifNull {
+                    errorCallback.invoke(RocketChatInvalidResponseException("Error parsing JSON message"))
+                }
+            } catch (ex: Exception) {
+                // kinda of multicatch exception...
+                when(ex) {
+                    is JsonDataException,
+                    is IllegalArgumentException,
+                    is IOException -> {
+                        errorCallback.invoke(RocketChatInvalidResponseException(ex.message!!, ex))
+                    }
+                    else -> throw ex
+                }
             }
         }
     })

@@ -6,4 +6,16 @@ interface PlatformLogger {
     fun info(s: String)
 
     fun warn(s: String)
+
+    class NoOpLogger : PlatformLogger {
+        override fun debug(s: String) {
+        }
+
+        override fun info(s: String) {
+        }
+
+        override fun warn(s: String) {
+        }
+
+    }
 }

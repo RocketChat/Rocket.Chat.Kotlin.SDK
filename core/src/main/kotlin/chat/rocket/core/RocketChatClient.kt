@@ -1,11 +1,11 @@
 package chat.rocket.core
 
 import chat.rocket.common.internal.ISO8601Date
-import chat.rocket.common.internal.RestResult
 import chat.rocket.common.model.TimestampAdapter
 import chat.rocket.common.util.CalendarISO8601Converter
 import chat.rocket.common.util.Logger
 import chat.rocket.common.util.PlatformLogger
+import chat.rocket.core.internal.RestResult
 import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
 import okhttp3.HttpUrl
