@@ -30,7 +30,7 @@ class LoginTest {
     private lateinit var sut: RocketChatClient
 
     @Mock
-    private lateinit var provider: TokenProvider
+    private lateinit var tokenProvider: TokenProvider
 
     private val authToken = Token("userId", "authToken")
 
@@ -47,11 +47,11 @@ class LoginTest {
             httpClient = client
             restUrl = baseUrl!!
             websocketUrl = "not needed"
-            tokenProvider = provider
+            tokenProvider = this@LoginTest.tokenProvider
             platformLogger = PlatformLogger.NoOpLogger()
         }
 
-        `when`(provider.get()).thenReturn(authToken)
+        `when`(tokenProvider.get()).thenReturn(authToken)
     }
 
     @Test
@@ -67,15 +67,13 @@ class LoginTest {
 
         sut.login("username", "password", success, error)
 
-        //latch.await(1000, TimeUnit.MILLISECONDS)
-        //println("final token: ${authToken}")
         verify(success, timeout(2000).times(1)).invoke(check {
             assertThat(it, isEqualTo(authToken))
             assertThat(it.userId, isEqualTo("userId"))
             assertThat(it.authToken, isEqualTo("authToken"))
         })
 
-        verify(provider).save(check {
+        verify(tokenProvider).save(check {
             assertThat(it.userId, isEqualTo("userId"))
             assertThat(it.authToken, isEqualTo("authToken"))
         })
@@ -84,7 +82,7 @@ class LoginTest {
     }
 
     @Test
-    fun `Login should fail with worng credentials`() {
+    fun `Login should fail with wrong credentials`() {
         val success: (Token) -> Unit = mock()
         val error: (RocketChatException) -> Unit = mock()
 
@@ -102,7 +100,7 @@ class LoginTest {
         })
 
         verify(success, never()).invoke(check {  })
-        verify(provider, never()).save(check {  })
+        verify(tokenProvider, never()).save(check {  })
     }
 
     @Test
@@ -125,7 +123,7 @@ class LoginTest {
         })
 
         verify(success, never()).invoke(check {  })
-        verify(provider, never()).save(check {  })
+        verify(tokenProvider, never()).save(check {  })
     }
 
     @Test
@@ -140,6 +138,6 @@ class LoginTest {
         })
 
         verify(success, never()).invoke(check {  })
-        verify(provider, never()).save(check {  })
+        verify(tokenProvider, never()).save(check {  })
     }
 }
