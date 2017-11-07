@@ -1,4 +1,4 @@
 package chat.rocket.common
 
 
-class RocketChatApiException(error: Int, message: String, errorType: String) : RocketChatException(message)
+class RocketChatApiException(val errorType: String, message: String, cause: Throwable? = null) : RocketChatException(message, cause)
