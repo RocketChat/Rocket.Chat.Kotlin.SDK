@@ -78,7 +78,7 @@ class LoginTest {
             assertThat(it.authToken, isEqualTo("authToken"))
         })
 
-        verify(error, never()).invoke(check {  })
+        verify(error, never()).invoke(check { })
     }
 
     @Test

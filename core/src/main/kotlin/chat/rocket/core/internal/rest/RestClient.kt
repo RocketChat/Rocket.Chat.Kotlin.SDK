@@ -27,7 +27,7 @@ fun RocketChatClient.serverInfo(success: (ServerInfo) -> Unit, error: (RocketCha
 
     val request = Request.Builder().url(url).get().build()
 
-    handleRestCall(this, request, ServerInfo::class.java, success, error)
+    handleRestCall(request, ServerInfo::class.java, success, error)
 }
 
 internal fun getRestApiMethodNameByRoomType(roomType: BaseRoom.RoomType, method: String): String {
@@ -57,10 +57,10 @@ fun RocketChatClient.requestBuilder(httpUrl: HttpUrl): Request.Builder {
     return builder
 }
 
-internal fun <T> handleRestCall(client: RocketChatClient, request: Request,
+internal fun <T> RocketChatClient.handleRestCall(request: Request,
                                 type: Type, valueCallback: (T) -> Unit,
                                 errorCallback: (RocketChatException) -> Unit) {
-    client.httpClient.newCall(request).enqueue(object : okhttp3.Callback {
+    httpClient.newCall(request).enqueue(object : okhttp3.Callback {
         override fun onFailure(call: Call, e: IOException) {
             errorCallback.invoke(RocketChatNetworkErrorException("network error", e))
         }
@@ -68,13 +68,13 @@ internal fun <T> handleRestCall(client: RocketChatClient, request: Request,
         @Throws(IOException::class)
         override fun onResponse(call: Call, response: Response) {
             if (!response.isSuccessful) {
-                errorCallback.invoke(processCallbackError(client.moshi, response, client.logger))
+                errorCallback.invoke(processCallbackError(moshi, response, logger))
                 return
             }
 
             try {
                 // Override nullability, if there is no adapter, moshi will throw...
-                val adapter: JsonAdapter<T> = client.moshi.adapter(type)!!
+                val adapter: JsonAdapter<T> = moshi.adapter(type)!!
 
                 response.body()?.let {
                     it.source()

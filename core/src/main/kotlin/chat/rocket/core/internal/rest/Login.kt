@@ -20,7 +20,7 @@ fun RocketChatClient.login(username: String, password: String, success: (Token) 
     val request = Request.Builder().url(url).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
-    handleRestCall<RestResult<Token>>(this, request, type, {
+    handleRestCall<RestResult<Token>>(request, type, {
         tokenProvider.save(it.result())
         success.invoke(it.result())
     }, error)
