@@ -110,13 +110,13 @@ private fun processCallbackError(moshi: Moshi, response: Response, logger: Logge
         } else {
             val adapter: JsonAdapter<ErrorMessage>? = moshi.adapter(ErrorMessage::class.java)
             val message = adapter?.fromJson(body)
-            exception = RocketChatApiException(response.code(), message?.error ?: "error",
-                    message?.errorType ?: "errorType")
+            exception = RocketChatApiException(message?.errorType ?: response.code().toString(),
+                    message?.error ?: "unknown error")
         }
     } catch (e: IOException) {
-        exception = RocketChatException(e.message!!, e)
+        exception = RocketChatApiException(response.code().toString(), e.message!!, e)
     } catch (e: NullPointerException) {
-        exception = RocketChatException(e.message!!, e)
+        exception = RocketChatApiException(response.code().toString(), e.message!!, e)
     }
 
     return exception

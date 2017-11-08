@@ -1,9 +1,11 @@
 package chat.rocket.core.internal.rest
 
+import chat.rocket.common.RocketChatApiException
 import chat.rocket.common.RocketChatAuthException
 import chat.rocket.common.RocketChatException
 import chat.rocket.common.RocketChatInvalidResponseException
 import chat.rocket.common.model.Token
+import chat.rocket.common.model.User
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenProvider
@@ -62,7 +64,7 @@ class LoginTest {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/login")
-                .andReturn(200, "{\"status\": \"success\",\"data\": {\"authToken\": \"authToken\",\"userId\": \"userId\"}}")
+                .andReturn(200, LOGIN_SUCCESS)
                 .once()
 
         sut.login("username", "password", success, error)
@@ -82,14 +84,14 @@ class LoginTest {
     }
 
     @Test
-    fun `Login should fail with wrong credentials`() {
+    fun `Login should fail with RocketChatAuthException on wrong credentials`() {
         val success: (Token) -> Unit = mock()
         val error: (RocketChatException) -> Unit = mock()
 
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/login")
-                .andReturn(401, "{\"status\": \"error\",\"message\": \"Unauthorized\"}")
+                .andReturn(401, LOGIN_ERROR)
                 .once()
 
         sut.login("wronguser", "wrongpass", success, error)
@@ -104,7 +106,7 @@ class LoginTest {
     }
 
     @Test
-    fun `Login should fail on invalid response`() {
+    fun `Login should fail with RocketChatInvalidResponseException on invalid response`() {
         val success: (Token) -> Unit = mock()
         val error: (RocketChatException) -> Unit = mock()
 
@@ -127,17 +129,81 @@ class LoginTest {
     }
 
     @Test
-    fun `Login should fail when response is not 200 OK`() {
+    fun `Login should fail with RocketChatApiException when response is not 200 OK`() {
         val success: (Token) -> Unit = mock()
         val error: (RocketChatException) -> Unit = mock()
 
         sut.login("user", "pass", success, error)
 
         verify(error, timeout(2000).times(1)).invoke(check {
-            assertThat(it, isEqualTo(instanceOf(RocketChatException::class.java)))
+            assertThat(it, isEqualTo(instanceOf(RocketChatApiException::class.java)))
         })
 
         verify(success, never()).invoke(check {  })
         verify(tokenProvider, never()).save(check {  })
+    }
+
+    @Test
+    fun `Register should succeed with valid parameters`() {
+        val success: (User) -> Unit = mock()
+        val error: (RocketChatException) -> Unit = mock()
+
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.register")
+                .andReturn(200, REGISTER_SUCCESS)
+                .once()
+
+        sut.signup("test@email.com", "Test User", "testuser",
+                "password", success, error)
+
+        verify(success, timeout(DEFAULT_TIMEOUT).times(1)).invoke(check {
+            val user = it
+            assertThat(user.id, isEqualTo("userId"))
+        })
+    }
+
+    @Test
+    fun `Register should fail with RocketChatApiException if email is already in use`() {
+        val success: (User) -> Unit = mock()
+        val error: (RocketChatException) -> Unit = mock()
+
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.register")
+                .andReturn(403, REGISTER_FAIL_EMAIL_IN_USE)
+                .once()
+
+        sut.signup("test@email.com", "Test User", "testuser",
+                "password", success, error)
+
+        verify(error, timeout(DEFAULT_TIMEOUT).times(1)).invoke(check {
+            assertThat(it, isEqualTo(instanceOf(RocketChatApiException::class.java)))
+            val ex = it as RocketChatApiException
+            assertThat(ex.errorType, isEqualTo("403"))
+            assertThat(ex.message, isEqualTo("Email already exists. [403]"))
+        })
+    }
+
+    @Test
+    fun `Register should fail with RocketChatApiException if username is already in use`() {
+        val success: (User) -> Unit = mock()
+        val error: (RocketChatException) -> Unit = mock()
+
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.register")
+                .andReturn(403, REGISTER_FAIL_USER_IN_USE)
+                .once()
+
+        sut.signup("test@email.com", "Test User", "testuser",
+                "password", success, error)
+
+        verify(error, timeout(DEFAULT_TIMEOUT).times(1)).invoke(check {
+            assertThat(it, isEqualTo(instanceOf(RocketChatApiException::class.java)))
+            val ex = it as RocketChatApiException
+            assertThat(ex.errorType, isEqualTo("error-field-unavailable"))
+            assertThat(ex.message, isEqualTo("<strong>testuser</strong> is already in use :( [error-field-unavailable]"))
+        })
     }
 }
