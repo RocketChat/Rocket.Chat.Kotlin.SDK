@@ -42,7 +42,6 @@ class TimestampAdapter(private val dateConverter: ISO8601Converter) : JsonAdapte
                 } catch (e: ParseException) {
                     throw IOException("Error parsing date: " + result!!, e)
                 }
-
             }
         }
         return timestamp

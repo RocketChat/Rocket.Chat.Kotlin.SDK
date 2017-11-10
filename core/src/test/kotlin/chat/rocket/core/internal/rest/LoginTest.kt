@@ -21,8 +21,10 @@ import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Test
-import org.mockito.*
-import org.mockito.Mockito.*
+import org.mockito.Mock
+import org.mockito.Mockito.`when`
+import org.mockito.Mockito.never
+import org.mockito.MockitoAnnotations
 import org.hamcrest.CoreMatchers.`is` as isEqualTo
 
 class LoginTest {
@@ -101,8 +103,8 @@ class LoginTest {
             assertThat(it.message, isEqualTo("Unauthorized"))
         })
 
-        verify(success, never()).invoke(check {  })
-        verify(tokenProvider, never()).save(check {  })
+        verify(success, never()).invoke(check { })
+        verify(tokenProvider, never()).save(check { })
     }
 
     @Test
@@ -124,8 +126,8 @@ class LoginTest {
             assertThat(it.cause, isEqualTo(instanceOf(JsonEncodingException::class.java)))
         })
 
-        verify(success, never()).invoke(check {  })
-        verify(tokenProvider, never()).save(check {  })
+        verify(success, never()).invoke(check { })
+        verify(tokenProvider, never()).save(check { })
     }
 
     @Test
@@ -139,8 +141,8 @@ class LoginTest {
             assertThat(it, isEqualTo(instanceOf(RocketChatApiException::class.java)))
         })
 
-        verify(success, never()).invoke(check {  })
-        verify(tokenProvider, never()).save(check {  })
+        verify(success, never()).invoke(check { })
+        verify(tokenProvider, never()).save(check { })
     }
 
     @Test

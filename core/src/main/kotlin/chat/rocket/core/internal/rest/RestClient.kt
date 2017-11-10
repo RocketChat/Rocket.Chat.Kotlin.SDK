@@ -1,6 +1,10 @@
 package chat.rocket.core.internal.rest
 
-import chat.rocket.common.*
+import chat.rocket.common.RocketChatApiException
+import chat.rocket.common.RocketChatAuthException
+import chat.rocket.common.RocketChatException
+import chat.rocket.common.RocketChatInvalidResponseException
+import chat.rocket.common.RocketChatNetworkErrorException
 import chat.rocket.common.internal.AuthenticationErrorMessage
 import chat.rocket.common.internal.ErrorMessage
 import chat.rocket.common.model.BaseRoom
@@ -45,7 +49,7 @@ internal fun requestUrl(baseUrl: HttpUrl, method: String): HttpUrl.Builder {
             .addPathSegment(method)
 }
 
-fun RocketChatClient.requestBuilder(httpUrl: HttpUrl): Request.Builder {
+internal fun RocketChatClient.requestBuilder(httpUrl: HttpUrl): Request.Builder {
     val builder = Request.Builder().url(httpUrl)
 
     val token: Token? = tokenProvider.get()
@@ -85,7 +89,7 @@ internal fun <T> RocketChatClient.handleRestCall(request: Request,
                 }
             } catch (ex: Exception) {
                 // kinda of multicatch exception...
-                when(ex) {
+                when (ex) {
                     is JsonDataException,
                     is IllegalArgumentException,
                     is IOException -> {
@@ -98,11 +102,11 @@ internal fun <T> RocketChatClient.handleRestCall(request: Request,
     })
 }
 
-private fun processCallbackError(moshi: Moshi, response: Response, logger: Logger) : RocketChatException {
+internal fun processCallbackError(moshi: Moshi, response: Response, logger: Logger): RocketChatException {
     var exception: RocketChatException
     try {
         val body = response.body()?.string() ?: "missing body"
-        logger.debug {"Error body: ${body}"}
+        logger.debug { "Error body: $body" }
         if (response.code() == 401) {
             val adapter: JsonAdapter<AuthenticationErrorMessage>? = moshi.adapter(AuthenticationErrorMessage::class.java)
             val message: AuthenticationErrorMessage? = adapter?.fromJson(body)

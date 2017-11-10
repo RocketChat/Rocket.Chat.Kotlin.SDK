@@ -5,12 +5,15 @@ import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenProvider
-import chat.rocket.core.internal.rest.*
+import chat.rocket.core.internal.rest.getRoomFavoriteMessages
+import chat.rocket.core.internal.rest.login
+import chat.rocket.core.internal.rest.pinMessage
+import chat.rocket.core.internal.rest.serverInfo
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 
-fun main(args:Array<String>) {
+fun main(args: Array<String>) {
     val logger = object : PlatformLogger {
         override fun debug(s: String) {
             println(s)
@@ -23,7 +26,6 @@ fun main(args:Array<String>) {
         override fun warn(s: String) {
             println(s)
         }
-
     }
 
     val interceptor = HttpLoggingInterceptor()
@@ -43,6 +45,7 @@ fun main(args:Array<String>) {
         logger.debug("Login: ${it.userId} - ${it.authToken}")
         pinMessage(client)
     }, error = {
+        it.printStackTrace()
         logger.debug(it.message!!)
     })
 
@@ -68,7 +71,7 @@ fun pinMessage(client: RocketChatClient) {
 }
 
 class SimpleTokenProvider : TokenProvider {
-    var savedToken: Token? = null
+    private var savedToken: Token? = null
     override fun save(token: Token) {
         savedToken = token
     }
@@ -76,5 +79,4 @@ class SimpleTokenProvider : TokenProvider {
     override fun get(): Token? {
         return savedToken
     }
-
 }

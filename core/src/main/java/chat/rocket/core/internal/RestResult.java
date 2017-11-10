@@ -21,7 +21,7 @@ public class RestResult<T> {
     @Nullable private Long offset = null;
     @Nullable private Long count = null;
 
-    RestResult(T data, @Nullable Long total, @Nullable Long offset, @Nullable Long count) {
+    private RestResult(T data, @Nullable Long total, @Nullable Long offset, @Nullable Long count) {
         this._result = data;
         this.total = total;
         this.offset = offset;
@@ -46,7 +46,7 @@ public class RestResult<T> {
         return count;
     }
 
-    public static <T> RestResult<T> create(T data, Long total, Long offset, Long count) {
+    static <T> RestResult<T> create(T data, Long total, Long offset, Long count) {
         return new RestResult<T>(data, total, offset, count);
     }
 
@@ -56,7 +56,7 @@ public class RestResult<T> {
         private static final JsonReader.Options OPTIONS = JsonReader.Options.of(NAMES);
         private final JsonAdapter<T> tAdaptper;
 
-        public MoshiJsonAdapter(Moshi moshi, Type[] types) {
+        MoshiJsonAdapter(Moshi moshi, Type[] types) {
             this.tAdaptper = adapter(moshi, types[0]);
         }
 
@@ -110,7 +110,7 @@ public class RestResult<T> {
 
         }
 
-        private JsonAdapter adapter(Moshi moshi, Type adapterType) {
+        private JsonAdapter<T> adapter(Moshi moshi, Type adapterType) {
             return moshi.adapter(adapterType);
         }
     }

@@ -12,6 +12,10 @@ import okhttp3.MediaType
 import okhttp3.Request
 import okhttp3.RequestBody
 
+/**
+ * Login with username and password
+ *
+ */
 fun RocketChatClient.login(username: String, password: String, success: (Token) -> Unit,
                            error: (RocketChatException) -> Unit) {
     val body = FormBody.Builder()

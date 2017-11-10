@@ -39,7 +39,7 @@ class RocketChatClient private constructor(var httpClient: OkHttpClient,
         lateinit var httpClient: OkHttpClient
         lateinit var restUrl: HttpUrl
         lateinit var websocketUrl: String
-        lateinit var tokenProvider : TokenProvider
+        lateinit var tokenProvider: TokenProvider
         lateinit var platformLogger: PlatformLogger
 
         fun httpClient(init: Builder.() -> OkHttpClient) = apply { httpClient = init() }
