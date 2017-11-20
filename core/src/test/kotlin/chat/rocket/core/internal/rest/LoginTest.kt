@@ -19,6 +19,7 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -59,7 +60,7 @@ class LoginTest {
     }
 
     @Test
-    fun `Login should succeed with right credentials`() {
+    fun `login() should succeed with right credentials`() {
         val success: (Token) -> Unit = mock()
         val error: (RocketChatException) -> Unit = mock()
 
@@ -71,7 +72,7 @@ class LoginTest {
 
         sut.login("username", "password", success, error)
 
-        verify(success, timeout(2000).times(1)).invoke(check {
+        verify(success, timeout(DEFAULT_TIMEOUT).times(1)).invoke(check {
             assertThat(it, isEqualTo(authToken))
             assertThat(it.userId, isEqualTo("userId"))
             assertThat(it.authToken, isEqualTo("authToken"))
@@ -86,7 +87,7 @@ class LoginTest {
     }
 
     @Test
-    fun `Login should fail with RocketChatAuthException on wrong credentials`() {
+    fun `login() should fail with RocketChatAuthException on wrong credentials`() {
         val success: (Token) -> Unit = mock()
         val error: (RocketChatException) -> Unit = mock()
 
@@ -98,7 +99,7 @@ class LoginTest {
 
         sut.login("wronguser", "wrongpass", success, error)
 
-        verify(error, timeout(2000).times(1)).invoke(check {
+        verify(error, timeout(DEFAULT_TIMEOUT).times(1)).invoke(check {
             assertThat(it, isEqualTo(instanceOf(RocketChatAuthException::class.java)))
             assertThat(it.message, isEqualTo("Unauthorized"))
         })
@@ -108,7 +109,7 @@ class LoginTest {
     }
 
     @Test
-    fun `Login should fail with RocketChatInvalidResponseException on invalid response`() {
+    fun `login() should fail with RocketChatInvalidResponseException on invalid response`() {
         val success: (Token) -> Unit = mock()
         val error: (RocketChatException) -> Unit = mock()
 
@@ -120,7 +121,7 @@ class LoginTest {
 
         sut.login("user", "pass", success, error)
 
-        verify(error, timeout(2000).times(1)).invoke(check {
+        verify(error, timeout(DEFAULT_TIMEOUT).times(1)).invoke(check {
             assertThat(it, isEqualTo(instanceOf(RocketChatInvalidResponseException::class.java)))
             assertThat(it.message, isEqualTo("Use JsonReader.setLenient(true) to accept malformed JSON at path $"))
             assertThat(it.cause, isEqualTo(instanceOf(JsonEncodingException::class.java)))
@@ -131,13 +132,13 @@ class LoginTest {
     }
 
     @Test
-    fun `Login should fail with RocketChatApiException when response is not 200 OK`() {
+    fun `login() should fail with RocketChatApiException when response is not 200 OK`() {
         val success: (Token) -> Unit = mock()
         val error: (RocketChatException) -> Unit = mock()
 
         sut.login("user", "pass", success, error)
 
-        verify(error, timeout(2000).times(1)).invoke(check {
+        verify(error, timeout(DEFAULT_TIMEOUT).times(1)).invoke(check {
             assertThat(it, isEqualTo(instanceOf(RocketChatApiException::class.java)))
         })
 
@@ -146,7 +147,7 @@ class LoginTest {
     }
 
     @Test
-    fun `Register should succeed with valid parameters`() {
+    fun `signup() should succeed with valid parameters`() {
         val success: (User) -> Unit = mock()
         val error: (RocketChatException) -> Unit = mock()
 
@@ -163,10 +164,12 @@ class LoginTest {
             val user = it
             assertThat(user.id, isEqualTo("userId"))
         })
+
+        verify(error, never()).invoke(check { })
     }
 
     @Test
-    fun `Register should fail with RocketChatApiException if email is already in use`() {
+    fun `signup() should fail with RocketChatApiException if email is already in use`() {
         val success: (User) -> Unit = mock()
         val error: (RocketChatException) -> Unit = mock()
 
@@ -185,10 +188,12 @@ class LoginTest {
             assertThat(ex.errorType, isEqualTo("403"))
             assertThat(ex.message, isEqualTo("Email already exists. [403]"))
         })
+
+        verify(success, never()).invoke(check { })
     }
 
     @Test
-    fun `Register should fail with RocketChatApiException if username is already in use`() {
+    fun `signup() should fail with RocketChatApiException if username is already in use`() {
         val success: (User) -> Unit = mock()
         val error: (RocketChatException) -> Unit = mock()
 
@@ -207,5 +212,12 @@ class LoginTest {
             assertThat(ex.errorType, isEqualTo("error-field-unavailable"))
             assertThat(ex.message, isEqualTo("<strong>testuser</strong> is already in use :( [error-field-unavailable]"))
         })
+
+        verify(success, never()).invoke(check { })
+    }
+
+    @After
+    fun shutdown() {
+        mockServer.shutdown()
     }
 }
