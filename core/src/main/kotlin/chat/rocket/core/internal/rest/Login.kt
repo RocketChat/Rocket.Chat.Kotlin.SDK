@@ -13,8 +13,16 @@ import okhttp3.Request
 import okhttp3.RequestBody
 
 /**
- * Login with username and password
+ * Login with username and password. On success this will also call [chat.rocket.core.TokenRepository].save(token)
  *
+ * @param username Username
+ * @param password Password
+ * @param success ([Token]) lambda receiving the Authentication Token
+ * @param error ([RocketChatException]) lambda indicating errors
+ * @see Token
+ * @see chat.rocket.core.TokenRepository
+ *
+ * @sample
  */
 fun RocketChatClient.login(username: String, password: String, success: (Token) -> Unit,
                            error: (RocketChatException) -> Unit) {
@@ -29,11 +37,25 @@ fun RocketChatClient.login(username: String, password: String, success: (Token) 
 
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
     handleRestCall<RestResult<Token>>(request, type, {
-        tokenProvider.save(it.result())
-        success.invoke(it.result())
+        tokenRepository.save(it.result())
+        success(it.result())
     }, error)
 }
 
+/**
+ * Registers a new user within the server.
+ *
+ * Note, this doesn't authenticate the user. after a successful registration you still need to
+ * call [login]
+ *
+ * @param email Email
+ * @param name Name
+ * @param username Username
+ * @param password Password
+ * @param success ([User]) lambda indicating success
+ * @param error ([RocketChatException]) lambda indicating errors
+ * @see User
+ */
 fun RocketChatClient.signup(email: String,
                             name: String,
                             username: String,
@@ -53,6 +75,6 @@ fun RocketChatClient.signup(email: String,
 
     val type = Types.newParameterizedType(RestResult::class.java, User::class.java)
     handleRestCall<RestResult<User>>(request, type, {
-        success.invoke(it.result())
+        success(it.result())
     }, error)
 }

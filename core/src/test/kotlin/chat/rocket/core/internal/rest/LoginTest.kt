@@ -8,7 +8,7 @@ import chat.rocket.common.model.Token
 import chat.rocket.common.model.User
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
-import chat.rocket.core.TokenProvider
+import chat.rocket.core.TokenRepository
 import com.nhaarman.mockito_kotlin.check
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.timeout
@@ -35,7 +35,7 @@ class LoginTest {
     private lateinit var sut: RocketChatClient
 
     @Mock
-    private lateinit var tokenProvider: TokenProvider
+    private lateinit var tokenProvider: TokenRepository
 
     private val authToken = Token("userId", "authToken")
 
@@ -52,7 +52,7 @@ class LoginTest {
             httpClient = client
             restUrl = baseUrl!!
             websocketUrl = "not needed"
-            tokenProvider = this@LoginTest.tokenProvider
+            tokenRepository = this@LoginTest.tokenProvider
             platformLogger = PlatformLogger.NoOpLogger()
         }
 

@@ -52,7 +52,7 @@ internal fun requestUrl(baseUrl: HttpUrl, method: String): HttpUrl.Builder {
 internal fun RocketChatClient.requestBuilder(httpUrl: HttpUrl): Request.Builder {
     val builder = Request.Builder().url(httpUrl)
 
-    val token: Token? = tokenProvider.get()
+    val token: Token? = tokenRepository.get()
     token?.let {
         builder.addHeader("X-Auth-Token", token.authToken)
                 .addHeader("X-User-Id", token.userId)

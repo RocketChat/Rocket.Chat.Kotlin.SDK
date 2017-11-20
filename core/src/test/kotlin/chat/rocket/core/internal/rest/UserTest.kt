@@ -6,7 +6,7 @@ import chat.rocket.common.model.BaseRoom
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
-import chat.rocket.core.TokenProvider
+import chat.rocket.core.TokenRepository
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room
 import com.nhaarman.mockito_kotlin.check
@@ -36,7 +36,7 @@ class UserTest {
     private lateinit var sut: RocketChatClient
 
     @Mock
-    private lateinit var tokenProvider: TokenProvider
+    private lateinit var tokenProvider: TokenRepository
 
     private val authToken = Token("userId", "authToken")
 
@@ -53,7 +53,7 @@ class UserTest {
             httpClient = client
             restUrl = baseUrl!!
             websocketUrl = "not needed"
-            tokenProvider = this@UserTest.tokenProvider
+            tokenRepository = this@UserTest.tokenProvider
             platformLogger = PlatformLogger.NoOpLogger()
         }
 

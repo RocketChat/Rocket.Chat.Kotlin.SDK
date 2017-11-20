@@ -20,7 +20,7 @@ fun RocketChatClient.pinMessage(messageId: String, success: (Message) -> Unit,
             Message::class.java)
 
     handleRestCall<RestResult<Message>>(request, type, {
-        success.invoke(it.result())
+        success(it.result())
     }, error)
 }
 
@@ -29,7 +29,7 @@ fun RocketChatClient.getRoomFavoriteMessages(roomId: String,
                                              offset: Int,
                                              success: (List<Message>, Long) -> Unit,
                                              error: (RocketChatException) -> Unit) {
-    val userId = tokenProvider.get()?.userId
+    val userId = tokenRepository.get()?.userId
 
     val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "messages"))
             .addQueryParameter("roomId", roomId)
@@ -42,7 +42,7 @@ fun RocketChatClient.getRoomFavoriteMessages(roomId: String,
     val type = Types.newParameterizedType(RestResult::class.java,
             Types.newParameterizedType(List::class.java, Message::class.java))
     handleRestCall<RestResult<List<Message>>>(request, type, {
-        success.invoke(it.result(), it.total() ?: 0)
+        success(it.result(), it.total() ?: 0)
     }, error)
 }
 
@@ -63,6 +63,6 @@ fun RocketChatClient.getRoomPinnedMessages(roomId: String,
     val type = Types.newParameterizedType(RestResult::class.java,
             Types.newParameterizedType(List::class.java, Message::class.java))
     handleRestCall<RestResult<List<Message>>>(request, type, {
-        success.invoke(it.result(), it.total() ?: 0)
+        success(it.result(), it.total() ?: 0)
     }, error)
 }

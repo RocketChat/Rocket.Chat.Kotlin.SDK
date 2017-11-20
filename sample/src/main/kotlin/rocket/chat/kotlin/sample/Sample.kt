@@ -5,7 +5,7 @@ import chat.rocket.common.model.BaseRoom
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
-import chat.rocket.core.TokenProvider
+import chat.rocket.core.TokenRepository
 import chat.rocket.core.internal.rest.channelSubscriptions
 import chat.rocket.core.internal.rest.coroutines.me
 import chat.rocket.core.internal.rest.dmSubscriptions
@@ -45,7 +45,7 @@ fun main(args: Array<String>) {
         httpClient = okHttpClient
         restUrl = HttpUrl.parse("http://localhost:3000/")!!
         websocketUrl = "ws://localhost:3000/websocket"
-        tokenProvider = SimpleTokenProvider()
+        tokenRepository = SimpleTokenRepository()
         platformLogger = logger
     }
 
@@ -113,7 +113,7 @@ fun pinMessage(client: RocketChatClient) {
     })
 }
 
-class SimpleTokenProvider : TokenProvider {
+class SimpleTokenRepository : TokenRepository {
     private var savedToken: Token? = null
     override fun save(token: Token) {
         savedToken = token
