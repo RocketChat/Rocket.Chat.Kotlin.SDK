@@ -8,14 +8,14 @@ import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenProvider
 import chat.rocket.core.internal.rest.channelSubscriptions
 import chat.rocket.core.internal.rest.coroutines.me
+import chat.rocket.core.internal.rest.dmSubscriptions
 import chat.rocket.core.internal.rest.getRoomFavoriteMessages
+import chat.rocket.core.internal.rest.groupSubscriptions
 import chat.rocket.core.internal.rest.login
 import chat.rocket.core.internal.rest.pinMessage
 import chat.rocket.core.internal.rest.serverInfo
-import chat.rocket.core.model.Myself
+import chat.rocket.core.model.Room
 import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -80,13 +80,13 @@ fun main(args: Array<String>) {
 }
 
 fun getSubscriptions(client: RocketChatClient) {
-    /*client.channelSubscriptions(success = { rooms: List<BaseRoom>, total: Long ->
+    client.channelSubscriptions(success = { rooms: List<BaseRoom>, total: Long ->
         println("Channels: $rooms, total: $total")
     }, error = {
         it.printStackTrace()
-    })*/
+    })
 
-    /*client.groupSubscriptions(success = { rooms: List<Room>, total: Long ->
+    client.groupSubscriptions(success = { rooms: List<Room>, total: Long ->
         println("Groups: $rooms, total: $total")
     }, error = {
         it.printStackTrace()
@@ -96,7 +96,7 @@ fun getSubscriptions(client: RocketChatClient) {
         println("DM: $rooms, total: $total")
     }, error = {
         it.printStackTrace()
-    })*/
+    })
 }
 
 fun pinMessage(client: RocketChatClient) {

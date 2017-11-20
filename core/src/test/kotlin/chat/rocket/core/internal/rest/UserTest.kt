@@ -10,8 +10,6 @@ import chat.rocket.core.TokenProvider
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room
 import com.nhaarman.mockito_kotlin.check
-import com.nhaarman.mockito_kotlin.createinstance.createInstance
-import com.nhaarman.mockito_kotlin.isNotNull
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.timeout
 import com.nhaarman.mockito_kotlin.verify
@@ -25,9 +23,8 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.MockitoAnnotations
-
 import org.mockito.Mockito.never
+import org.mockito.MockitoAnnotations
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import org.hamcrest.CoreMatchers.`is` as isEqualTo
