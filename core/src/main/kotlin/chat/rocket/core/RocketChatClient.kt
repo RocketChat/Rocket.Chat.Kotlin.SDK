@@ -14,7 +14,7 @@ import okhttp3.OkHttpClient
 class RocketChatClient private constructor(var httpClient: OkHttpClient,
                                            var restUrl: HttpUrl,
                                            var websocketUrl: String,
-                                           var tokenProvider: TokenProvider,
+                                           var tokenRepository: TokenRepository,
                                            var logger: Logger) {
 
     val moshi: Moshi = Moshi.Builder()
@@ -25,7 +25,7 @@ class RocketChatClient private constructor(var httpClient: OkHttpClient,
                         .build()
 
     private constructor(builder: Builder) : this(builder.httpClient, builder.restUrl,
-            builder.websocketUrl, builder.tokenProvider, Logger(builder.platformLogger))
+            builder.websocketUrl, builder.tokenRepository, Logger(builder.platformLogger))
 
     companion object {
         fun create(init: Builder.() -> Unit) = Builder(init).build()
@@ -39,7 +39,7 @@ class RocketChatClient private constructor(var httpClient: OkHttpClient,
         lateinit var httpClient: OkHttpClient
         lateinit var restUrl: HttpUrl
         lateinit var websocketUrl: String
-        lateinit var tokenProvider: TokenProvider
+        lateinit var tokenRepository: TokenRepository
         lateinit var platformLogger: PlatformLogger
 
         fun httpClient(init: Builder.() -> OkHttpClient) = apply { httpClient = init() }
@@ -48,7 +48,7 @@ class RocketChatClient private constructor(var httpClient: OkHttpClient,
 
         fun websocketUrl(init: Builder.() -> String) = apply { websocketUrl = init() }
 
-        fun tokenProvider(init: Builder.() -> TokenProvider) = apply { tokenProvider = init() }
+        fun tokenRepository(init: Builder.() -> TokenRepository) = apply { tokenRepository = init() }
 
         fun platformLogger(init: Builder.() -> PlatformLogger) = apply { platformLogger = init() }
 
