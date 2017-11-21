@@ -2,12 +2,13 @@ group 'chat.rocket.sdk'
 version '0.1-SNAPSHOT'
 
 apply plugin: 'kotlin'
+apply plugin: 'java'
 apply plugin: 'org.jetbrains.dokka'
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
 
-    compile 'io.reactivex.rxjava:2.1.6'
+    compile 'io.reactivex.rxjava2:rxjava:2.1.6'
     compile 'io.reactivex.rxjava2:rxkotlin:2.1.0'
 
     compile project (':core')
