@@ -1,7 +1,6 @@
 package chat.rocket.core.internal.rest
 
 import chat.rocket.common.RocketChatException
-import chat.rocket.common.model.User
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
 import chat.rocket.core.internal.RestResult
