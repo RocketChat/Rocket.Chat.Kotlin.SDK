@@ -4,7 +4,6 @@ import chat.rocket.common.internal.ISO8601Date
 import chat.rocket.common.model.BaseMessage
 import chat.rocket.common.model.SimpleRoom
 import chat.rocket.common.model.SimpleUser
-import chat.rocket.common.model.User
 import com.squareup.moshi.Json
 
 data class Message(

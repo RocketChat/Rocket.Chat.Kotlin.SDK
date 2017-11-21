@@ -1,23 +1,20 @@
 package rocket.chat.kotlin.sample
 
-import chat.rocket.common.RocketChatException
 import chat.rocket.common.model.BaseRoom
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
 import chat.rocket.core.internal.rest.channelSubscriptions
-import chat.rocket.core.coroutines.me
 import chat.rocket.core.internal.rest.dmSubscriptions
 import chat.rocket.core.internal.rest.getRoomFavoriteMessages
 import chat.rocket.core.internal.rest.getRoomPinnedMessages
 import chat.rocket.core.internal.rest.groupSubscriptions
 import chat.rocket.core.internal.rest.login
+import chat.rocket.core.internal.rest.me
 import chat.rocket.core.internal.rest.sendMessage
 import chat.rocket.core.internal.rest.serverInfo
 import chat.rocket.core.model.Room
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.launch
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -53,11 +50,11 @@ fun main(args: Array<String>) {
     client.login("testuser", "testpass", success = {
         logger.debug("Login: ${it.userId} - ${it.authToken}")
         //pinMessage(client)
-        /*client.me(success = {
+        client.me(success = {
             logger.debug("User: $it")
         }, error = {
             it.printStackTrace()
-        })*/
+        })
         /*launch(CommonPool) {
             try {
                 val myself = client.me()
