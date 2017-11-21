@@ -80,9 +80,7 @@ internal fun <T> RocketChatClient.handleRestCall(request: Request,
                 // Override nullability, if there is no adapter, moshi will throw...
                 val adapter: JsonAdapter<T> = moshi.adapter(type)!!
 
-                response.body()?.let {
-                    it.source()
-                }?.let {
+                response.body()?.source()?.let {
                     adapter.fromJson(it)
                 }?.let(valueCallback).ifNull {
                     errorCallback.invoke(RocketChatInvalidResponseException("Error parsing JSON message"))
