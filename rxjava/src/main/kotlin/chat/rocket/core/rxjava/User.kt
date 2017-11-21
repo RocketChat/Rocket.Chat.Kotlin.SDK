@@ -10,7 +10,7 @@ import chat.rocket.core.model.Room
 import io.reactivex.Single
 
 fun RocketChatClient.me(): Single<Myself> =
-    Single.create<Myself> { emitter ->
+    Single.create { emitter ->
         me(success = {
             emitter.onSuccess(it)
         }, error = {
@@ -19,7 +19,7 @@ fun RocketChatClient.me(): Single<Myself> =
     }
 
 fun RocketChatClient.channelSubscriptions(offset: Long? = 0): Single<PaginatedResponse<Room>> =
-        Single.create<PaginatedResponse<Room>> { emitter ->
+        Single.create { emitter ->
             channelSubscriptions(offset, success = { rooms, total ->
                 emitter.onSuccess(PaginatedResponse(rooms, total))
             }, error = {
@@ -28,7 +28,7 @@ fun RocketChatClient.channelSubscriptions(offset: Long? = 0): Single<PaginatedRe
         }
 
 fun RocketChatClient.groupSubscriptions(offset: Long? = 0): Single<PaginatedResponse<Room>> =
-        Single.create<PaginatedResponse<Room>> { emitter ->
+        Single.create { emitter ->
             groupSubscriptions(offset, success = { rooms, total ->
                 emitter.onSuccess(PaginatedResponse(rooms, total))
             }, error = {
@@ -37,7 +37,7 @@ fun RocketChatClient.groupSubscriptions(offset: Long? = 0): Single<PaginatedResp
         }
 
 fun RocketChatClient.dmSubscriptions(offset: Long? = 0): Single<PaginatedResponse<Room>> =
-        Single.create<PaginatedResponse<Room>> { emitter ->
+        Single.create { emitter ->
             dmSubscriptions(offset, success = { rooms, total ->
                 emitter.onSuccess(PaginatedResponse(rooms, total))
             }, error = {
