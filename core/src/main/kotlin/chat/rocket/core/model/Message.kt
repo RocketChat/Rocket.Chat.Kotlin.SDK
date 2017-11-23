@@ -16,7 +16,9 @@ data class Message(
         @ISO8601Date override val editedAt: Long?,
         override val editedBy: SimpleUser?,
         @Json(name = "alias") override val senderAlias: String?,
-        val groupable: Boolean = false,
+        override val avatar: String?,
+        val groupable: Boolean? = false,
+        val parseUrls: Boolean? = false,
         val urls: List<Url>?,
         override val mentions: List<SimpleUser>?,
         override val channels: List<SimpleRoom>?

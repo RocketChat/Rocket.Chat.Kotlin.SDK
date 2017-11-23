@@ -5,5 +5,5 @@ data class Url(
         val meta: Map<String, String>?,
         val headers: Map<String, String>?,
         val parsedUrl: ParsedUrl?,
-        val ignoreParse: Boolean = false
+        val ignoreParse: Boolean? = false
 )

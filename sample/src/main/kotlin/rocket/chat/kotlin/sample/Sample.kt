@@ -103,7 +103,8 @@ fun getSubscriptions(client: RocketChatClient) {
         it.printStackTrace()
     })
 
-    client.sendMessage(roomId = "GENERAL", text = "Sending message from SDK to #general and @here",
+    client.sendMessage(roomId = "GENERAL",
+            text = "Sending message from SDK to #general and @here with url https://github.com/RocketChat/Rocket.Chat.Kotlin.SDK/",
             alias = "TestingAlias",
             emoji = ":smirk:",
             avatar = "https://avatars2.githubusercontent.com/u/224255?s=88&v=4",

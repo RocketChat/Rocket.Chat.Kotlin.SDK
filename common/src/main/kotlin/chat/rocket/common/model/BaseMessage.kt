@@ -9,6 +9,7 @@ interface BaseMessage {
     val editedAt: Long?
     val editedBy: SimpleUser?
     val senderAlias: String?
+    val avatar: String?
     val mentions: List<SimpleUser>?
     val channels: List<SimpleRoom>?
 }
