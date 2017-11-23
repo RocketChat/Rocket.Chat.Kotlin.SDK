@@ -93,10 +93,10 @@ fun RocketChatClient.sendMessage(roomId: String,
                                  error: (RocketChatException) -> Unit) {
     val payload = MessagePayload(roomId, text, alias, emoji, avatar, attachments)
     val adapter = moshi.adapter(MessagePayload::class.java)
-    val paylodBody = adapter.toJson(payload)
+    val payloadBody = adapter.toJson(payload)
 
     val contentType = MediaType.parse("application/json; charset=utf-8")
-    val body = RequestBody.create(contentType, paylodBody)
+    val body = RequestBody.create(contentType, payloadBody)
 
     val url = requestUrl(restUrl, "chat.postMessage").build()
     val request = requestBuilder(url).post(body).build()
