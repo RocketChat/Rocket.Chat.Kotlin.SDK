@@ -6,7 +6,7 @@ import com.squareup.moshi.Json
 data class Myself(
         @Json(name = "_id") val id: String,
         override val username: String?,
-        val name: String?,
+        override val name: String?,
         val status: BaseUser.Status?,
         val statusConnection: BaseUser.Status?,
         val utcOffset: Float,
