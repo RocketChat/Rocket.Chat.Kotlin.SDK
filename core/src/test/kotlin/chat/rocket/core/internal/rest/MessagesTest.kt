@@ -11,6 +11,7 @@ import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.timeout
 import com.nhaarman.mockito_kotlin.verify
 import io.fabric8.mockwebserver.DefaultMockServer
+import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import org.hamcrest.MatcherAssert.assertThat
@@ -64,16 +65,14 @@ class MessagesTest {
                 .andReturn(200, SEND_MESSAGE_OK)
                 .once()
 
-        sut.sendMessage(roomId = "GENERAL",
-                text = "Sending message from SDK to #general and @here",
-                alias = "TestingAlias",
-                emoji = ":smirk:",
-                avatar = "https://avatars2.githubusercontent.com/u/224255?s=88&v=4",
-                success = success,
-                error = error)
+        runBlocking {
+            val msg= sut.sendMessage(roomId = "GENERAL",
+                    text = "Sending message from SDK to #general and @here",
+                    alias = "TestingAlias",
+                    emoji = ":smirk:",
+                    avatar = "https://avatars2.githubusercontent.com/u/224255?s=88&v=4")
 
-        verify(success, timeout(DEFAULT_TIMEOUT).times(1)).invoke(check {
-            with(it) {
+            with(msg) {
                 assertThat(senderAlias, isEqualTo("TestingAlias"))
                 assertThat(message, isEqualTo("Sending message from SDK to #general and @here with url https://github.com/RocketChat/Rocket.Chat.Kotlin.SDK/"))
                 assertThat(parseUrls, isEqualTo(true))
@@ -108,7 +107,7 @@ class MessagesTest {
                 assertThat(updatedAt, isEqualTo(1511443964808))
                 assertThat(id, isEqualTo("messageId"))
             }
-        })
+        }
     }
 
     @After

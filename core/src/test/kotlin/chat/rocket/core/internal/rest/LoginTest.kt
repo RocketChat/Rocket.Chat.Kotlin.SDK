@@ -15,6 +15,7 @@ import com.nhaarman.mockito_kotlin.timeout
 import com.nhaarman.mockito_kotlin.verify
 import com.squareup.moshi.JsonEncodingException
 import io.fabric8.mockwebserver.DefaultMockServer
+import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import org.hamcrest.CoreMatchers.instanceOf
@@ -61,159 +62,139 @@ class LoginTest {
 
     @Test
     fun `login() should succeed with right credentials`() {
-        val success: (Token) -> Unit = mock()
-        val error: (RocketChatException) -> Unit = mock()
-
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/login")
                 .andReturn(200, LOGIN_SUCCESS)
                 .once()
 
-        sut.login("username", "password", success, error)
+        runBlocking {
+            val token = sut.login("username", "password")
+            assertThat(token, isEqualTo(authToken))
+            assertThat(token.userId, isEqualTo("userId"))
+            assertThat(token.authToken, isEqualTo("authToken"))
 
-        verify(success, timeout(DEFAULT_TIMEOUT).times(1)).invoke(check {
-            assertThat(it, isEqualTo(authToken))
-            assertThat(it.userId, isEqualTo("userId"))
-            assertThat(it.authToken, isEqualTo("authToken"))
-        })
-
-        verify(tokenProvider).save(check {
-            assertThat(it.userId, isEqualTo("userId"))
-            assertThat(it.authToken, isEqualTo("authToken"))
-        })
-
-        verify(error, never()).invoke(check { })
+            verify(tokenProvider).save(check {
+                assertThat(it.userId, isEqualTo("userId"))
+                assertThat(it.authToken, isEqualTo("authToken"))
+            })
+        }
     }
 
     @Test
     fun `login() should fail with RocketChatAuthException on wrong credentials`() {
-        val success: (Token) -> Unit = mock()
-        val error: (RocketChatException) -> Unit = mock()
-
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/login")
                 .andReturn(401, LOGIN_ERROR)
                 .once()
 
-        sut.login("wronguser", "wrongpass", success, error)
+        runBlocking {
+            try {
+                sut.login("wronguser", "wrongpass")
 
-        verify(error, timeout(DEFAULT_TIMEOUT).times(1)).invoke(check {
-            assertThat(it, isEqualTo(instanceOf(RocketChatAuthException::class.java)))
-            assertThat(it.message, isEqualTo("Unauthorized"))
-        })
-
-        verify(success, never()).invoke(check { })
-        verify(tokenProvider, never()).save(check { })
+                throw RuntimeException("unreachable code")
+            } catch (ex: Exception) {
+                assertThat(ex, isEqualTo(instanceOf(RocketChatAuthException::class.java)))
+                assertThat(ex.message, isEqualTo("Unauthorized"))
+            }
+            verify(tokenProvider, never()).save(check { })
+        }
     }
 
     @Test
     fun `login() should fail with RocketChatInvalidResponseException on invalid response`() {
-        val success: (Token) -> Unit = mock()
-        val error: (RocketChatException) -> Unit = mock()
-
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/login")
                 .andReturn(200, "NOT A JSON")
                 .once()
 
-        sut.login("user", "pass", success, error)
+        runBlocking {
+            try {
+                sut.login("user", "pass")
 
-        verify(error, timeout(DEFAULT_TIMEOUT).times(1)).invoke(check {
-            assertThat(it, isEqualTo(instanceOf(RocketChatInvalidResponseException::class.java)))
-            assertThat(it.message, isEqualTo("Use JsonReader.setLenient(true) to accept malformed JSON at path $"))
-            assertThat(it.cause, isEqualTo(instanceOf(JsonEncodingException::class.java)))
-        })
+                throw RuntimeException("unreachable code")
+            } catch (ex: Exception) {
+                assertThat(ex, isEqualTo(instanceOf(RocketChatInvalidResponseException::class.java)))
+                assertThat(ex.message, isEqualTo("Use JsonReader.setLenient(true) to accept malformed JSON at path $"))
+                assertThat(ex.cause, isEqualTo(instanceOf(JsonEncodingException::class.java)))
+            }
 
-        verify(success, never()).invoke(check { })
-        verify(tokenProvider, never()).save(check { })
+            verify(tokenProvider, never()).save(check { })
+        }
     }
 
     @Test
     fun `login() should fail with RocketChatApiException when response is not 200 OK`() {
-        val success: (Token) -> Unit = mock()
-        val error: (RocketChatException) -> Unit = mock()
+        runBlocking {
+            try {
+                sut.login("user", "pass")
 
-        sut.login("user", "pass", success, error)
-
-        verify(error, timeout(DEFAULT_TIMEOUT).times(1)).invoke(check {
-            assertThat(it, isEqualTo(instanceOf(RocketChatApiException::class.java)))
-        })
-
-        verify(success, never()).invoke(check { })
-        verify(tokenProvider, never()).save(check { })
+                throw RuntimeException("unreachable code")
+            } catch (ex: Exception) {
+                assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
+            }
+            verify(tokenProvider, never()).save(check { })
+        }
     }
 
     @Test
     fun `signup() should succeed with valid parameters`() {
-        val success: (User) -> Unit = mock()
-        val error: (RocketChatException) -> Unit = mock()
-
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/users.register")
                 .andReturn(200, REGISTER_SUCCESS)
                 .once()
 
-        sut.signup("test@email.com", "Test User", "testuser",
-                "password", success, error)
-
-        verify(success, timeout(DEFAULT_TIMEOUT).times(1)).invoke(check {
-            val user = it
+        runBlocking {
+            val user = sut.signup("test@email.com", "Test User", "testuser", "password")
             assertThat(user.id, isEqualTo("userId"))
-        })
-
-        verify(error, never()).invoke(check { })
+        }
     }
 
     @Test
     fun `signup() should fail with RocketChatApiException if email is already in use`() {
-        val success: (User) -> Unit = mock()
-        val error: (RocketChatException) -> Unit = mock()
-
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/users.register")
                 .andReturn(403, REGISTER_FAIL_EMAIL_IN_USE)
                 .once()
 
-        sut.signup("test@email.com", "Test User", "testuser",
-                "password", success, error)
+        runBlocking {
+            try {
+                sut.signup("test@email.com", "Test User", "testuser", "password")
 
-        verify(error, timeout(DEFAULT_TIMEOUT).times(1)).invoke(check {
-            assertThat(it, isEqualTo(instanceOf(RocketChatApiException::class.java)))
-            val ex = it as RocketChatApiException
-            assertThat(ex.errorType, isEqualTo("403"))
-            assertThat(ex.message, isEqualTo("Email already exists. [403]"))
-        })
-
-        verify(success, never()).invoke(check { })
+                throw RuntimeException("unreachable code")
+            } catch (ex: Exception) {
+                assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
+                assertThat(ex.message, isEqualTo("Email already exists. [403]"))
+                val api = ex as RocketChatApiException
+                assertThat(api.errorType, isEqualTo("403"))
+            }
+        }
     }
 
     @Test
     fun `signup() should fail with RocketChatApiException if username is already in use`() {
-        val success: (User) -> Unit = mock()
-        val error: (RocketChatException) -> Unit = mock()
-
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/users.register")
                 .andReturn(403, REGISTER_FAIL_USER_IN_USE)
                 .once()
 
-        sut.signup("test@email.com", "Test User", "testuser",
-                "password", success, error)
+        runBlocking {
+            try {
+                sut.signup("test@email.com", "Test User", "testuser", "password")
 
-        verify(error, timeout(DEFAULT_TIMEOUT).times(1)).invoke(check {
-            assertThat(it, isEqualTo(instanceOf(RocketChatApiException::class.java)))
-            val ex = it as RocketChatApiException
-            assertThat(ex.errorType, isEqualTo("error-field-unavailable"))
-            assertThat(ex.message, isEqualTo("<strong>testuser</strong> is already in use :( [error-field-unavailable]"))
-        })
-
-        verify(success, never()).invoke(check { })
+                throw RuntimeException("unreachable code")
+            } catch (exception: Exception) {
+                assertThat(exception, isEqualTo(instanceOf(RocketChatApiException::class.java)))
+                val ex = exception as RocketChatApiException
+                assertThat(ex.errorType, isEqualTo("error-field-unavailable"))
+                assertThat(ex.message, isEqualTo("<strong>testuser</strong> is already in use :( [error-field-unavailable]"))
+            }
+        }
     }
 
     @After
