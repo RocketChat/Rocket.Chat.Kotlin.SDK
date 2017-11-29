@@ -4,10 +4,7 @@ import chat.rocket.core.RocketChatClient
 import chat.rocket.core.compat.internal.callback
 import chat.rocket.core.internal.rest.me
 import chat.rocket.core.model.Myself
-import chat.rocket.core.model.Room
 import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.CompletableDeferred
-import kotlinx.coroutines.experimental.Deferred
 
 /**
  * Returns the current logged user information, useful to check if the Token from TokenProvider

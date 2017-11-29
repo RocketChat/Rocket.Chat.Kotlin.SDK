@@ -13,7 +13,6 @@ import chat.rocket.core.internal.rest.chatRooms
 import chat.rocket.core.internal.rest.getRoomFavoriteMessages
 import chat.rocket.core.internal.rest.login
 import chat.rocket.core.internal.rest.sendMessage
-import chat.rocket.core.internal.rest.subscriptions
 import chat.rocket.core.model.Myself
 import chat.rocket.core.rxjava.me
 import io.reactivex.Single
@@ -81,7 +80,6 @@ fun main(args: Array<String>) {
         override fun onError(error: RocketChatException) {
             error.printStackTrace()
         }
-
     })
 
     runBlocking {

@@ -1,15 +1,9 @@
 package chat.rocket.core.internal.rest
 
-import chat.rocket.common.RocketChatException
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
-import chat.rocket.core.model.Message
-import com.nhaarman.mockito_kotlin.check
-import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.timeout
-import com.nhaarman.mockito_kotlin.verify
 import io.fabric8.mockwebserver.DefaultMockServer
 import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.HttpUrl
@@ -56,9 +50,6 @@ class MessagesTest {
 
     @Test
     fun `sendMessage() should return a complete Message object`() {
-        val success: (Message) -> Unit = mock()
-        val error: (RocketChatException) -> Unit = mock()
-
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/chat.postMessage")

@@ -8,7 +8,6 @@ import chat.rocket.common.RocketChatNetworkErrorException
 import chat.rocket.common.internal.AuthenticationErrorMessage
 import chat.rocket.common.internal.ErrorMessage
 import chat.rocket.common.model.BaseRoom
-import chat.rocket.common.model.ServerInfo
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.Logger
 import chat.rocket.common.util.ifNull
@@ -132,8 +131,11 @@ internal fun processCallbackError(moshi: Moshi, response: Response, logger: Logg
 
 private inline fun <T> CancellableContinuation<T>.tryToResume(getter: () -> T) {
     isActive || return
-    try { resume(getter()) }
-    catch (exception: Throwable) { resumeWithException(exception) }
+    try {
+        resume(getter())
+    } catch (exception: Throwable) {
+        resumeWithException(exception)
+    }
 }
 
 private fun OkHttpClient.cancel(tag: Any) {

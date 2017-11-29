@@ -1,19 +1,11 @@
 package chat.rocket.core.internal.rest
 
 import chat.rocket.common.RocketChatAuthException
-import chat.rocket.common.RocketChatException
-import chat.rocket.common.model.BaseRoom
 import chat.rocket.common.model.BaseUser
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
-import chat.rocket.core.model.Myself
-import chat.rocket.core.model.Room
-import com.nhaarman.mockito_kotlin.check
-import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.timeout
-import com.nhaarman.mockito_kotlin.verify
 import io.fabric8.mockwebserver.DefaultMockServer
 import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.HttpUrl
@@ -25,10 +17,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.never
 import org.mockito.MockitoAnnotations
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import org.hamcrest.CoreMatchers.`is` as isEqualTo
 
 class UserTest {
