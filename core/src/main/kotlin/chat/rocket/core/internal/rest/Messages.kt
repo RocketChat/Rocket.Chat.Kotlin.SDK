@@ -1,19 +1,18 @@
 package chat.rocket.core.internal.rest
 
-import chat.rocket.common.RocketChatException
 import chat.rocket.common.model.BaseRoom
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.model.MessagePayload
 import chat.rocket.core.model.Attachment
 import chat.rocket.core.model.Message
+import chat.rocket.core.model.PagedResult
 import com.squareup.moshi.Types
 import okhttp3.FormBody
 import okhttp3.MediaType
 import okhttp3.RequestBody
 
-fun RocketChatClient.pinMessage(messageId: String, success: (Message) -> Unit,
-                                error: (RocketChatException) -> Unit) {
+suspend fun RocketChatClient.pinMessage(messageId: String): Message {
     val body = FormBody.Builder().add("messageId", messageId).build()
 
     val httpUrl = requestUrl(restUrl, "chat.pinMessage").build()
@@ -23,16 +22,12 @@ fun RocketChatClient.pinMessage(messageId: String, success: (Message) -> Unit,
     val type = Types.newParameterizedType(RestResult::class.java,
             Message::class.java)
 
-    handleRestCall<RestResult<Message>>(request, type, {
-        success(it.result())
-    }, error)
+    return handleRestCall<RestResult<Message>>(request, type).result()
 }
 
-fun RocketChatClient.getRoomFavoriteMessages(roomId: String,
+suspend fun RocketChatClient.getRoomFavoriteMessages(roomId: String,
                                              roomType: BaseRoom.RoomType,
-                                             offset: Int,
-                                             success: (List<Message>, Long) -> Unit,
-                                             error: (RocketChatException) -> Unit) {
+                                             offset: Int): PagedResult<List<Message>> {
     val userId = tokenRepository.get()?.userId
 
     val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "messages"))
@@ -45,16 +40,14 @@ fun RocketChatClient.getRoomFavoriteMessages(roomId: String,
 
     val type = Types.newParameterizedType(RestResult::class.java,
             Types.newParameterizedType(List::class.java, Message::class.java))
-    handleRestCall<RestResult<List<Message>>>(request, type, {
-        success(it.result(), it.total() ?: 0)
-    }, error)
+    val result = handleRestCall<RestResult<List<Message>>>(request, type)
+
+    return PagedResult<List<Message>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
 }
 
-fun RocketChatClient.getRoomPinnedMessages(roomId: String,
+suspend fun RocketChatClient.getRoomPinnedMessages(roomId: String,
                                            roomType: BaseRoom.RoomType,
-                                           offset: Int? = 0,
-                                           success: (List<Message>, Long) -> Unit,
-                                           error: (RocketChatException) -> Unit) {
+                                           offset: Int? = 0): PagedResult<List<Message>> {
     val httpUrl = requestUrl(restUrl,
             getRestApiMethodNameByRoomType(roomType, "messages"))
             .addQueryParameter("roomId", roomId)
@@ -66,9 +59,9 @@ fun RocketChatClient.getRoomPinnedMessages(roomId: String,
 
     val type = Types.newParameterizedType(RestResult::class.java,
             Types.newParameterizedType(List::class.java, Message::class.java))
-    handleRestCall<RestResult<List<Message>>>(request, type, {
-        success(it.result(), it.total() ?: 0)
-    }, error)
+    val result = handleRestCall<RestResult<List<Message>>>(request, type)
+
+    return PagedResult<List<Message>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
 }
 
 /**
@@ -80,17 +73,14 @@ fun RocketChatClient.getRoomPinnedMessages(roomId: String,
  * @param emoji Optional emoji to be used as the sender's avatar
  * @param avatar Optional avatar url to be used as the sender's avatar
  * @param attachments Optional List of [Attachment]
- * @param success Message sent success callback
- * @param error error callback
+ * @return
  */
-fun RocketChatClient.sendMessage(roomId: String,
+suspend fun RocketChatClient.sendMessage(roomId: String,
                                  text: String? = null,
                                  alias: String? = null,
                                  emoji: String? = null,
                                  avatar: String? = null,
-                                 attachments: List<Attachment>? = null,
-                                 success: (Message) -> Unit,
-                                 error: (RocketChatException) -> Unit) {
+                                 attachments: List<Attachment>? = null): Message {
     val payload = MessagePayload(roomId, text, alias, emoji, avatar, attachments)
     val adapter = moshi.adapter(MessagePayload::class.java)
     val payloadBody = adapter.toJson(payload)
@@ -102,7 +92,5 @@ fun RocketChatClient.sendMessage(roomId: String,
     val request = requestBuilder(url).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, Message::class.java)
-    handleRestCall<RestResult<Message>>(request, type, {
-        success(it.result())
-    }, error)
+    return handleRestCall<RestResult<Message>>(request, type).result()
 }

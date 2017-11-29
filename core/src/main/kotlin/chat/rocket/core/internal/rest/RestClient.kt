@@ -16,23 +16,16 @@ import chat.rocket.core.RocketChatClient
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
+import kotlinx.coroutines.experimental.CancellableContinuation
+import kotlinx.coroutines.experimental.suspendCancellableCoroutine
 import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
 import java.lang.reflect.Type
-
-fun RocketChatClient.serverInfo(success: (ServerInfo) -> Unit, error: (RocketChatException) -> Unit) {
-    val url = restUrl.newBuilder()
-                        .addPathSegment("api")
-                        .addPathSegment("info")
-                        .build()
-
-    val request = Request.Builder().url(url).get().build()
-
-    handleRestCall(request, ServerInfo::class.java, success, error)
-}
 
 internal fun getRestApiMethodNameByRoomType(roomType: BaseRoom.RoomType, method: String): String {
     when (roomType) {
@@ -61,65 +54,89 @@ internal fun RocketChatClient.requestBuilder(httpUrl: HttpUrl): Request.Builder 
     return builder
 }
 
-internal fun <T> RocketChatClient.handleRestCall(request: Request,
-                                type: Type, valueCallback: (T) -> Unit,
-                                errorCallback: (RocketChatException) -> Unit) {
-    httpClient.newCall(request).enqueue(object : okhttp3.Callback {
-        override fun onFailure(call: Call, e: IOException) {
-            errorCallback.invoke(RocketChatNetworkErrorException("network error", e))
-        }
+internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type: Type): T =
+        suspendCancellableCoroutine { continuation ->
 
-        @Throws(IOException::class)
-        override fun onResponse(call: Call, response: Response) {
-            if (!response.isSuccessful) {
-                errorCallback.invoke(processCallbackError(moshi, response, logger))
-                return
-            }
-
-            try {
-                // Override nullability, if there is no adapter, moshi will throw...
-                val adapter: JsonAdapter<T> = moshi.adapter(type)!!
-
-                response.body()?.source()?.let {
-                    adapter.fromJson(it)
-                }?.let(valueCallback).ifNull {
-                    errorCallback.invoke(RocketChatInvalidResponseException("Error parsing JSON message"))
+            val callback = object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    continuation.tryToResume { throw RocketChatNetworkErrorException("network error", e) }
                 }
-            } catch (ex: Exception) {
-                // kinda of multicatch exception...
-                when (ex) {
-                    is JsonDataException,
-                    is IllegalArgumentException,
-                    is IOException -> {
-                        errorCallback.invoke(RocketChatInvalidResponseException(ex.message!!, ex))
+
+                override fun onResponse(call: Call, response: Response) {
+                    if (!response.isSuccessful) {
+                        continuation.tryToResume { throw processCallbackError(moshi, response, logger) }
                     }
-                    else -> throw ex
+
+                    try {
+                        // Override nullability, if there is no adapter, moshi will throw...
+                        val adapter: JsonAdapter<T> = moshi.adapter(type)!!
+
+                        response.body()?.source()?.let { source ->
+                            adapter.fromJson(source)?.let {
+                                value -> continuation.resume(value)
+                            }.ifNull {
+                                continuation.tryToResume {
+                                    throw RocketChatInvalidResponseException("Error parsing JSON message")
+                                }
+                            }
+                        }
+                    } catch (ex: Exception) {
+                        // kinda of multi catch exception...
+                        when (ex) {
+                            is JsonDataException,
+                            is IllegalArgumentException,
+                            is IOException -> {
+                                continuation.tryToResume {
+                                    throw RocketChatInvalidResponseException(ex.message!!, ex)
+                                }
+                            }
+                            else -> continuation.tryToResume { throw ex }
+                        }
+                    } finally {
+                        response.body()?.close()
+                    }
                 }
             }
+
+            httpClient.newCall(request).enqueue(callback)
+
+            continuation.invokeOnCompletion {
+                if (continuation.isCancelled) httpClient.cancel(request.tag())
+            }
         }
-    })
-}
 
 internal fun processCallbackError(moshi: Moshi, response: Response, logger: Logger): RocketChatException {
     var exception: RocketChatException
     try {
         val body = response.body()?.string() ?: "missing body"
         logger.debug { "Error body: $body" }
-        if (response.code() == 401) {
+        exception = if (response.code() == 401) {
             val adapter: JsonAdapter<AuthenticationErrorMessage>? = moshi.adapter(AuthenticationErrorMessage::class.java)
             val message: AuthenticationErrorMessage? = adapter?.fromJson(body)
-            exception = RocketChatAuthException(message?.message ?: "Authentication problem")
+            RocketChatAuthException(message?.message ?: "Authentication problem")
         } else {
             val adapter: JsonAdapter<ErrorMessage>? = moshi.adapter(ErrorMessage::class.java)
             val message = adapter?.fromJson(body)
-            exception = RocketChatApiException(message?.errorType ?: response.code().toString(),
-                    message?.error ?: "unknown error")
+            RocketChatApiException(message?.errorType ?: response.code().toString(), message?.error ?: "unknown error")
         }
     } catch (e: IOException) {
         exception = RocketChatApiException(response.code().toString(), e.message!!, e)
     } catch (e: NullPointerException) {
         exception = RocketChatApiException(response.code().toString(), e.message!!, e)
+    } finally {
+        response.body()?.close()
     }
 
     return exception
+}
+
+private inline fun <T> CancellableContinuation<T>.tryToResume(getter: () -> T) {
+    isActive || return
+    try { resume(getter()) }
+    catch (exception: Throwable) { resumeWithException(exception) }
+}
+
+private fun OkHttpClient.cancel(tag: Any) {
+    dispatcher().queuedCalls().filter { tag == it.request().tag() }.forEach { it.cancel() }
+    dispatcher().runningCalls().filter { tag == it.request().tag() }.forEach { it.cancel() }
 }

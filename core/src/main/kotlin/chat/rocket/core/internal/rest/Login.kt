@@ -24,8 +24,7 @@ import okhttp3.RequestBody
  *
  * @sample
  */
-fun RocketChatClient.login(username: String, password: String, success: (Token) -> Unit,
-                           error: (RocketChatException) -> Unit) {
+suspend fun RocketChatClient.login(username: String, password: String): Token {
     val body = FormBody.Builder()
             .add("username", username)
             .add("password", password)
@@ -36,10 +35,11 @@ fun RocketChatClient.login(username: String, password: String, success: (Token) 
     val request = Request.Builder().url(url).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
-    handleRestCall<RestResult<Token>>(request, type, {
-        tokenRepository.save(it.result())
-        success(it.result())
-    }, error)
+    val result = handleRestCall<RestResult<Token>>(request, type).result()
+
+    tokenRepository.save(result)
+
+    return result
 }
 
 /**
@@ -56,12 +56,10 @@ fun RocketChatClient.login(username: String, password: String, success: (Token) 
  * @param error ([RocketChatException]) lambda indicating errors
  * @see User
  */
-fun RocketChatClient.signup(email: String,
+suspend fun RocketChatClient.signup(email: String,
                             name: String,
                             username: String,
-                            password: String,
-                            success: (User) -> Unit,
-                            error: (RocketChatException) -> Unit) {
+                            password: String): User {
     val payload = UserPayload(email, name, password, username)
     val adapter = moshi.adapter(UserPayload::class.java)
 
@@ -74,7 +72,5 @@ fun RocketChatClient.signup(email: String,
     val request = Request.Builder().url(url).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, User::class.java)
-    handleRestCall<RestResult<User>>(request, type, {
-        success(it.result())
-    }, error)
+    return handleRestCall<RestResult<User>>(request, type).result()
 }

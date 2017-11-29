@@ -1,12 +1,12 @@
 package chat.rocket.core.rxjava
 
-import chat.rocket.common.RocketChatException
 import chat.rocket.common.model.Token
 import chat.rocket.common.model.User
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.rest.login
 import chat.rocket.core.internal.rest.signup
 import io.reactivex.Single
+import kotlinx.coroutines.experimental.rx2.rxSingle
 
 
 /**
@@ -21,12 +21,8 @@ import io.reactivex.Single
  * @sample
  */
 fun RocketChatClient.login(username: String, password: String): Single<Token> =
-        Single.create { emitter ->
-            login(username, password, success = {
-                emitter.onSuccess(it)
-            }, error = {
-                emitter.onError(it)
-            })
+        rxSingle {
+            login(username, password)
         }
 
 /**
@@ -46,11 +42,6 @@ fun RocketChatClient.signup(email: String,
                             name: String,
                             username: String,
                             password: String): Single<User> =
-        Single.create { emitter ->
-            signup(email, name, username, password, success = {
-                emitter.onSuccess(it)
-            }, error = {
-                emitter.onError(it)
-            })
+        rxSingle {
+            signup(email, name, username, password)
         }
-

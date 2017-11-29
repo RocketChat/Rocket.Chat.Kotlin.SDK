@@ -1,12 +1,15 @@
 group 'chat.rocket.sdk'
 version '0.1-SNAPSHOT'
 
+apply plugin: 'java'
 apply plugin: 'kotlin'
 apply plugin: 'org.jetbrains.dokka'
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
     compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.19.3'
+
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
 
     compile project (':core')
 
