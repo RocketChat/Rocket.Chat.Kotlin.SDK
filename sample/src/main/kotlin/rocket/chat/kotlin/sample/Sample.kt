@@ -9,9 +9,11 @@ import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
 import chat.rocket.core.compat.Callback
 import chat.rocket.core.compat.serverInfo
+import chat.rocket.core.internal.rest.chatRooms
 import chat.rocket.core.internal.rest.getRoomFavoriteMessages
 import chat.rocket.core.internal.rest.login
 import chat.rocket.core.internal.rest.sendMessage
+import chat.rocket.core.internal.rest.subscriptions
 import chat.rocket.core.model.Myself
 import chat.rocket.core.rxjava.me
 import io.reactivex.Single
@@ -65,6 +67,9 @@ fun main(args: Array<String>) {
         pinMessage(client)
 
         getMeInfoByRx(client)
+
+        val rooms = client.chatRooms()
+        logger.debug("ChatRooms: $rooms")
     }
 
     // simple old callbacks
