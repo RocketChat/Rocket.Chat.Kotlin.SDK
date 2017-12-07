@@ -7,6 +7,8 @@ import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.model.UserPayload
 import com.squareup.moshi.Types
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.run
 import okhttp3.FormBody
 import okhttp3.MediaType
 import okhttp3.Request
@@ -24,7 +26,7 @@ import okhttp3.RequestBody
  *
  * @sample
  */
-suspend fun RocketChatClient.login(username: String, password: String): Token {
+suspend fun RocketChatClient.login(username: String, password: String): Token = run(CommonPool) {
     val body = FormBody.Builder()
             .add("username", username)
             .add("password", password)
@@ -39,7 +41,7 @@ suspend fun RocketChatClient.login(username: String, password: String): Token {
 
     tokenRepository.save(result)
 
-    return result
+    result
 }
 
 /**
@@ -59,7 +61,7 @@ suspend fun RocketChatClient.login(username: String, password: String): Token {
 suspend fun RocketChatClient.signup(email: String,
                             name: String,
                             username: String,
-                            password: String): User {
+                            password: String): User = run(CommonPool) {
     val payload = UserPayload(email, name, password, username)
     val adapter = moshi.adapter(UserPayload::class.java)
 
@@ -72,5 +74,5 @@ suspend fun RocketChatClient.signup(email: String,
     val request = Request.Builder().url(url).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, User::class.java)
-    return handleRestCall<RestResult<User>>(request, type).result()
+    handleRestCall<RestResult<User>>(request, type).result()
 }

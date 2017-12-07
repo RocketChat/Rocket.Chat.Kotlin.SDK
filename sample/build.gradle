@@ -21,6 +21,9 @@ dependencies {
     compile project (':compat')
 
     compile 'com.squareup.okhttp3:logging-interceptor:3.9.0'
+
+    compile 'com.squareup.moshi:moshi:1.5.0'
+    compile 'com.squareup.moshi:moshi-kotlin:1.5.0'
 }
 
 compileKotlin {

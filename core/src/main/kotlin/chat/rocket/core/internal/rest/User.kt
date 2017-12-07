@@ -50,7 +50,9 @@ internal fun RocketChatClient.combine(rooms: List<Room>, subscriptions: List<Sub
     subscriptions.forEach {
         val room = map[it.roomId]
         val subscription = it
-        // TODO - what should we do if rooms and subscriptions are not matching?
+        // In case of any inconsistency we just ignore the room/subscription...
+        // This should be a very, very rare situation, like the user leaving/joining a channel
+        // between the 2 calls.
         room?.let {
             chatRooms.add(ChatRoom.create(room, subscription, this))
         }
