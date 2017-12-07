@@ -2,16 +2,12 @@ package chat.rocket.core.internal.rest
 
 import chat.rocket.common.RocketChatApiException
 import chat.rocket.common.RocketChatAuthException
-import chat.rocket.common.RocketChatException
 import chat.rocket.common.RocketChatInvalidResponseException
 import chat.rocket.common.model.Token
-import chat.rocket.common.model.User
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
 import com.nhaarman.mockito_kotlin.check
-import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.timeout
 import com.nhaarman.mockito_kotlin.verify
 import com.squareup.moshi.JsonEncodingException
 import io.fabric8.mockwebserver.DefaultMockServer

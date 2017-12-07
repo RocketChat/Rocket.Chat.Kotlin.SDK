@@ -1,6 +1,8 @@
 group 'chat.rocket.sdk'
 version '0.1-SNAPSHOT'
 
+apply from: rootProject.file('dependencies.gradle')
+
 apply plugin: 'java'
 apply plugin: 'kotlin'
 
@@ -8,7 +10,7 @@ sourceCompatibility = 1.8
 
 dependencies {
     compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.19.3'
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:${versions.kotlin}"
 
     compile 'io.reactivex.rxjava2:rxjava:2.1.6'
     compile 'io.reactivex.rxjava2:rxkotlin:2.1.0'
@@ -21,6 +23,9 @@ dependencies {
     compile project (':compat')
 
     compile 'com.squareup.okhttp3:logging-interceptor:3.9.0'
+
+    /*compile 'com.squareup.moshi:moshi:1.5.0'
+    compile 'com.squareup.moshi:moshi-kotlin:1.5.0'*/
 }
 
 compileKotlin {

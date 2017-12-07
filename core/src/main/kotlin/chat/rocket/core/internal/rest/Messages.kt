@@ -26,8 +26,8 @@ suspend fun RocketChatClient.pinMessage(messageId: String): Message {
 }
 
 suspend fun RocketChatClient.getRoomFavoriteMessages(roomId: String,
-                                             roomType: BaseRoom.RoomType,
-                                             offset: Int): PagedResult<List<Message>> {
+                                                     roomType: BaseRoom.RoomType,
+                                                     offset: Int): PagedResult<List<Message>> {
     val userId = tokenRepository.get()?.userId
 
     val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "messages"))
@@ -46,8 +46,8 @@ suspend fun RocketChatClient.getRoomFavoriteMessages(roomId: String,
 }
 
 suspend fun RocketChatClient.getRoomPinnedMessages(roomId: String,
-                                           roomType: BaseRoom.RoomType,
-                                           offset: Int? = 0): PagedResult<List<Message>> {
+                                                   roomType: BaseRoom.RoomType,
+                                                   offset: Int? = 0): PagedResult<List<Message>> {
     val httpUrl = requestUrl(restUrl,
             getRestApiMethodNameByRoomType(roomType, "messages"))
             .addQueryParameter("roomId", roomId)
@@ -76,11 +76,11 @@ suspend fun RocketChatClient.getRoomPinnedMessages(roomId: String,
  * @return
  */
 suspend fun RocketChatClient.sendMessage(roomId: String,
-                                 text: String? = null,
-                                 alias: String? = null,
-                                 emoji: String? = null,
-                                 avatar: String? = null,
-                                 attachments: List<Attachment>? = null): Message {
+                                         text: String? = null,
+                                         alias: String? = null,
+                                         emoji: String? = null,
+                                         avatar: String? = null,
+                                         attachments: List<Attachment>? = null): Message {
     val payload = MessagePayload(roomId, text, alias, emoji, avatar, attachments)
     val adapter = moshi.adapter(MessagePayload::class.java)
     val payloadBody = adapter.toJson(payload)
