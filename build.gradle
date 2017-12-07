@@ -1,6 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.2.0'
-    ext.dokka_version = '0.9.15'
+    apply from: rootProject.file('dependencies.gradle')
 
     repositories {
         jcenter()
@@ -10,17 +9,21 @@ buildscript {
         }
     }
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
         classpath "gradle.plugin.org.jmailen.gradle:kotlinter-gradle:1.5.0"
-        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:${versions.dokka}"
     }
 }
 
 allprojects {
+    apply from: rootProject.file('dependencies.gradle')
     repositories {
         jcenter()
         mavenCentral()
         maven { url 'https://jitpack.io' }
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
     }
 
     apply plugin: "org.jmailen.kotlinter"
