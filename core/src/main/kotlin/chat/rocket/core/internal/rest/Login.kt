@@ -26,8 +26,8 @@ import okhttp3.RequestBody
  *
  * @sample
  */
-suspend fun RocketChatClient.login(username: String, password: String): Token = run(CommonPool) {
-    val payload = LoginPayload(username, password)
+suspend fun RocketChatClient.login(username: String, password: String, pin: String? = null): Token = run(CommonPool) {
+    val payload = LoginPayload(username, password, pin)
     val adapter = moshi.adapter(LoginPayload::class.java)
 
     val paylodBody = adapter.toJson(payload)
