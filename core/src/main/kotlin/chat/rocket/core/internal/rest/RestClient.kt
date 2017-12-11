@@ -1,10 +1,6 @@
 package chat.rocket.core.internal.rest
 
-import chat.rocket.common.RocketChatApiException
-import chat.rocket.common.RocketChatAuthException
-import chat.rocket.common.RocketChatException
-import chat.rocket.common.RocketChatInvalidResponseException
-import chat.rocket.common.RocketChatNetworkErrorException
+import chat.rocket.common.*
 import chat.rocket.common.internal.AuthenticationErrorMessage
 import chat.rocket.common.internal.ErrorMessage
 import chat.rocket.common.model.BaseRoom
@@ -17,12 +13,7 @@ import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.experimental.CancellableContinuation
 import kotlinx.coroutines.experimental.suspendCancellableCoroutine
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
+import okhttp3.*
 import java.io.IOException
 import java.lang.reflect.Type
 
@@ -112,7 +103,7 @@ internal fun processCallbackError(moshi: Moshi, response: Response, logger: Logg
         exception = if (response.code() == 401) {
             val adapter: JsonAdapter<AuthenticationErrorMessage>? = moshi.adapter(AuthenticationErrorMessage::class.java)
             val message: AuthenticationErrorMessage? = adapter?.fromJson(body)
-            RocketChatAuthException(message?.message ?: "Authentication problem")
+            RocketChatAuthException(message?.message ?: "Authentication problem", message?.error)
         } else {
             val adapter: JsonAdapter<ErrorMessage>? = moshi.adapter(ErrorMessage::class.java)
             val message = adapter?.fromJson(body)
