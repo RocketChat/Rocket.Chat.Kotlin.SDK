@@ -103,7 +103,10 @@ internal fun processCallbackError(moshi: Moshi, response: Response, logger: Logg
         exception = if (response.code() == 401) {
             val adapter: JsonAdapter<AuthenticationErrorMessage>? = moshi.adapter(AuthenticationErrorMessage::class.java)
             val message: AuthenticationErrorMessage? = adapter?.fromJson(body)
-            RocketChatAuthException(message?.message ?: "Authentication problem", message?.error)
+            if (message?.error?.contentEquals("totp-required") == true)
+                RocketChatTwoFactorException(message.message)
+            else
+                RocketChatAuthException(message?.message ?: "Authentication problem")
         } else {
             val adapter: JsonAdapter<ErrorMessage>? = moshi.adapter(ErrorMessage::class.java)
             val message = adapter?.fromJson(body)
