@@ -1,7 +1,7 @@
 ext {
     versions = [
             kotlin    : '1.2.0',
-            coroutine : '0.19.3',
+            coroutine : '0.20',
             dokka     : '0.9.15'
     ]
 }
