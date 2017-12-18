@@ -4,7 +4,9 @@ import chat.rocket.common.internal.ISO8601Date
 import chat.rocket.common.model.BaseRoom
 import chat.rocket.common.model.SimpleUser
 import com.squareup.moshi.Json
+import se.ansman.kotshi.JsonSerializable
 
+@JsonSerializable
 data class Room(
         @Json(name = "_id") override val id: String,
         @Json(name = "t") override val type: BaseRoom.RoomType,

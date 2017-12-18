@@ -5,7 +5,9 @@ import chat.rocket.common.model.BaseMessage
 import chat.rocket.common.model.SimpleRoom
 import chat.rocket.common.model.SimpleUser
 import com.squareup.moshi.Json
+import se.ansman.kotshi.JsonSerializable
 
+@JsonSerializable
 data class Message(
         @Json(name = "_id") val id: String,
         @Json(name = "rid") override val roomId: String,

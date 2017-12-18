@@ -2,6 +2,9 @@ ext {
     versions = [
             kotlin    : '1.2.0',
             coroutine : '0.20',
-            dokka     : '0.9.15'
+            dokka     : '0.9.15',
+            kotshi    : '0.3.0-beta2',
+            okhttp    : '3.9.0',
+            moshi     : '1.6.0-SNAPSHOT'
     ]
 }
