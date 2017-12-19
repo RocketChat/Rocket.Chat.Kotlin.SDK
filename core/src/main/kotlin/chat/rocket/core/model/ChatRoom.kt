@@ -15,7 +15,7 @@ data class ChatRoom(override val id: String,
                     val timestamp: Long?,
                     val lastModified: Long?,
                     @get:JvmName("isDefault")
-                    val default: Boolean? = false,
+                    val default: Boolean = false,
                     val open: Boolean,
                     val alert: Boolean,
                     val unread: Long,

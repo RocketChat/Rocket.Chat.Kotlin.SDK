@@ -4,6 +4,7 @@ import chat.rocket.common.internal.ISO8601Date
 import chat.rocket.common.model.BaseRoom
 import chat.rocket.common.model.SimpleUser
 import com.squareup.moshi.Json
+import se.ansman.kotshi.JsonDefaultValueBoolean
 import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
@@ -19,7 +20,8 @@ data class Subscription(
         @Json(name = "lm") @ISO8601Date val lastModified: Long?,
         @Json(name = "_updatedAt") @ISO8601Date override val updatedAt: Long?,
         @Json(name = "default")
-        val isDefault: Boolean? = false,
+        @JsonDefaultValueBoolean(false)
+        val isDefault: Boolean,
         val open: Boolean,
         val alert: Boolean,
         val unread: Long,
