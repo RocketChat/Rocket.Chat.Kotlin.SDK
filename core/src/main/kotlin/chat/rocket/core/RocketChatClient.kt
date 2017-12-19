@@ -1,13 +1,14 @@
 package chat.rocket.core
 
+import chat.rocket.common.CommonJsonAdapterFactory
 import chat.rocket.common.internal.ISO8601Date
 import chat.rocket.common.model.TimestampAdapter
 import chat.rocket.common.util.CalendarISO8601Converter
 import chat.rocket.common.util.Logger
 import chat.rocket.common.util.PlatformLogger
+import chat.rocket.core.internal.CoreJsonAdapterFactory
 import chat.rocket.core.internal.RestMultiResult
 import chat.rocket.core.internal.RestResult
-import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -18,12 +19,13 @@ class RocketChatClient private constructor(var httpClient: OkHttpClient,
                                            var tokenRepository: TokenRepository,
                                            var logger: Logger) {
 
-    val moshi: Moshi = Moshi.Builder()
+    internal val moshi: Moshi = Moshi.Builder()
                         .add(RestResult.JsonAdapterFactory())
                         .add(RestMultiResult.JsonAdapterFactory())
                         .add(java.lang.Long::class.java, ISO8601Date::class.java, TimestampAdapter(CalendarISO8601Converter()))
                         .add(Long::class.java, ISO8601Date::class.java, TimestampAdapter(CalendarISO8601Converter()))
-                        .add(KotlinJsonAdapterFactory())
+                        .add(CommonJsonAdapterFactory.INSTANCE)
+                        .add(CoreJsonAdapterFactory.INSTANCE)
                         .build()
 
     private constructor(builder: Builder) : this(builder.httpClient, builder.restUrl,

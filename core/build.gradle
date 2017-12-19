@@ -3,7 +3,9 @@ version '0.1-SNAPSHOT'
 
 apply from: rootProject.file('dependencies.gradle')
 
+apply plugin: 'java'
 apply plugin: 'kotlin'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'org.jetbrains.dokka'
 
 dependencies {
@@ -12,10 +14,10 @@ dependencies {
 
     compile project (':common')
 
-    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+    compile "se.ansman.kotshi:api:${versions.kotshi}"
+    kapt "se.ansman.kotshi:compiler:${versions.kotshi}"
 
-    /*compileOnly 'com.squareup.moshi:moshi:1.6.0-SNAPSHOT'
-    compileOnly 'com.squareup.moshi:moshi-kotlin:1.6.0-SNAPSHOT'*/
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
 
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:${versions.kotlin}"
     testCompile 'junit:junit:4.12'

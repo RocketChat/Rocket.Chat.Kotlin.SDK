@@ -5,7 +5,10 @@ import chat.rocket.common.model.BaseMessage
 import chat.rocket.common.model.SimpleRoom
 import chat.rocket.common.model.SimpleUser
 import com.squareup.moshi.Json
+import se.ansman.kotshi.JsonDefaultValueBoolean
+import se.ansman.kotshi.JsonSerializable
 
+@JsonSerializable
 data class Message(
         @Json(name = "_id") val id: String,
         @Json(name = "rid") override val roomId: String,
@@ -17,8 +20,10 @@ data class Message(
         override val editedBy: SimpleUser?,
         @Json(name = "alias") override val senderAlias: String?,
         override val avatar: String?,
-        val groupable: Boolean? = false,
-        val parseUrls: Boolean? = false,
+        @JsonDefaultValueBoolean(false)
+        val groupable: Boolean,
+        @JsonDefaultValueBoolean(false)
+        val parseUrls: Boolean,
         val urls: List<Url>?,
         override val mentions: List<SimpleUser>?,
         override val channels: List<SimpleRoom>?

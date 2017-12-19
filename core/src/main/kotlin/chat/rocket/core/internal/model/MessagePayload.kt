@@ -1,7 +1,9 @@
 package chat.rocket.core.internal.model
 
 import chat.rocket.core.model.Attachment
+import se.ansman.kotshi.JsonSerializable
 
+@JsonSerializable
 data class MessagePayload(
         val roomId: String,
         val text: String?,
