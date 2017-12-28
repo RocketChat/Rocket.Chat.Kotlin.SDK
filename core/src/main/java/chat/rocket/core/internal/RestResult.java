@@ -47,7 +47,7 @@ public class RestResult<T> {
     }
 
     static <T> RestResult<T> create(T data, Long total, Long offset, Long count) {
-        return new RestResult<T>(data, total, offset, count);
+        return new RestResult<>(data, total, offset, count);
     }
 
     public static class MoshiJsonAdapter<T> extends JsonAdapter<RestResult<T>> {

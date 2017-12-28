@@ -4,6 +4,10 @@ import chat.rocket.common.model.BaseRoom
 import chat.rocket.common.model.SimpleUser
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.model.Subscription
+import chat.rocket.core.internal.rest.history
+import chat.rocket.core.internal.rest.messages
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.run
 
 data class ChatRoom(override val id: String,
                     override val type: BaseRoom.RoomType,
@@ -19,8 +23,9 @@ data class ChatRoom(override val id: String,
                     val open: Boolean,
                     val alert: Boolean,
                     val unread: Long,
-                    val userMenstions: Long,
-                    val groupMentions: Long,
+                    val userMenstions: Long?,
+                    val groupMentions: Long?,
+                    val lastMessage: Message?,
                     val client: RocketChatClient
 ) : BaseRoom {
     companion object {
@@ -30,7 +35,7 @@ data class ChatRoom(override val id: String,
                     user = room.user ?: subscription.user,
                     name = room.name ?: subscription.name,
                     fullName = room.fullName ?: subscription.fullName,
-                    readonly = room.readonly ?: subscription.readonly,
+                    readonly = room.readonly,
                     updatedAt = room.updatedAt ?: subscription.updatedAt,
                     timestamp = subscription.timestamp,
                     lastModified = subscription.lastModified,
@@ -40,7 +45,19 @@ data class ChatRoom(override val id: String,
                     unread = subscription.unread,
                     userMenstions = subscription.userMentions,
                     groupMentions = subscription.groupMentions,
+                    lastMessage = room.lastMessage,
                     client = client)
         }
     }
+}
+
+suspend fun ChatRoom.messages(offset: Long = 0,
+                              count: Long = 50): PagedResult<List<Message>> = run(CommonPool) {
+    client.messages(id, type, offset, count)
+}
+
+suspend fun ChatRoom.history(count: Long = 50,
+                             oldest: String? = null,
+                             latest: String? = null): PagedResult<List<Message>> = run(CommonPool) {
+    return@run client.history(id, type, count, oldest, latest)
 }

@@ -25,6 +25,6 @@ data class Subscription(
         val open: Boolean,
         val alert: Boolean,
         val unread: Long,
-        val userMentions: Long,
-        val groupMentions: Long
+        val userMentions: Long?,
+        val groupMentions: Long?
 ) : BaseRoom
