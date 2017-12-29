@@ -9,6 +9,7 @@ import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.internal.CoreJsonAdapterFactory
 import chat.rocket.core.internal.RestMultiResult
 import chat.rocket.core.internal.RestResult
+import chat.rocket.core.internal.SettingsAdapter
 import com.squareup.moshi.Moshi
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -22,6 +23,7 @@ class RocketChatClient private constructor(var httpClient: OkHttpClient,
     internal val moshi: Moshi = Moshi.Builder()
                         .add(RestResult.JsonAdapterFactory())
                         .add(RestMultiResult.JsonAdapterFactory())
+                        .add(SettingsAdapter())
                         .add(java.lang.Long::class.java, ISO8601Date::class.java, TimestampAdapter(CalendarISO8601Converter()))
                         .add(Long::class.java, ISO8601Date::class.java, TimestampAdapter(CalendarISO8601Converter()))
                         .add(CommonJsonAdapterFactory.INSTANCE)
