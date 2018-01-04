@@ -8,3 +8,6 @@ data class PushRegistrationPayload(
         val value: String,
         val appName: String = "Main"
 )
+
+@JsonSerializable
+data class PushUnregistrationPayload(val token: String)
