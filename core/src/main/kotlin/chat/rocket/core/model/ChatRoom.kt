@@ -53,7 +53,7 @@ data class ChatRoom(override val id: String,
 
 suspend fun ChatRoom.messages(offset: Long = 0,
                               count: Long = 50): PagedResult<List<Message>> = withContext(CommonPool) {
-                                  client.messages(id, type, offset, count)
+                                  return@withContext client.messages(id, type, offset, count)
                               }
 
 suspend fun ChatRoom.history(count: Long = 50,
