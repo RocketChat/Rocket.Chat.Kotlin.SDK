@@ -6,6 +6,7 @@ import chat.rocket.common.model.TimestampAdapter
 import chat.rocket.common.util.CalendarISO8601Converter
 import chat.rocket.common.util.Logger
 import chat.rocket.common.util.PlatformLogger
+import chat.rocket.common.util.ifNull
 import chat.rocket.core.internal.CoreJsonAdapterFactory
 import chat.rocket.core.internal.RestMultiResult
 import chat.rocket.core.internal.RestResult
@@ -13,12 +14,21 @@ import chat.rocket.core.internal.SettingsAdapter
 import com.squareup.moshi.Moshi
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
+import java.security.InvalidParameterException
 
-class RocketChatClient private constructor(var httpClient: OkHttpClient,
-                                           var restUrl: HttpUrl,
-                                           var websocketUrl: String,
-                                           var tokenRepository: TokenRepository,
-                                           var logger: Logger) {
+class RocketChatClient private constructor(internal val httpClient: OkHttpClient,
+                                           val url: String,
+                                           internal val tokenRepository: TokenRepository,
+                                           internal val logger: Logger) {
+    internal lateinit var restUrl: HttpUrl
+
+    init {
+        HttpUrl.parse(url)?.let {
+            restUrl = it
+        }.ifNull {
+            throw InvalidParameterException("You must pass a valid HTTP or HTTPS URL")
+        }
+    }
 
     internal val moshi: Moshi = Moshi.Builder()
                         .add(RestResult.JsonAdapterFactory())
@@ -31,7 +41,8 @@ class RocketChatClient private constructor(var httpClient: OkHttpClient,
                         .build()
 
     private constructor(builder: Builder) : this(builder.httpClient, builder.restUrl,
-            builder.websocketUrl, builder.tokenRepository, Logger(builder.platformLogger))
+            builder.tokenRepository, Logger(builder.platformLogger))
+
 
     companion object {
         fun create(init: Builder.() -> Unit) = Builder(init).build()
@@ -43,16 +54,13 @@ class RocketChatClient private constructor(var httpClient: OkHttpClient,
         }
 
         lateinit var httpClient: OkHttpClient
-        lateinit var restUrl: HttpUrl
-        lateinit var websocketUrl: String
+        lateinit var restUrl: String
         lateinit var tokenRepository: TokenRepository
         lateinit var platformLogger: PlatformLogger
 
         fun httpClient(init: Builder.() -> OkHttpClient) = apply { httpClient = init() }
 
-        fun restUrl(init: Builder.() -> HttpUrl) = apply { restUrl = init() }
-
-        fun websocketUrl(init: Builder.() -> String) = apply { websocketUrl = init() }
+        fun restUrl(init: Builder.() -> String) = apply { restUrl = init() }
 
         fun tokenRepository(init: Builder.() -> TokenRepository) = apply { tokenRepository = init() }
 

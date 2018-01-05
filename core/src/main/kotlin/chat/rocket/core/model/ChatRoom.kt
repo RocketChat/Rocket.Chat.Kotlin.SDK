@@ -12,7 +12,7 @@ import kotlinx.coroutines.experimental.withContext
 data class ChatRoom(override val id: String,
                     override val type: BaseRoom.RoomType,
                     override val user: SimpleUser?,
-                    override val name: String?,
+                    val name: String,
                     override val fullName: String?,
                     override val readonly: Boolean? = false,
                     override val updatedAt: Long?,

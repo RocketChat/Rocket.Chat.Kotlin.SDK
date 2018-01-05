@@ -87,6 +87,19 @@ class UserTest {
         }
     }
 
+    @Test
+    fun `chatRooms() should return users chatrooms`() {
+        mockServer.expect()
+                .get().withPath("/api/v1/rooms.get?updatedAt=1970-01-01T00:00:00.000Z").andReturn(200, ROOMS_OK).once()
+        mockServer.expect()
+                .get().withPath("/api/v1/subscriptions.get?updatedAt=1970-01-01T00:00:00.000Z").andReturn(200, SUBSCRIPTIONS_OK).once()
+
+        runBlocking {
+            val rooms = sut.chatRooms()
+            System.out.println("Rooms: $rooms")
+        }
+    }
+
     @After
     fun shutdown() {
         mockServer.shutdown()
