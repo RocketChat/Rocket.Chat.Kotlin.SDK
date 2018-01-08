@@ -10,11 +10,12 @@ import chat.rocket.core.model.PagedResult
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.run
+import kotlinx.coroutines.experimental.withContext
 import okhttp3.FormBody
 import okhttp3.MediaType
 import okhttp3.RequestBody
 
-suspend fun RocketChatClient.pinMessage(messageId: String): Message = run(CommonPool) {
+suspend fun RocketChatClient.pinMessage(messageId: String): Message = withContext(CommonPool) {
     val body = FormBody.Builder().add("messageId", messageId).build()
 
     val httpUrl = requestUrl(restUrl, "chat.pinMessage").build()
@@ -24,12 +25,12 @@ suspend fun RocketChatClient.pinMessage(messageId: String): Message = run(Common
     val type = Types.newParameterizedType(RestResult::class.java,
             Message::class.java)
 
-    return@run handleRestCall<RestResult<Message>>(request, type).result()
+    return@withContext handleRestCall<RestResult<Message>>(request, type).result()
 }
 
 suspend fun RocketChatClient.getRoomFavoriteMessages(roomId: String,
                                                      roomType: BaseRoom.RoomType,
-                                                     offset: Int): PagedResult<List<Message>> = run(CommonPool) {
+                                                     offset: Int): PagedResult<List<Message>> = withContext(CommonPool) {
     val userId = tokenRepository.get()?.userId
 
     val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "messages"))
@@ -44,12 +45,12 @@ suspend fun RocketChatClient.getRoomFavoriteMessages(roomId: String,
             Types.newParameterizedType(List::class.java, Message::class.java))
     val result = handleRestCall<RestResult<List<Message>>>(request, type)
 
-    return@run PagedResult<List<Message>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
+    return@withContext PagedResult<List<Message>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
 }
 
 suspend fun RocketChatClient.getRoomPinnedMessages(roomId: String,
                                                    roomType: BaseRoom.RoomType,
-                                                   offset: Int? = 0): PagedResult<List<Message>>  = run(CommonPool) {
+                                                   offset: Int? = 0): PagedResult<List<Message>>  = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl,
             getRestApiMethodNameByRoomType(roomType, "messages"))
             .addQueryParameter("roomId", roomId)
@@ -63,7 +64,7 @@ suspend fun RocketChatClient.getRoomPinnedMessages(roomId: String,
             Types.newParameterizedType(List::class.java, Message::class.java))
     val result = handleRestCall<RestResult<List<Message>>>(request, type)
 
-    return@run PagedResult<List<Message>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
+    return@withContext PagedResult<List<Message>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
 }
 
 /**
@@ -82,7 +83,7 @@ suspend fun RocketChatClient.sendMessage(roomId: String,
                                          alias: String? = null,
                                          emoji: String? = null,
                                          avatar: String? = null,
-                                         attachments: List<Attachment>? = null): Message = run(CommonPool) {
+                                         attachments: List<Attachment>? = null): Message = withContext(CommonPool) {
     val payload = MessagePayload(roomId, text, alias, emoji, avatar, attachments)
     val adapter = moshi.adapter(MessagePayload::class.java)
     val payloadBody = adapter.toJson(payload)
@@ -94,13 +95,13 @@ suspend fun RocketChatClient.sendMessage(roomId: String,
     val request = requestBuilder(url).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, Message::class.java)
-    return@run handleRestCall<RestResult<Message>>(request, type).result()
+    return@withContext handleRestCall<RestResult<Message>>(request, type).result()
 }
 
 suspend internal fun RocketChatClient.messages(roomId: String,
                                               roomType: BaseRoom.RoomType,
                                               offset: Long,
-                                              count: Long): PagedResult<List<Message>> {
+                                              count: Long): PagedResult<List<Message>> = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl,
             getRestApiMethodNameByRoomType(roomType, "messages"))
             .addQueryParameter("roomId", roomId)
@@ -114,14 +115,14 @@ suspend internal fun RocketChatClient.messages(roomId: String,
             Types.newParameterizedType(List::class.java, Message::class.java))
     val result = handleRestCall<RestResult<List<Message>>>(request, type)
 
-    return PagedResult<List<Message>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
+    return@withContext PagedResult<List<Message>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
 }
 
 internal suspend fun RocketChatClient.history(roomId: String,
                                      roomType: BaseRoom.RoomType,
                                      count: Long,
                                      oldest: String?,
-                                     latest: String?): PagedResult<List<Message>> {
+                                     latest: String?): PagedResult<List<Message>> = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl,
             getRestApiMethodNameByRoomType(roomType, "history"))
             .addQueryParameter("roomId", roomId).apply {
@@ -140,5 +141,5 @@ internal suspend fun RocketChatClient.history(roomId: String,
             Types.newParameterizedType(List::class.java, Message::class.java))
     val result = handleRestCall<RestResult<List<Message>>>(request, type)
 
-    return PagedResult<List<Message>>(result.result(), result.total() ?: -1, result.offset() ?: -1)
+    return@withContext PagedResult<List<Message>>(result.result(), result.total() ?: -1, result.offset() ?: -1)
 }

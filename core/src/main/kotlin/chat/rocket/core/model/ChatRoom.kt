@@ -7,12 +7,12 @@ import chat.rocket.core.internal.model.Subscription
 import chat.rocket.core.internal.rest.history
 import chat.rocket.core.internal.rest.messages
 import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.run
+import kotlinx.coroutines.experimental.withContext
 
 data class ChatRoom(override val id: String,
                     override val type: BaseRoom.RoomType,
                     override val user: SimpleUser?,
-                    override val name: String?,
+                    val name: String,
                     override val fullName: String?,
                     override val readonly: Boolean? = false,
                     override val updatedAt: Long?,
@@ -52,12 +52,12 @@ data class ChatRoom(override val id: String,
 }
 
 suspend fun ChatRoom.messages(offset: Long = 0,
-                              count: Long = 50): PagedResult<List<Message>> = run(CommonPool) {
-    client.messages(id, type, offset, count)
-}
+                              count: Long = 50): PagedResult<List<Message>> = withContext(CommonPool) {
+                                  return@withContext client.messages(id, type, offset, count)
+                              }
 
 suspend fun ChatRoom.history(count: Long = 50,
                              oldest: String? = null,
-                             latest: String? = null): PagedResult<List<Message>> = run(CommonPool) {
-    return@run client.history(id, type, count, oldest, latest)
-}
+                             latest: String? = null): PagedResult<List<Message>> = withContext(CommonPool) {
+                                 return@withContext client.history(id, type, count, oldest, latest)
+                             }

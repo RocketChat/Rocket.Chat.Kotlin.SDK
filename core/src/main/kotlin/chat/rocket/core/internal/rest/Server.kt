@@ -6,10 +6,11 @@ import chat.rocket.core.model.Value
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.run
+import kotlinx.coroutines.experimental.withContext
 import okhttp3.Request
 import se.ansman.kotshi.JsonSerializable
 
-suspend fun RocketChatClient.serverInfo(): ServerInfo = run(CommonPool) {
+suspend fun RocketChatClient.serverInfo(): ServerInfo = withContext(CommonPool) {
     val url = restUrl.newBuilder()
             .addPathSegment("api")
             .addPathSegment("info")
@@ -20,7 +21,7 @@ suspend fun RocketChatClient.serverInfo(): ServerInfo = run(CommonPool) {
     handleRestCall<ServerInfo>(request, ServerInfo::class.java)
 }
 
-suspend fun RocketChatClient.configurations(): Map<String, Map<String, String>> = run(CommonPool) {
+suspend fun RocketChatClient.configurations(): Map<String, Map<String, String>> = withContext(CommonPool) {
     val url = restUrl.newBuilder().apply {
         addPathSegment("api")
         addPathSegment("v1")
@@ -45,10 +46,10 @@ suspend fun RocketChatClient.configurations(): Map<String, Map<String, String>> 
         }
     }
 
-    return@run result
+    return@withContext result
 }
 
-suspend fun RocketChatClient.settings(vararg filter: String): Map<String, Value<Any>> = run(CommonPool) {
+suspend fun RocketChatClient.settings(vararg filter: String): Map<String, Value<Any>> = withContext(CommonPool) {
     val url = restUrl.newBuilder().apply {
         addPathSegment("api")
         addPathSegment("v1")

@@ -34,3 +34,5 @@ proguard/
 .gradle/
 build/
 bin/
+
+.last_commit_hash

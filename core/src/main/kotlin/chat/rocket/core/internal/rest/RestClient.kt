@@ -18,10 +18,10 @@ import java.io.IOException
 import java.lang.reflect.Type
 
 internal fun getRestApiMethodNameByRoomType(roomType: BaseRoom.RoomType, method: String): String {
-    when (roomType) {
-        BaseRoom.RoomType.PUBLIC -> return "channels." + method
-        BaseRoom.RoomType.PRIVATE -> return "groups." + method
-        else -> return "dm." + method
+    return when (roomType) {
+        BaseRoom.RoomType.PUBLIC -> "channels." + method
+        BaseRoom.RoomType.PRIVATE -> "groups." + method
+        else -> "dm." + method
     }
 }
 

@@ -10,6 +10,7 @@ import chat.rocket.core.internal.model.UserPayload
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.run
+import kotlinx.coroutines.experimental.withContext
 import okhttp3.MediaType
 import okhttp3.Request
 import okhttp3.RequestBody
@@ -26,7 +27,7 @@ import okhttp3.RequestBody
  *
  * @sample
  */
-suspend fun RocketChatClient.login(username: String, password: String, pin: String? = null): Token = run(CommonPool) {
+suspend fun RocketChatClient.login(username: String, password: String, pin: String? = null): Token = withContext(CommonPool) {
     val payload = LoginPayload(username, password, pin)
     val adapter = moshi.adapter(LoginPayload::class.java)
 
@@ -63,7 +64,7 @@ suspend fun RocketChatClient.login(username: String, password: String, pin: Stri
 suspend fun RocketChatClient.signup(email: String,
                             name: String,
                             username: String,
-                            password: String): User = run(CommonPool) {
+                            password: String): User = withContext(CommonPool) {
     val payload = UserPayload(email, name, password, username)
     val adapter = moshi.adapter(UserPayload::class.java)
 

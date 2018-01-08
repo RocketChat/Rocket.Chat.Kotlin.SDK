@@ -6,7 +6,6 @@ interface BaseRoom {
 
     val id: String
     val type: RoomType
-    val name: String?
     val fullName: String?
     val user: SimpleUser?
     val readonly: Boolean?

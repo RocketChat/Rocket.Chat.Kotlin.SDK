@@ -55,8 +55,7 @@ class SettingsAdapter : JsonAdapter<Map<String, Value<Any>>>() {
                         JsonReader.Token.STRING -> tmp = reader.nextString()
                         JsonReader.Token.BEGIN_OBJECT -> {
                             reader.beginObject()
-                            assertNextName(reader, "defaultUrl")
-                            tmp = reader.nextString()
+                            tmp = readAsset(reader)
                             reader.endObject()
                         }
                     }
@@ -74,6 +73,22 @@ class SettingsAdapter : JsonAdapter<Map<String, Value<Any>>>() {
             is Boolean -> Pair(id!!, Value(tmp))
             else -> throw JsonEncodingException("Unknown value type for $tmp")
         }
+    }
+
+    private val ASSET_NAMES = arrayOf("url", "defaultUrl")
+    private val ASSET_OPTIONS = JsonReader.Options.of(*ASSET_NAMES)
+    private fun readAsset(reader: JsonReader): String? {
+        var url: String? = null
+        var defaultUrl: String? = null
+        while (reader.hasNext()) {
+            when (reader.selectName(ASSET_OPTIONS)) {
+                0 -> url = reader.nextString()
+                1 -> defaultUrl = reader.nextString()
+                else -> reader.skipValue()
+            }
+        }
+
+        return url ?: defaultUrl
     }
 
     private fun assertNextName(reader: JsonReader, expected: String) {
