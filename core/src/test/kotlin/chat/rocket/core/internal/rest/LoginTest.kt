@@ -47,8 +47,7 @@ class LoginTest {
         val client = OkHttpClient()
         sut = RocketChatClient.create {
             httpClient = client
-            restUrl = baseUrl!!
-            websocketUrl = "not needed"
+            restUrl = mockServer.url("/")
             tokenRepository = this@LoginTest.tokenProvider
             platformLogger = PlatformLogger.NoOpLogger()
         }

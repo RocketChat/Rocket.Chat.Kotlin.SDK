@@ -46,8 +46,7 @@ fun main(args: Array<String>) {
 
     val client = RocketChatClient.create {
         httpClient = okHttpClient
-        restUrl = HttpUrl.parse("http://localhost:3000/")!!
-        websocketUrl = "ws://localhost:3000/websocket"
+        restUrl = "http://localhost:3000/"
         tokenRepository = SimpleTokenRepository()
         platformLogger = logger
     }

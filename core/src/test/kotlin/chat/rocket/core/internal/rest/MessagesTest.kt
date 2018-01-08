@@ -39,8 +39,7 @@ class MessagesTest {
         val client = OkHttpClient()
         sut = RocketChatClient.create {
             httpClient = client
-            restUrl = baseUrl!!
-            websocketUrl = "not needed"
+            restUrl = mockServer.url("/")
             tokenRepository = this@MessagesTest.tokenProvider
             platformLogger = PlatformLogger.NoOpLogger()
         }
