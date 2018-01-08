@@ -7,10 +7,12 @@ import chat.rocket.core.internal.model.PushRegistrationPayload
 import chat.rocket.core.internal.model.PushUnregistrationPayload
 import chat.rocket.core.model.PushToken
 import com.squareup.moshi.Types
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.withContext
 import okhttp3.MediaType
 import okhttp3.RequestBody
 
-suspend fun RocketChatClient.registerPushToken(token: String) {
+suspend fun RocketChatClient.registerPushToken(token: String) = withContext(CommonPool) {
     val payload = PushRegistrationPayload(value = token)
     val adapter = moshi.adapter(PushRegistrationPayload::class.java)
 
@@ -22,10 +24,11 @@ suspend fun RocketChatClient.registerPushToken(token: String) {
     val request = requestBuilder(httpUrl).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, PushToken::class.java)
+
     handleRestCall<RestResult<PushToken>>(request, type).result()
 }
 
-suspend fun RocketChatClient.unregisterPushToken(token: String) {
+suspend fun RocketChatClient.unregisterPushToken(token: String) = withContext(CommonPool) {
     val payload = PushUnregistrationPayload(token)
     val adapter = moshi.adapter(PushUnregistrationPayload::class.java)
 
