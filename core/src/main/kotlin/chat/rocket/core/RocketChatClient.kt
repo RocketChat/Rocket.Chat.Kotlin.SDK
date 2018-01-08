@@ -13,6 +13,7 @@ import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.SettingsAdapter
 import com.squareup.moshi.Moshi
 import okhttp3.HttpUrl
+import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import java.security.InvalidParameterException
 
@@ -45,6 +46,8 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
 
 
     companion object {
+        val CONTENT_TYPE_JSON = MediaType.parse("application/json; charset=utf-8")
+
         fun create(init: Builder.() -> Unit) = Builder(init).build()
     }
 

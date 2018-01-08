@@ -17,8 +17,7 @@ suspend fun RocketChatClient.registerPushToken(token: String) = withContext(Comm
     val adapter = moshi.adapter(PushRegistrationPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
-    val contentType = MediaType.parse("application/json; charset=utf-8")
-    val body = RequestBody.create(contentType, payloadBody)
+    val body = RequestBody.create(RocketChatClient.CONTENT_TYPE_JSON, payloadBody)
 
     val httpUrl = requestUrl(restUrl, "push.token").build()
     val request = requestBuilder(httpUrl).post(body).build()
@@ -33,8 +32,7 @@ suspend fun RocketChatClient.unregisterPushToken(token: String) = withContext(Co
     val adapter = moshi.adapter(PushUnregistrationPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
-    val contentType = MediaType.parse("application/json; charset=utf-8")
-    val body = RequestBody.create(contentType, payloadBody)
+    val body = RequestBody.create(RocketChatClient.CONTENT_TYPE_JSON, payloadBody)
 
     val httpUrl = requestUrl(restUrl, "push.token").build()
     val request = requestBuilder(httpUrl).delete(body).build()
