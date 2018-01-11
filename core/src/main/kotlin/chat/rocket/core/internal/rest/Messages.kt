@@ -98,7 +98,7 @@ suspend fun RocketChatClient.sendMessage(roomId: String,
     return@withContext handleRestCall<RestResult<Message>>(request, type).result()
 }
 
-suspend internal fun RocketChatClient.messages(roomId: String,
+suspend fun RocketChatClient.messages(roomId: String,
                                               roomType: BaseRoom.RoomType,
                                               offset: Long,
                                               count: Long): PagedResult<List<Message>> = withContext(CommonPool) {
