@@ -113,10 +113,15 @@ class Socket(internal val client: RocketChatClient,
 
     private fun processAuthenticationResponse(message: SocketMessage, text: String) {
         when (message.type) {
-            MessageType.ADDED -> {
+            MessageType.ADDED, MessageType.UPDATED -> {
+                // FIXME - for now just set the state to connected
+                setState(State.Connected)
             }
             MessageType.RESULT -> {
                 processLoginResult(text)
+            }
+            MessageType.PING -> {
+                send(pongMessage())
             }
             else -> {
             }
@@ -180,7 +185,7 @@ class Socket(internal val client: RocketChatClient,
                 processIncomingMessage(message)
             }
         }
-        webSocket.send(CONNECT_MESSAGE)
+        send(CONNECT_MESSAGE)
     }
 
     override fun onFailure(webSocket: WebSocket, throwable: Throwable?, response: Response?) {

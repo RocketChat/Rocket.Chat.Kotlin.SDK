@@ -83,4 +83,7 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
 
         fun build() = RocketChatClient(this)
     }
+
+    val state: State
+        get() = socket.currentState
 }
