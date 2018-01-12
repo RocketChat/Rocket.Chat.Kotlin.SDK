@@ -33,35 +33,35 @@ data class ChatRoom(override val id: String,
     companion object {
         fun create(room: Room, subscription: Subscription, client: RocketChatClient): ChatRoom {
             return ChatRoom(id = room.id,
-                    type = room.type,
-                    user = room.user ?: subscription.user,
-                    name = room.name ?: subscription.name,
-                    fullName = room.fullName ?: subscription.fullName,
-                    readonly = room.readonly,
-                    updatedAt = room.updatedAt ?: subscription.updatedAt,
-                    timestamp = subscription.timestamp,
-                    lastModified = subscription.lastModified,
-                    topic = room.topic,
-                    announcement = room.announcement,
-                    default = subscription.isDefault,
-                    open = subscription.open,
-                    alert = subscription.alert,
-                    unread = subscription.unread,
-                    userMenstions = subscription.userMentions,
-                    groupMentions = subscription.groupMentions,
-                    lastMessage = room.lastMessage,
-                    client = client)
+                            type = room.type,
+                            user = room.user ?: subscription.user,
+                            name = room.name ?: subscription.name,
+                            fullName = room.fullName ?: subscription.fullName,
+                            readonly = room.readonly,
+                            updatedAt = room.updatedAt ?: subscription.updatedAt,
+                            timestamp = subscription.timestamp,
+                            lastModified = subscription.lastModified,
+                            topic = room.topic,
+                            announcement = room.announcement,
+                            default = subscription.isDefault,
+                            open = subscription.open,
+                            alert = subscription.alert,
+                            unread = subscription.unread,
+                            userMenstions = subscription.userMentions,
+                            groupMentions = subscription.groupMentions,
+                            lastMessage = room.lastMessage,
+                            client = client)
         }
     }
 }
 
 suspend fun ChatRoom.messages(offset: Long = 0,
                               count: Long = 50): PagedResult<List<Message>> = withContext(CommonPool) {
-                                  return@withContext client.messages(id, type, offset, count)
-                              }
+    return@withContext client.messages(id, type, offset, count)
+}
 
 suspend fun ChatRoom.history(count: Long = 50,
                              oldest: String? = null,
                              latest: String? = null): PagedResult<List<Message>> = withContext(CommonPool) {
-                                 return@withContext client.history(id, type, count, oldest, latest)
-                             }
+    return@withContext client.history(id, type, count, oldest, latest)
+}

@@ -12,7 +12,6 @@ import com.nhaarman.mockito_kotlin.verify
 import com.squareup.moshi.JsonEncodingException
 import io.fabric8.mockwebserver.DefaultMockServer
 import kotlinx.coroutines.experimental.runBlocking
-import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
@@ -43,12 +42,10 @@ class LoginTest {
         mockServer = DefaultMockServer()
         mockServer.start()
 
-        val baseUrl = HttpUrl.parse(mockServer.url("/"))
         val client = OkHttpClient()
         sut = RocketChatClient.create {
             httpClient = client
-            restUrl = baseUrl!!
-            websocketUrl = "not needed"
+            restUrl = mockServer.url("/")
             tokenRepository = this@LoginTest.tokenProvider
             platformLogger = PlatformLogger.NoOpLogger()
         }

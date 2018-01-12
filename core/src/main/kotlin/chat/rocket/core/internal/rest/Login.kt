@@ -9,9 +9,7 @@ import chat.rocket.core.internal.model.LoginPayload
 import chat.rocket.core.internal.model.UserPayload
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.run
 import kotlinx.coroutines.experimental.withContext
-import okhttp3.MediaType
 import okhttp3.Request
 import okhttp3.RequestBody
 

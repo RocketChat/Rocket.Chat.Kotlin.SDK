@@ -9,10 +9,8 @@ import chat.rocket.core.model.Message
 import chat.rocket.core.model.PagedResult
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.run
 import kotlinx.coroutines.experimental.withContext
 import okhttp3.FormBody
-import okhttp3.MediaType
 import okhttp3.RequestBody
 
 suspend fun RocketChatClient.pinMessage(messageId: String): Message = withContext(CommonPool) {
@@ -50,7 +48,7 @@ suspend fun RocketChatClient.getRoomFavoriteMessages(roomId: String,
 
 suspend fun RocketChatClient.getRoomPinnedMessages(roomId: String,
                                                    roomType: BaseRoom.RoomType,
-                                                   offset: Int? = 0): PagedResult<List<Message>>  = withContext(CommonPool) {
+                                                   offset: Int? = 0): PagedResult<List<Message>> = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl,
             getRestApiMethodNameByRoomType(roomType, "messages"))
             .addQueryParameter("roomId", roomId)
@@ -97,10 +95,10 @@ suspend fun RocketChatClient.sendMessage(roomId: String,
     return@withContext handleRestCall<RestResult<Message>>(request, type).result()
 }
 
-suspend internal fun RocketChatClient.messages(roomId: String,
-                                              roomType: BaseRoom.RoomType,
-                                              offset: Long,
-                                              count: Long): PagedResult<List<Message>> = withContext(CommonPool) {
+internal suspend fun RocketChatClient.messages(roomId: String,
+                                               roomType: BaseRoom.RoomType,
+                                               offset: Long,
+                                               count: Long): PagedResult<List<Message>> = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl,
             getRestApiMethodNameByRoomType(roomType, "messages"))
             .addQueryParameter("roomId", roomId)
@@ -118,10 +116,10 @@ suspend internal fun RocketChatClient.messages(roomId: String,
 }
 
 internal suspend fun RocketChatClient.history(roomId: String,
-                                     roomType: BaseRoom.RoomType,
-                                     count: Long,
-                                     oldest: String?,
-                                     latest: String?): PagedResult<List<Message>> = withContext(CommonPool) {
+                                              roomType: BaseRoom.RoomType,
+                                              count: Long,
+                                              oldest: String?,
+                                              latest: String?): PagedResult<List<Message>> = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl,
             getRestApiMethodNameByRoomType(roomType, "history"))
             .addQueryParameter("roomId", roomId).apply {

@@ -114,7 +114,6 @@ class Socket(internal val client: RocketChatClient,
     private fun processAuthenticationResponse(message: SocketMessage, text: String) {
         when (message.type) {
             MessageType.ADDED -> {
-
             }
             MessageType.RESULT -> {
                 processLoginResult(text)
@@ -194,7 +193,6 @@ class Socket(internal val client: RocketChatClient,
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String?) {
-
     }
 
     override fun onMessage(webSocket: WebSocket, text: String?) {
@@ -218,7 +216,6 @@ fun Socket.login(token: Token?) {
             send(loginMethod(generateId(), authToken.authToken))
         }
     }
-
 }
 
 fun RocketChatClient.connect() {
@@ -232,7 +229,7 @@ fun RocketChatClient.disconnect() {
 sealed class State {
     object Created : State()
     object Connecting : State()
-    object Authenticating: State()
+    object Authenticating : State()
     object Connected : State()
     object Disconnecting : State()
     object Disconnected : State()
