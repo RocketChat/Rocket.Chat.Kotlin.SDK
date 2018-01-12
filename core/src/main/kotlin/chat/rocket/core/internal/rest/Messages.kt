@@ -95,10 +95,10 @@ suspend fun RocketChatClient.sendMessage(roomId: String,
     return@withContext handleRestCall<RestResult<Message>>(request, type).result()
 }
 
-internal suspend fun RocketChatClient.messages(roomId: String,
-                                               roomType: BaseRoom.RoomType,
-                                               offset: Long,
-                                               count: Long): PagedResult<List<Message>> = withContext(CommonPool) {
+suspend fun RocketChatClient.messages(roomId: String,
+                                      roomType: BaseRoom.RoomType,
+                                      offset: Long,
+                                      count: Long): PagedResult<List<Message>> = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl,
             getRestApiMethodNameByRoomType(roomType, "messages"))
             .addQueryParameter("roomId", roomId)
