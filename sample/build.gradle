@@ -12,6 +12,8 @@ dependencies {
     compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.19.3'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:${versions.kotlin}"
 
+    compile 'org.json:json:20090211'
+
     compile 'io.reactivex.rxjava2:rxjava:2.1.6'
     compile 'io.reactivex.rxjava2:rxkotlin:2.1.0'
 

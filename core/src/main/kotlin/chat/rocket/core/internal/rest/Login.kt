@@ -9,9 +9,7 @@ import chat.rocket.core.internal.model.LoginPayload
 import chat.rocket.core.internal.model.UserPayload
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.run
 import kotlinx.coroutines.experimental.withContext
-import okhttp3.MediaType
 import okhttp3.Request
 import okhttp3.RequestBody
 
@@ -32,8 +30,7 @@ suspend fun RocketChatClient.login(username: String, password: String, pin: Stri
     val adapter = moshi.adapter(LoginPayload::class.java)
 
     val paylodBody = adapter.toJson(payload)
-    val contentType = MediaType.parse("application/json; charset=utf-8")
-    val body = RequestBody.create(contentType, paylodBody)
+    val body = RequestBody.create(JSON_CONTENT_TYPE, paylodBody)
 
     val url = requestUrl(restUrl, "login").build()
 
@@ -69,9 +66,7 @@ suspend fun RocketChatClient.signup(email: String,
     val adapter = moshi.adapter(UserPayload::class.java)
 
     val paylodBody = adapter.toJson(payload)
-
-    val contentType = MediaType.parse("application/json; charset=utf-8")
-    val body = RequestBody.create(contentType, paylodBody)
+    val body = RequestBody.create(JSON_CONTENT_TYPE, paylodBody)
 
     val url = requestUrl(restUrl, "users.register").build()
     val request = Request.Builder().url(url).post(body).build()

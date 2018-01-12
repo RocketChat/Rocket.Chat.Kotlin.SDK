@@ -5,7 +5,6 @@ import chat.rocket.core.RocketChatClient
 import chat.rocket.core.model.Value
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.run
 import kotlinx.coroutines.experimental.withContext
 import okhttp3.Request
 import se.ansman.kotshi.JsonSerializable
@@ -33,14 +32,13 @@ suspend fun RocketChatClient.configurations(): Map<String, Map<String, String>> 
     val payload = handleRestCall<ConfigurationsPayload>(request,
             ConfigurationsPayload::class.java)
 
-
     val result = HashMap<String, Map<String, String>>()
     payload.configurations.map { map ->
         map["service"]?.let {
             val values = map.filterNot { entry -> entry.key == "service" }
             Pair(it, values)
         }
-    }.forEach {pair: Pair<String, Map<String, String>>? ->
+    }.forEach { pair: Pair<String, Map<String, String>>? ->
         pair?.let {
             result.put(pair.first, pair.second)
         }
