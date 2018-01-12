@@ -97,5 +97,4 @@ class SettingsAdapter : JsonAdapter<Map<String, Value<Any>>>() {
             throw JsonEncodingException("expected a \"$expected\" value, got \"$name\"")
         }
     }
-
 }

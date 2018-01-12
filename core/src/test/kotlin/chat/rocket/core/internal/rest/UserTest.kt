@@ -8,7 +8,6 @@ import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
 import io.fabric8.mockwebserver.DefaultMockServer
 import kotlinx.coroutines.experimental.runBlocking
-import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert.assertThat
@@ -38,7 +37,6 @@ class UserTest {
         mockServer = DefaultMockServer()
         mockServer.start()
 
-        val baseUrl = HttpUrl.parse(mockServer.url("/"))
         val client = OkHttpClient()
         sut = RocketChatClient.create {
             httpClient = client

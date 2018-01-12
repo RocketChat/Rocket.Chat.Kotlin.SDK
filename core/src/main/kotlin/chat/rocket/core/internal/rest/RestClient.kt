@@ -1,6 +1,11 @@
 package chat.rocket.core.internal.rest
 
-import chat.rocket.common.*
+import chat.rocket.common.RocketChatApiException
+import chat.rocket.common.RocketChatAuthException
+import chat.rocket.common.RocketChatException
+import chat.rocket.common.RocketChatInvalidResponseException
+import chat.rocket.common.RocketChatNetworkErrorException
+import chat.rocket.common.RocketChatTwoFactorException
 import chat.rocket.common.internal.AuthenticationErrorMessage
 import chat.rocket.common.internal.ErrorMessage
 import chat.rocket.common.model.BaseRoom
@@ -13,7 +18,13 @@ import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.experimental.CancellableContinuation
 import kotlinx.coroutines.experimental.suspendCancellableCoroutine
-import okhttp3.*
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.HttpUrl
+import okhttp3.MediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import java.io.IOException
 import java.lang.reflect.Type
 
@@ -136,3 +147,5 @@ private fun OkHttpClient.cancel(tag: Any) {
     dispatcher().queuedCalls().filter { tag == it.request().tag() }.forEach { it.cancel() }
     dispatcher().runningCalls().filter { tag == it.request().tag() }.forEach { it.cancel() }
 }
+
+internal val JSON_CONTENT_TYPE = MediaType.parse("application/json; charset=utf-8")
