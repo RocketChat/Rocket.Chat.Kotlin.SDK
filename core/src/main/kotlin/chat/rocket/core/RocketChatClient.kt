@@ -48,7 +48,7 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
     internal val socket: Socket
 
     init {
-        url = sanatizeUrl(baseUrl)
+        url = sanitizeUrl(baseUrl)
         HttpUrl.parse(url)?.let {
             restUrl = it
         }.ifNull {
@@ -57,7 +57,7 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
         socket = Socket(this, statusChannel, roomsChannel, subscriptionsChannel, messagesChannel)
     }
 
-    private fun sanatizeUrl(baseUrl: String): String {
+    private fun sanitizeUrl(baseUrl: String): String {
         var url = baseUrl.trim()
         while (url.endsWith('/')) {
             url = url.dropLast(1)
