@@ -31,7 +31,7 @@ internal fun pongMessage(): String {
 }
 
 internal fun pingMessage(): String {
-    return "{\"msg\":\"pong\"}"
+    return "{\"msg\":\"ping\"}"
 }
 
 internal fun subscriptionsStreamMessage(id: String, userId: String): String {
