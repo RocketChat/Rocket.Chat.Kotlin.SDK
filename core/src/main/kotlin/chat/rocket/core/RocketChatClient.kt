@@ -15,6 +15,7 @@ import chat.rocket.core.internal.model.Subscription
 import chat.rocket.core.internal.realtime.State
 import chat.rocket.core.internal.realtime.Socket
 import chat.rocket.core.internal.realtime.StreamMessage
+import chat.rocket.core.model.Message
 import chat.rocket.core.model.Room
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.experimental.channels.Channel
@@ -24,7 +25,7 @@ import okhttp3.OkHttpClient
 import java.security.InvalidParameterException
 
 class RocketChatClient private constructor(internal val httpClient: OkHttpClient,
-                                           internal val baseUrl: String,
+                                           baseUrl: String,
                                            internal val tokenRepository: TokenRepository,
                                            internal val logger: Logger) {
 
@@ -43,6 +44,7 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
     val statusChannel = Channel<State>()
     val roomsChannel = Channel<StreamMessage<Room>>()
     val subscriptionsChannel = Channel<StreamMessage<Subscription>>()
+    val messagesChannel = Channel<Message>()
     internal val socket: Socket
 
     init {
@@ -52,7 +54,7 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
         }.ifNull {
             throw InvalidParameterException("You must pass a valid HTTP or HTTPS URL")
         }
-        socket = Socket(this, statusChannel, roomsChannel, subscriptionsChannel)
+        socket = Socket(this, statusChannel, roomsChannel, subscriptionsChannel, messagesChannel)
     }
 
     private fun sanatizeUrl(baseUrl: String): String {

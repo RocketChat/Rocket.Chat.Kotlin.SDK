@@ -5,6 +5,7 @@ import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.model.MessageType
 import chat.rocket.core.internal.model.SocketMessage
 import chat.rocket.core.internal.model.Subscription
+import chat.rocket.core.model.Message
 import chat.rocket.core.model.Room
 import com.squareup.moshi.JsonAdapter
 import kotlinx.coroutines.experimental.Job
@@ -25,7 +26,8 @@ const val PING_INTERVAL = 15L
 class Socket(internal val client: RocketChatClient,
              private val statusChannel: SendChannel<State>,
              internal val roomsChannel: SendChannel<StreamMessage<Room>>,
-             internal val subscriptionsChannel: SendChannel<StreamMessage<Subscription>>
+             internal val subscriptionsChannel: SendChannel<StreamMessage<Subscription>>,
+             internal val messagesChannel: SendChannel<Message>
 ) : WebSocketListener() {
 
     private val request: Request = Request.Builder()
@@ -167,6 +169,9 @@ class Socket(internal val client: RocketChatClient,
             }
             MessageType.CHANGED -> {
                 processSubscriptionsChanged(message, text)
+            }
+            MessageType.READY -> {
+                processSubscriptionResult(text)
             }
             else -> {
                 logger.debug {

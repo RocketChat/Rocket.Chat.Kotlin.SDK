@@ -44,4 +44,12 @@ internal fun roomsStreamMessage(id: String, userId: String): String {
             "\"$userId/rooms-changed\", false")
 }
 
+internal fun streamRoomMessages(id: String, roomId: String): String {
+    return newSubscriptionMessage("stream-room-messages", id, "\"$roomId\", false")
+}
+
+internal fun unsubscribeMessage(id: String): String {
+    return "{\"msg\":\"unsub\", \"id\":\"$id\"}"
+}
+
 internal const val CONNECT_MESSAGE = "{\"msg\":\"connect\",\"version\":\"1\",\"support\":[\"1\",\"pre2\",\"pre1\"]}"
