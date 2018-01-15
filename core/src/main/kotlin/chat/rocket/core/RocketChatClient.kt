@@ -40,7 +40,7 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
             .build()
 
     internal lateinit var restUrl: HttpUrl
-    internal val url: String
+    val url: String
     val statusChannel = Channel<State>()
     val roomsChannel = Channel<StreamMessage<Room>>()
     val subscriptionsChannel = Channel<StreamMessage<Subscription>>()
