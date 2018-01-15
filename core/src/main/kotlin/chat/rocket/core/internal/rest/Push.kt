@@ -9,7 +9,6 @@ import chat.rocket.core.model.PushToken
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
-import okhttp3.MediaType
 import okhttp3.RequestBody
 
 suspend fun RocketChatClient.registerPushToken(token: String) = withContext(CommonPool) {

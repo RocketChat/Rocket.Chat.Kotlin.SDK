@@ -87,8 +87,8 @@ fun main(args: Array<String>) {
                     State.Authenticating -> logger.debug("Authenticating")
                     State.Connected -> {
                         logger.debug("Connected")
-                        client.subscribeSubscriptions()
-                        client.subscribeRooms()
+                        client.subscribeSubscriptions { }
+                        client.subscribeRooms { }
                     }
                 }
             }
