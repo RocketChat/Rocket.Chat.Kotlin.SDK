@@ -24,7 +24,7 @@ import okhttp3.OkHttpClient
 import java.security.InvalidParameterException
 
 class RocketChatClient private constructor(internal val httpClient: OkHttpClient,
-                                           val url: String,
+                                           internal val baseUrl: String,
                                            internal val tokenRepository: TokenRepository,
                                            internal val logger: Logger) {
 
@@ -39,12 +39,14 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
             .build()
 
     internal lateinit var restUrl: HttpUrl
+    internal val url: String
     val statusChannel = Channel<State>()
     val roomsChannel = Channel<StreamMessage<Room>>()
     val subscriptionsChannel = Channel<StreamMessage<Subscription>>()
     internal val socket: Socket
 
     init {
+        url = sanatizeUrl(baseUrl)
         HttpUrl.parse(url)?.let {
             restUrl = it
         }.ifNull {
@@ -53,9 +55,17 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
         socket = Socket(this, statusChannel, roomsChannel, subscriptionsChannel)
     }
 
-    private constructor(builder: Builder) : this(builder.httpClient, builder.restUrl,
-            builder.tokenRepository, Logger(builder.platformLogger)) {
+    private fun sanatizeUrl(baseUrl: String): String {
+        var url = baseUrl.trim()
+        while (url.endsWith('/')) {
+            url = url.dropLast(1)
+        }
+
+        return url
     }
+
+    private constructor(builder: Builder) : this(builder.httpClient, builder.restUrl,
+            builder.tokenRepository, Logger(builder.platformLogger))
 
     companion object {
         val CONTENT_TYPE_JSON = MediaType.parse("application/json; charset=utf-8")

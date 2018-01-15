@@ -5,24 +5,35 @@ import chat.rocket.common.model.BaseRoom
 import chat.rocket.common.model.ServerInfo
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
+import chat.rocket.common.util.ifNull
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
 import chat.rocket.core.compat.Callback
 import chat.rocket.core.compat.serverInfo
+import chat.rocket.core.internal.realtime.*
 import chat.rocket.core.internal.rest.chatRooms
+import chat.rocket.core.internal.rest.configurations
 import chat.rocket.core.internal.rest.getRoomFavoriteMessages
 import chat.rocket.core.internal.rest.login
 import chat.rocket.core.internal.rest.sendMessage
+import chat.rocket.core.internal.rest.settings
+import chat.rocket.core.internal.rest.signup
 import chat.rocket.core.model.Myself
+import chat.rocket.core.model.history
+import chat.rocket.core.model.messages
 import chat.rocket.core.rxjava.me
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import java.util.concurrent.TimeUnit
+import kotlin.math.log
+import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     val logger = object : PlatformLogger {
@@ -42,32 +53,85 @@ fun main(args: Array<String>) {
     val interceptor = HttpLoggingInterceptor()
     interceptor.level = HttpLoggingInterceptor.Level.BODY
     val okHttpClient = OkHttpClient.Builder()
-            .addInterceptor(interceptor).build()
+            .addInterceptor(interceptor)
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .build()
 
     val client = RocketChatClient.create {
         httpClient = okHttpClient
-        restUrl = "http://localhost:3000/"
+        restUrl = "https://unstable.rocket.chat"
         tokenRepository = SimpleTokenRepository()
         platformLogger = logger
     }
 
     // using coroutines
     val job = launch(CommonPool) {
-        val token = client.login("testuser", "testpass")
+//        val configs = client.configurations()
+//        logger.debug("Configurations: $configs")
+//
+          //val settings = client.settings()
+//        logger.debug("Settings: $settings")
+//        logger.debug("Site url: ${settings["Site_Url"]}")
+//        val value = settings["Site_Url"]
+//        logger.debug("Value: ${value?.value}")
+
+        //val token = client.login("testuser", "testpass")
+        val token = client.login("luciofm-testing", "vpnfe5lnv!")
         logger.debug("Login: ${token.userId} - ${token.authToken}")
 
-        client.sendMessage(roomId = "GENERAL",
+        launch {
+            for (status in client.statusChannel) {
+                logger.debug("Changing status to: $status")
+                when (status) {
+                    State.Authenticating -> logger.debug("Authenticating")
+                    State.Connected -> {
+                        logger.debug("Connected")
+                        client.subscribeSubscriptions()
+                        client.subscribeRooms()
+                    }
+                }
+            }
+            logger.debug("Done on statusChannel")
+        }
+
+        launch {
+            for (room in client.roomsChannel) {
+                logger.debug("Room: $room")
+            }
+        }
+
+        launch {
+            for (subscription in client.subscriptionsChannel) {
+                logger.debug("Subscription: $subscription")
+            }
+        }
+
+        client.connect()
+
+/*        client.sendMessage(roomId = "GENERAL",
                 text = "Sending message from SDK to #general and @here with url https://github.com/RocketChat/Rocket.Chat.Kotlin.SDK/",
                 alias = "TestingAlias",
                 emoji = ":smirk:",
                 avatar = "https://avatars2.githubusercontent.com/u/224255?s=88&v=4")
 
-        pinMessage(client)
+        pinMessage(client)*/
 
-        getMeInfoByRx(client)
+        //getMeInfoByRx(client)
 
         val rooms = client.chatRooms()
         logger.debug("ChatRooms: $rooms")
+        val room = rooms.update.lastOrNull { room -> room.id.contentEquals("GENERAL") }
+        logger.debug("Room: $room")
+        val messages = room?.messages()
+        messages?.let {
+            logger.debug("Messages: $messages")
+        }
+
+        val messages2 = room?.history()
+        messages2?.let {
+            logger.debug("Messages2: $messages2")
+        }
     }
 
     // simple old callbacks
@@ -82,7 +146,11 @@ fun main(args: Array<String>) {
     })
 
     runBlocking {
+        //delay(10000)
+        //client.disconnect()
         job.join()
+        //delay(2000)
+        //  exitProcess(-1)
     }
 }
 
