@@ -31,7 +31,7 @@ internal fun pongMessage(): String {
 }
 
 internal fun pingMessage(): String {
-    return "{\"msg\":\"pong\"}"
+    return "{\"msg\":\"ping\"}"
 }
 
 internal fun subscriptionsStreamMessage(id: String, userId: String): String {
@@ -42,6 +42,14 @@ internal fun subscriptionsStreamMessage(id: String, userId: String): String {
 internal fun roomsStreamMessage(id: String, userId: String): String {
     return newSubscriptionMessage("stream-notify-user", id,
             "\"$userId/rooms-changed\", false")
+}
+
+internal fun streamRoomMessages(id: String, roomId: String): String {
+    return newSubscriptionMessage("stream-room-messages", id, "\"$roomId\", false")
+}
+
+internal fun unsubscribeMessage(id: String): String {
+    return "{\"msg\":\"unsub\", \"id\":\"$id\"}"
 }
 
 internal const val CONNECT_MESSAGE = "{\"msg\":\"connect\",\"version\":\"1\",\"support\":[\"1\",\"pre2\",\"pre1\"]}"

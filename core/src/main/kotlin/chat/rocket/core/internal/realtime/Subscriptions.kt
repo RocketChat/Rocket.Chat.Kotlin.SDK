@@ -4,36 +4,58 @@ import chat.rocket.common.RocketChatAuthException
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.model.SocketMessage
 import chat.rocket.core.internal.model.Subscription
+import chat.rocket.core.model.Message
 import chat.rocket.core.model.Room
 import org.json.JSONObject
 import java.security.InvalidParameterException
 
-fun RocketChatClient.subscribeSubscriptions() {
-    socket.subscribeSubscriptions()
+fun RocketChatClient.subscribeSubscriptions(callback: (Boolean) -> Unit): String {
+    return socket.subscribeSubscriptions(callback)
 }
 
-fun RocketChatClient.subscribeRooms() {
-    socket.subscribeRooms()
+fun RocketChatClient.subscribeRooms(callback: (Boolean) -> Unit): String {
+    return socket.subscribeRooms(callback)
 }
 
-internal fun Socket.subscribeSubscriptions(): String {
+fun RocketChatClient.subscribeRoomMessages(roomId: String, callback: (Boolean) -> Unit): String {
+    return socket.subscribeRoomMessages(roomId, callback)
+}
+
+fun RocketChatClient.unsubscibre(subId: String) {
+    socket.unsubscribe(subId)
+}
+
+internal fun Socket.subscribeSubscriptions(callback: (Boolean) -> Unit): String {
     client.tokenRepository.get()?.let { token ->
         val id = generateId()
         send(subscriptionsStreamMessage(id, token.userId))
+        subscriptionsMap[id] = callback
         return id
     }
 
     throw RocketChatAuthException("Missing user id and token")
 }
 
-internal fun Socket.subscribeRooms(): String {
+internal fun Socket.subscribeRooms(callback: (Boolean) -> Unit): String {
     client.tokenRepository.get()?.let { token ->
         val id = generateId()
         send(roomsStreamMessage(id, token.userId))
+        subscriptionsMap[id] = callback
         return id
     }
 
     throw RocketChatAuthException("Missing user id and token")
+}
+
+internal fun Socket.subscribeRoomMessages(roomId: String, callback: (Boolean) -> Unit): String {
+    val id = generateId()
+    send(streamRoomMessages(id, roomId))
+    subscriptionsMap[id] = callback
+    return id
+}
+
+internal fun Socket.unsubscribe(subId: String) {
+    send(unsubscribeMessage(subId))
 }
 
 fun Socket.processSubscriptionsChanged(message: SocketMessage, text: String) {
@@ -41,9 +63,29 @@ fun Socket.processSubscriptionsChanged(message: SocketMessage, text: String) {
         "stream-notify-user" -> {
             processUserStream(text)
         }
+        "stream-room-messages" -> {
+            processRoomMessage(text)
+        }
         else -> {
             // IGNORE for now
         }
+    }
+}
+
+internal fun Socket.processSubscriptionResult(message: String) {
+    val subId: String
+    try {
+        val json = JSONObject(message)
+        val array = json.getJSONArray("subs")
+        subId = array.getString(0)
+    } catch (ex: Exception) {
+        ex.printStackTrace()
+        return
+    }
+
+    val callback = subscriptionsMap.remove(subId)
+    callback?.let {
+        callback(true)
     }
 }
 
@@ -63,6 +105,23 @@ private fun Socket.processUserStream(text: String) {
             "subscriptions-changed" -> {
                 processSubscriptionStream(state, data)
             }
+        }
+    } catch (ex: Exception) {
+        ex.printStackTrace()
+    }
+}
+
+private fun Socket.processRoomMessage(text: String) {
+    try {
+        val json = JSONObject(text)
+        val fields = json.getJSONObject("fields")
+        val array = fields.getJSONArray("args")
+        val data = array.getJSONObject(0)
+        val adapter = moshi.adapter<Message>(Message::class.java)
+        val message = adapter.fromJson(data.toString())
+
+        message?.let {
+            messagesChannel.offer(message)
         }
     } catch (ex: Exception) {
         ex.printStackTrace()

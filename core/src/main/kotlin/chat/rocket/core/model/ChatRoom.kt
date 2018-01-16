@@ -4,6 +4,7 @@ import chat.rocket.common.model.BaseRoom
 import chat.rocket.common.model.SimpleUser
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.model.Subscription
+import chat.rocket.core.internal.realtime.subscribeRoomMessages
 import chat.rocket.core.internal.rest.history
 import chat.rocket.core.internal.rest.messages
 import kotlinx.coroutines.experimental.CommonPool
@@ -64,4 +65,8 @@ suspend fun ChatRoom.history(count: Long = 50,
                              oldest: String? = null,
                              latest: String? = null): PagedResult<List<Message>> = withContext(CommonPool) {
     return@withContext client.history(id, type, count, oldest, latest)
+}
+
+fun ChatRoom.subscribeMessages(callback: (Boolean) -> Unit): String {
+    return client.subscribeRoomMessages(id, callback)
 }

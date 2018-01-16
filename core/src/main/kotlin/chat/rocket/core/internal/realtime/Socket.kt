@@ -5,6 +5,7 @@ import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.model.MessageType
 import chat.rocket.core.internal.model.SocketMessage
 import chat.rocket.core.internal.model.Subscription
+import chat.rocket.core.model.Message
 import chat.rocket.core.model.Room
 import com.squareup.moshi.JsonAdapter
 import kotlinx.coroutines.experimental.Job
@@ -20,12 +21,13 @@ import okio.ByteString
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
-const val PING_INTERVAL = 10L
+const val PING_INTERVAL = 15L
 
 class Socket(internal val client: RocketChatClient,
              private val statusChannel: SendChannel<State>,
              internal val roomsChannel: SendChannel<StreamMessage<Room>>,
-             internal val subscriptionsChannel: SendChannel<StreamMessage<Subscription>>
+             internal val subscriptionsChannel: SendChannel<StreamMessage<Subscription>>,
+             internal val messagesChannel: SendChannel<Message>
 ) : WebSocketListener() {
 
     private val request: Request = Request.Builder()
@@ -47,7 +49,14 @@ class Socket(internal val client: RocketChatClient,
     internal var parentJob: Job? = null
     internal var readJob: Job? = null
     internal var pingJob: Job? = null
+    private var timeoutJob: Job? = null
     internal val currentId = AtomicInteger(1)
+
+    internal val subscriptionsMap = HashMap<String, (Boolean) -> Unit>()
+
+    private val reconnectionStrategy = ReconnectionStrategy(5, 3000)
+
+    private var selfDisconnect = false
 
     init {
         setState(State.Created)
@@ -55,6 +64,7 @@ class Socket(internal val client: RocketChatClient,
     }
 
     internal fun connect() {
+        selfDisconnect = false
         // reset id counter
         currentId.set(1)
         parentJob = Job()
@@ -64,8 +74,32 @@ class Socket(internal val client: RocketChatClient,
     }
 
     internal fun disconnect() {
-        socket?.close(1002, "Bye bye!!")
-        setState(State.Disconnecting)
+        when (currentState) {
+            State.Disconnected -> return
+            else -> {
+                selfDisconnect = true
+                socket?.close(1002, "Bye bye!!")
+                pingJob?.cancel()
+                timeoutJob?.cancel()
+                setState(State.Disconnecting)
+            }
+        }
+    }
+
+    private fun startReconnection() {
+        // Ignore  self disconnection
+        if (selfDisconnect) return
+
+        if (!selfDisconnect) {
+            if (reconnectionStrategy.numberOfAttempts < reconnectionStrategy.maxAttempts) {
+                launch {
+                    delay(reconnectionStrategy.reconnectInterval)
+                    if (!isActive) return@launch
+                    reconnectionStrategy.processAttempts()
+                    connect()
+                }
+            }
+        }
     }
 
     private fun processIncomingMessage(text: String) {
@@ -136,6 +170,9 @@ class Socket(internal val client: RocketChatClient,
             MessageType.CHANGED -> {
                 processSubscriptionsChanged(message, text)
             }
+            MessageType.READY -> {
+                processSubscriptionResult(text)
+            }
             else -> {
                 logger.debug {
                     "Ingnoring message type: ${message.type}"
@@ -156,10 +193,38 @@ class Socket(internal val client: RocketChatClient,
             "Rescheduling ping in $PING_INTERVAL seconds"
         }
 
+        timeoutJob?.cancel()
+
         pingJob?.cancel()
-        pingJob = launch {
+        pingJob = launch(parent = parentJob) {
+            logger.debug { "Scheduling ping" }
             delay(PING_INTERVAL, TimeUnit.SECONDS)
-            socket?.send(pingMessage())
+
+            logger.debug { "running ping if active" }
+            if (!isActive) return@launch
+            schedulePingTimeout()
+            logger.debug { "sending ping" }
+            send(pingMessage())
+        }
+    }
+
+    private suspend fun schedulePingTimeout() {
+        val timeout = (PING_INTERVAL * 1.5).toLong()
+        logger.debug { "Scheduling ping timout in $timeout" }
+        timeoutJob = launch(parent = parentJob) {
+            delay(timeout, TimeUnit.SECONDS)
+
+            if (!isActive) return@launch
+            when (currentState) {
+                State.Disconnected,
+                State.Disconnecting-> {
+                    logger.warn { "PONG not received, but already disconnected" }
+                }
+                else -> {
+                    logger.warn { "PONG not received" }
+                    socket?.cancel()
+                }
+            }
         }
     }
 
@@ -195,9 +260,11 @@ class Socket(internal val client: RocketChatClient,
         throwable?.printStackTrace()
         setState(State.Disconnected)
         close()
+        startReconnection()
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String?) {
+        setState(State.Disconnecting)
     }
 
     override fun onMessage(webSocket: WebSocket, text: String?) {
@@ -211,6 +278,8 @@ class Socket(internal val client: RocketChatClient,
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String?) {
         setState(State.Disconnected)
+        close()
+        startReconnection()
     }
 }
 
