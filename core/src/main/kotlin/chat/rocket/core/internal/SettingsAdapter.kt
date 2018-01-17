@@ -13,8 +13,45 @@ class SettingsAdapter : JsonAdapter<Map<String, Value<Any>>>() {
     private val NAMES = arrayOf("_id", "type", "value")
     private val OPTIONS = JsonReader.Options.of(*NAMES)
 
-    override fun toJson(writer: JsonWriter?, value: Map<String, Value<Any>>?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun toJson(writer: JsonWriter, value: Map<String, Value<Any>>?) {
+        writer.beginObject()
+        writer.name("settings")
+        writeSettingsObject(writer, value)
+        writer.endObject()
+    }
+
+    private fun writeSettingsObject(writer: JsonWriter, value: Map<String, Value<Any>>?) {
+        writer.beginArray()
+        value?.let {
+            for (entry in value.entries) {
+                writer.beginObject()
+                writer.name("_id")
+                writer.value(entry.key)
+                when (entry.value.value) {
+                    is String -> {
+                        writer.name("value")
+                        writer.value(entry.value.value as String)
+                        writer.name("type")
+                        writer.value("string")
+                    }
+                    is Boolean -> {
+                        writer.name("value")
+                        writer.value(entry.value.value as Boolean)
+                        writer.name("type")
+                        writer.value("boolean")
+                    }
+                    is Int -> {
+                        writer.name("value")
+                        writer.value(entry.value.value as Int)
+                        writer.name("type")
+                        writer.value("int")
+                    }
+                }
+                writer.endObject()
+            }
+        }
+
+        writer.endArray()
     }
 
     @FromJson
