@@ -1,15 +1,18 @@
 package chat.rocket.core.internal.rest
 
 import chat.rocket.common.RocketChatException
+import chat.rocket.common.model.User
 import chat.rocket.common.util.CalendarISO8601Converter
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestMultiResult
-import chat.rocket.core.internal.model.Subscription
+import chat.rocket.core.internal.RestResult
+import chat.rocket.core.internal.model.*
 import chat.rocket.core.model.ChatRoom
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.async
+import okhttp3.RequestBody
 
 /**
  * Returns the current logged user information, useful to check if the Token from TokenProvider
@@ -23,6 +26,90 @@ suspend fun RocketChatClient.me(): Myself {
     val request = requestBuilder(httpUrl).get().build()
 
     return handleRestCall(request, Myself::class.java)
+}
+
+/**
+ * Updates the email address for the user.
+ *
+ * @param userId The ID of the user to update.
+ * @param email The email address for the user.
+ * @return The [User] with an updated email address.
+ */
+suspend fun RocketChatClient.updateEmail(userId: String, email: String): User {
+    val payload = UserUpdateEmailPayload(userId, email)
+    val adapter = moshi.adapter(UserUpdateEmailPayload::class.java)
+
+    val payloadBody = adapter.toJson(payload)
+    val body = RequestBody.create(JSON_CONTENT_TYPE, payloadBody)
+
+    val httpUrl = requestUrl(restUrl, "users.update").build()
+    val request = requestBuilder(httpUrl).post(body).build()
+
+    val type = Types.newParameterizedType(RestResult::class.java, User::class.java)
+    return handleRestCall<RestResult<User>>(request, type).result()
+}
+
+/**
+ * Updates the display name of the user.
+ *
+ * @param userId The ID of the user to update.
+ * @param name The display name of the user.
+ * @return The [User] with an updated display name.
+ */
+suspend fun RocketChatClient.updateName(userId: String, name: String): User {
+    val payload = UserUpdateNamePayload(userId, name)
+    val adapter = moshi.adapter(UserUpdateNamePayload::class.java)
+
+    val payloadBody = adapter.toJson(payload)
+    val body = RequestBody.create(JSON_CONTENT_TYPE, payloadBody)
+
+    val httpUrl = requestUrl(restUrl, "users.update").build()
+    val request = requestBuilder(httpUrl).post(body).build()
+
+    val type = Types.newParameterizedType(RestResult::class.java, User::class.java)
+    return handleRestCall<RestResult<User>>(request, type).result()
+}
+
+/**
+ * Updates the password for the user.
+ *
+ * @param userId The ID of the user to update.
+ * @param password The password for the user.
+ * @return The [User] with an updated password.
+ */
+suspend fun RocketChatClient.updatePassword(userId: String, password: String): User {
+    val payload = UserUpdatePasswordPayload(userId, password)
+    val adapter = moshi.adapter(UserUpdatePasswordPayload::class.java)
+
+    val payloadBody = adapter.toJson(payload)
+    val body = RequestBody.create(JSON_CONTENT_TYPE, payloadBody)
+
+    val httpUrl = requestUrl(restUrl, "users.update").build()
+    val request = requestBuilder(httpUrl).post(body).build()
+
+    val type = Types.newParameterizedType(RestResult::class.java, User::class.java)
+    return handleRestCall<RestResult<User>>(request, type).result()
+}
+
+/**
+ * Updates the username for the user.
+ *
+ * @param userId The ID of the user to update.
+ * @param username The username for the user.
+ * @return The [User] with an updated username.
+ */
+suspend fun RocketChatClient.updateUsername(userId: String, username: String): User {
+    val payload = UserUpdateUsernamePayload(userId, username)
+    val adapter = moshi.adapter(UserUpdateUsernamePayload::class.java)
+
+    val payloadBody = adapter.toJson(payload)
+    val body = RequestBody.create(JSON_CONTENT_TYPE, payloadBody)
+
+    val httpUrl = requestUrl(restUrl, "users.update").build()
+    val request = requestBuilder(httpUrl).post(body).build()
+
+    val type = Types.newParameterizedType(RestResult::class.java, User::class.java)
+    return handleRestCall<RestResult<User>>(request, type).result()
 }
 
 suspend fun RocketChatClient.chatRooms(timestamp: Long = 0): RestMultiResult<List<ChatRoom>> {

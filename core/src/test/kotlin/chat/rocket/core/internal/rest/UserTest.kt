@@ -1,5 +1,6 @@
 package chat.rocket.core.internal.rest
 
+import chat.rocket.common.RocketChatApiException
 import chat.rocket.common.RocketChatAuthException
 import chat.rocket.common.model.BaseUser
 import chat.rocket.common.model.Token
@@ -10,6 +11,7 @@ import io.fabric8.mockwebserver.DefaultMockServer
 import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.OkHttpClient
 import org.hamcrest.CoreMatchers
+import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
 import org.junit.Before
@@ -94,6 +96,106 @@ class UserTest {
         runBlocking {
             val rooms = sut.chatRooms()
             System.out.println("Rooms: $rooms")
+        }
+    }
+
+    @Test
+    fun `updateEmail() should succeed with valid parameters` () {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.update")
+                .andReturn(200, USER_UPDATE_SUCCESS)
+                .once()
+
+        runBlocking {
+            val user = sut.updateEmail("userId", "test@email.com")
+            assertThat(user.id, isEqualTo("userId"))
+        }
+    }
+
+    @Test
+    fun `updateEmail() should fail with RocketChatApiException if email is already in use`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.update")
+                .andReturn(403, FAIL_EMAIL_IN_USE)
+                .once()
+
+        runBlocking {
+            try {
+                sut.updateEmail("userId", "test@email.com")
+                throw RuntimeException("unreachable code")
+            } catch (ex: Exception) {
+                assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
+                assertThat(ex.message, isEqualTo("Email already exists. [403]"))
+                val apiException = ex as RocketChatApiException
+                assertThat(apiException.errorType, isEqualTo("403"))
+            }
+        }
+    }
+
+    @Test
+    fun `updateName() should succeed with valid parameters` () {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.update")
+                .andReturn(200, USER_UPDATE_SUCCESS)
+                .once()
+
+        runBlocking {
+            val user = sut.updateName("userId", "New name")
+            assertThat(user.id, isEqualTo("userId"))
+            assertThat(user.name, isEqualTo("New name"))
+        }
+    }
+
+    @Test
+    fun `updatePassword() should succeed with valid parameters` () {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.update")
+                .andReturn(200, USER_UPDATE_SUCCESS)
+                .once()
+
+        runBlocking {
+            val user = sut.updatePassword("userId", "new-bcrypt-password")
+            assertThat(user.id, isEqualTo("userId"))
+        }
+    }
+
+    @Test
+    fun `updateUsername() should succeed with valid parameters` () {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.update")
+                .andReturn(200, USER_UPDATE_SUCCESS)
+                .once()
+
+        runBlocking {
+            val user = sut.updateUsername("userId", "new-username")
+            assertThat(user.id, isEqualTo("userId"))
+            assertThat(user.username, isEqualTo("new-username"))
+        }
+    }
+
+    @Test
+    fun `updateUsername() should fail with RocketChatApiException if username is already in use`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.update")
+                .andReturn(403, FAIL_EMAIL_IN_USE)
+                .once()
+
+        runBlocking {
+            try {
+                sut.updateUsername("userId", "testuser")
+                throw RuntimeException("unreachable code")
+            } catch (ex: Exception) {
+                assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
+                val apiException = ex as RocketChatApiException
+                assertThat(apiException.errorType, isEqualTo("403"))
+                assertThat(apiException.message, isEqualTo("Email already exists. [403]"))
+            }
         }
     }
 

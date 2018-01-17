@@ -6,7 +6,7 @@ import chat.rocket.common.model.User
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.model.LoginPayload
-import chat.rocket.core.internal.model.UserPayload
+import chat.rocket.core.internal.model.UserCreatePayload
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
@@ -62,8 +62,8 @@ suspend fun RocketChatClient.signup(email: String,
                             name: String,
                             username: String,
                             password: String): User = withContext(CommonPool) {
-    val payload = UserPayload(email, name, password, username)
-    val adapter = moshi.adapter(UserPayload::class.java)
+    val payload = UserCreatePayload(email, name, password, username)
+    val adapter = moshi.adapter(UserCreatePayload::class.java)
 
     val paylodBody = adapter.toJson(payload)
     val body = RequestBody.create(JSON_CONTENT_TYPE, paylodBody)
