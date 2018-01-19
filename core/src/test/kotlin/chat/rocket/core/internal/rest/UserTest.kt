@@ -15,7 +15,9 @@ import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
@@ -31,6 +33,9 @@ class UserTest {
     private lateinit var tokenProvider: TokenRepository
 
     private val authToken = Token("userId", "authToken")
+
+    @Rule @JvmField
+    val temporaryFolder = TemporaryFolder()
 
     @Before
     fun setup() {
@@ -165,6 +170,35 @@ class UserTest {
 
         runBlocking {
             val result = sut.resetAvatar("userId")
+            assert(result.success)
+        }
+    }
+
+    @Test
+    fun `setAvatar(file, mimeType) should succeed with valid parameters`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.setAvatar")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val file = temporaryFolder.newFile("avatar.png")
+            val result = sut.setAvatar(file, "image/png")
+            assert(result.success)
+        }
+    }
+
+    @Test
+    fun `setAvatar(avatarUrl) should succeed with valid parameters`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.setAvatar")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.setAvatar("http://domain.tld/to/my/own/avatar.jpg")
             assert(result.success)
         }
     }

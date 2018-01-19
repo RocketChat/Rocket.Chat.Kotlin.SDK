@@ -14,7 +14,10 @@ import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.async
+import okhttp3.MediaType
+import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import java.io.File
 
 /**
  * Returns the current logged user information, useful to check if the Token from TokenProvider
@@ -49,7 +52,7 @@ suspend fun RocketChatClient.updateProfile(userId: String,
     val adapter = moshi.adapter(UserPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
-    val body = RequestBody.create(JSON_CONTENT_TYPE, payloadBody)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val httpUrl = requestUrl(restUrl, "users.update").build()
     val request = requestBuilder(httpUrl).post(body).build()
@@ -70,7 +73,7 @@ suspend fun RocketChatClient.resetAvatar(userId: String): BaseResult {
     val adapter = moshi.adapter(UserPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
-    val body = RequestBody.create(JSON_CONTENT_TYPE, payloadBody)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val httpUrl = requestUrl(restUrl, "users.resetAvatar").build()
     val request = requestBuilder(httpUrl).post(body).build()
@@ -81,11 +84,47 @@ suspend fun RocketChatClient.resetAvatar(userId: String): BaseResult {
 /**
  * Sets the user's avatar.
  *
- * @param userId The ID of the user to reset the avatar.
- * @param avatarImage The avatar image uploaded as multipart/form-data.
+ * @param file The file to set the avatar.
+ * @param mimeType The MIME type of the file. Allowed MIME types are: *image/gif*, *image/png*, *image/jpeg*, *image/bmp* and *image/webp*.
  *
  * @return True if the avatar was setted up, false otherwise.
  */
+suspend fun RocketChatClient.setAvatar(file: File, mimeType: String): BaseResult {
+    if (mimeType != "image/gif" && mimeType != "image/png" && mimeType != "image/jpeg" && mimeType != "image/bmp" && mimeType != "image/webp") {
+        throw RocketChatException("Invalid image type")
+    }
+
+    val body = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("image=", file.name,
+                    RequestBody.create(MediaType.parse(mimeType), file))
+            .build()
+
+    val httpUrl = requestUrl(restUrl, "users.setAvatar").build()
+    val request = requestBuilder(httpUrl).post(body).build()
+
+    return handleRestCall(request, BaseResult::class.java)
+}
+
+/**
+ * Sets the user's avatar.
+ *
+ * @param avatarUrl Url of the avatar for the user
+ *
+ * @return True if the avatar was setted up, false otherwise.
+ */
+suspend fun RocketChatClient.setAvatar(avatarUrl: String): BaseResult {
+    val payload = UserPayload(null, null, null, null, null, avatarUrl)
+    val adapter = moshi.adapter(UserPayload::class.java)
+
+    val payloadBody = adapter.toJson(payload)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val httpUrl = requestUrl(restUrl, "users.setAvatar").build()
+    val request = requestBuilder(httpUrl).post(body).build()
+
+    return handleRestCall(request, BaseResult::class.java)
+}
 
 suspend fun RocketChatClient.chatRooms(timestamp: Long = 0): RestMultiResult<List<ChatRoom>> {
     val rooms = async { listRooms(timestamp) }

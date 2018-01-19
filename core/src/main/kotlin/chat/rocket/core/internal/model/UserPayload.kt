@@ -5,4 +5,4 @@ class UserPayload(val userId: String?,
                   val name: String?,
                   val password: String?,
                   val username: String?,
-                  val avatarImage: String?)
+                  val avatarUrl: String?)

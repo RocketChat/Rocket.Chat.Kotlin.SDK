@@ -148,4 +148,4 @@ private fun OkHttpClient.cancel(tag: Any) {
     dispatcher().runningCalls().filter { tag == it.request().tag() }.forEach { it.cancel() }
 }
 
-internal val JSON_CONTENT_TYPE = MediaType.parse("application/json; charset=utf-8")
+internal val MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8")
