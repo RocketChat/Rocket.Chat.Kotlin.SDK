@@ -2,6 +2,8 @@ package chat.rocket.core.internal.rest
 
 const val DEFAULT_TIMEOUT: Long = 2000
 
+const val SUCCESS = "{\"success\": true}"
+
 const val LOGIN_SUCCESS = "{\"status\": \"success\",\"data\": {\"authToken\": \"authToken\",\"userId\": \"userId\"}}"
 const val LOGIN_ERROR = "{\"status\": \"error\",\"message\": \"Unauthorized\"}"
 

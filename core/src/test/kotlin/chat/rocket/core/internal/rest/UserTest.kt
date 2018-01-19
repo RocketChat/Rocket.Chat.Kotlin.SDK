@@ -100,7 +100,7 @@ class UserTest {
     }
 
     @Test
-    fun `updateEmail() should succeed with valid parameters` () {
+    fun `updateProfile() should succeed with valid parameters` () {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/users.update")
@@ -108,13 +108,13 @@ class UserTest {
                 .once()
 
         runBlocking {
-            val user = sut.updateEmail("userId", "test@email.com")
+            val user = sut.updateProfile("userId", "test@email.com")
             assertThat(user.id, isEqualTo("userId"))
         }
     }
 
     @Test
-    fun `updateEmail() should fail with RocketChatApiException if email is already in use`() {
+    fun `updateProfile() should fail with RocketChatApiException if email is already in use`() {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/users.update")
@@ -123,7 +123,7 @@ class UserTest {
 
         runBlocking {
             try {
-                sut.updateEmail("userId", "test@email.com")
+                sut.updateProfile("userId", "test@email.com")
                 throw RuntimeException("unreachable code")
             } catch (ex: Exception) {
                 assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
@@ -135,51 +135,7 @@ class UserTest {
     }
 
     @Test
-    fun `updateName() should succeed with valid parameters` () {
-        mockServer.expect()
-                .post()
-                .withPath("/api/v1/users.update")
-                .andReturn(200, USER_UPDATE_SUCCESS)
-                .once()
-
-        runBlocking {
-            val user = sut.updateName("userId", "New name")
-            assertThat(user.id, isEqualTo("userId"))
-            assertThat(user.name, isEqualTo("New name"))
-        }
-    }
-
-    @Test
-    fun `updatePassword() should succeed with valid parameters` () {
-        mockServer.expect()
-                .post()
-                .withPath("/api/v1/users.update")
-                .andReturn(200, USER_UPDATE_SUCCESS)
-                .once()
-
-        runBlocking {
-            val user = sut.updatePassword("userId", "new-bcrypt-password")
-            assertThat(user.id, isEqualTo("userId"))
-        }
-    }
-
-    @Test
-    fun `updateUsername() should succeed with valid parameters` () {
-        mockServer.expect()
-                .post()
-                .withPath("/api/v1/users.update")
-                .andReturn(200, USER_UPDATE_SUCCESS)
-                .once()
-
-        runBlocking {
-            val user = sut.updateUsername("userId", "new-username")
-            assertThat(user.id, isEqualTo("userId"))
-            assertThat(user.username, isEqualTo("new-username"))
-        }
-    }
-
-    @Test
-    fun `updateUsername() should fail with RocketChatApiException if username is already in use`() {
+    fun `updateProfile() should fail with RocketChatApiException if username is already in use`() {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/users.update")
@@ -188,7 +144,7 @@ class UserTest {
 
         runBlocking {
             try {
-                sut.updateUsername("userId", "testuser")
+                sut.updateProfile("userId", "test@email.com", null, null, "testuser" )
                 throw RuntimeException("unreachable code")
             } catch (ex: Exception) {
                 assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
@@ -196,6 +152,20 @@ class UserTest {
                 assertThat(apiException.errorType, isEqualTo("403"))
                 assertThat(apiException.message, isEqualTo("Email already exists. [403]"))
             }
+        }
+    }
+
+    @Test
+    fun `resetAvatar() should succeed with valid parameters`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.resetAvatar")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.resetAvatar("userId")
+            assert(result.success)
         }
     }
 
