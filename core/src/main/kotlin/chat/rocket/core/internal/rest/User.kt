@@ -1,15 +1,23 @@
 package chat.rocket.core.internal.rest
 
 import chat.rocket.common.RocketChatException
+import chat.rocket.common.model.BaseResult
+import chat.rocket.common.model.User
 import chat.rocket.common.util.CalendarISO8601Converter
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestMultiResult
+import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.model.Subscription
+import chat.rocket.core.internal.model.UserPayload
 import chat.rocket.core.model.ChatRoom
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.async
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import java.io.File
 
 /**
  * Returns the current logged user information, useful to check if the Token from TokenProvider
@@ -23,6 +31,99 @@ suspend fun RocketChatClient.me(): Myself {
     val request = requestBuilder(httpUrl).get().build()
 
     return handleRestCall(request, Myself::class.java)
+}
+
+/**
+ * Updates the profile for the user.
+ *
+ * @param userId The ID of the user to update.
+ * @param email The email address for the user.
+ * @param name The display name of the user.
+ * @param password The password for the user.
+ * @param username The username for the user.
+ * @return An [User] with an updated profile.
+ */
+suspend fun RocketChatClient.updateProfile(userId: String,
+                                           email: String? = null,
+                                           name: String? = null,
+                                           password: String? = null,
+                                           username: String? = null): User {
+    val payload = UserPayload(userId, email, name, password, username,null)
+    val adapter = moshi.adapter(UserPayload::class.java)
+
+    val payloadBody = adapter.toJson(payload)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val httpUrl = requestUrl(restUrl, "users.update").build()
+    val request = requestBuilder(httpUrl).post(body).build()
+
+    val type = Types.newParameterizedType(RestResult::class.java, User::class.java)
+    return handleRestCall<RestResult<User>>(request, type).result()
+}
+
+/**
+ * Resets the user's avatar.
+ *
+ * @param userId The ID of the user to reset the avatar.
+ *
+ * @return True if the avatar was reset, false otherwise.
+ */
+suspend fun RocketChatClient.resetAvatar(userId: String): Boolean {
+    val payload = UserPayload(userId, null, null, null, null, null)
+    val adapter = moshi.adapter(UserPayload::class.java)
+
+    val payloadBody = adapter.toJson(payload)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val httpUrl = requestUrl(restUrl, "users.resetAvatar").build()
+    val request = requestBuilder(httpUrl).post(body).build()
+
+    return handleRestCall<BaseResult>(request, BaseResult::class.java).success
+}
+
+/**
+ * Sets the user's avatar.
+ *
+ * @param file The file to set the avatar.
+ * @param mimeType The MIME type of the file. Allowed MIME types are: *image/gif*, *image/png*, *image/jpeg*, *image/bmp* and *image/webp*.
+ *
+ * @return True if the avatar was setted up, false otherwise.
+ */
+suspend fun RocketChatClient.setAvatar(file: File, mimeType: String): Boolean {
+    if (mimeType != "image/gif" && mimeType != "image/png" && mimeType != "image/jpeg" && mimeType != "image/bmp" && mimeType != "image/webp") {
+        throw RocketChatException("Invalid image type")
+    }
+
+    val body = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("image=", file.name,
+                    RequestBody.create(MediaType.parse(mimeType), file))
+            .build()
+
+    val httpUrl = requestUrl(restUrl, "users.setAvatar").build()
+    val request = requestBuilder(httpUrl).post(body).build()
+
+    return handleRestCall<BaseResult>(request, BaseResult::class.java).success
+}
+
+/**
+ * Sets the user's avatar.
+ *
+ * @param avatarUrl Url of the avatar for the user
+ *
+ * @return True if the avatar was setted up, false otherwise.
+ */
+suspend fun RocketChatClient.setAvatar(avatarUrl: String): Boolean {
+    val payload = UserPayload(null, null, null, null, null, avatarUrl)
+    val adapter = moshi.adapter(UserPayload::class.java)
+
+    val payloadBody = adapter.toJson(payload)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val httpUrl = requestUrl(restUrl, "users.setAvatar").build()
+    val request = requestBuilder(httpUrl).post(body).build()
+
+    return handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
 
 suspend fun RocketChatClient.chatRooms(timestamp: Long = 0): RestMultiResult<List<ChatRoom>> {

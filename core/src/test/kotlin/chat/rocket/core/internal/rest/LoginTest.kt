@@ -105,7 +105,7 @@ class LoginTest {
 
         runBlocking {
             try {
-                sut.login("user", "pass")
+                sut.login("user", "password")
 
                 throw RuntimeException("unreachable code")
             } catch (ex: Exception) {
@@ -122,7 +122,7 @@ class LoginTest {
     fun `login() should fail with RocketChatApiException when response is not 200 OK`() {
         runBlocking {
             try {
-                sut.login("user", "pass")
+                sut.login("user", "password")
 
                 throw RuntimeException("unreachable code")
             } catch (ex: Exception) {
@@ -137,7 +137,7 @@ class LoginTest {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/users.register")
-                .andReturn(200, REGISTER_SUCCESS)
+                .andReturn(200, USER_REGISTER_SUCCESS)
                 .once()
 
         runBlocking {
@@ -151,7 +151,7 @@ class LoginTest {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/users.register")
-                .andReturn(403, REGISTER_FAIL_EMAIL_IN_USE)
+                .andReturn(403, FAIL_EMAIL_IN_USE)
                 .once()
 
         runBlocking {
@@ -173,7 +173,7 @@ class LoginTest {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/users.register")
-                .andReturn(403, REGISTER_FAIL_USER_IN_USE)
+                .andReturn(403, FAIL_USER_IN_USE)
                 .once()
 
         runBlocking {

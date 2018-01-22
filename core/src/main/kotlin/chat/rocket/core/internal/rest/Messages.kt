@@ -86,7 +86,7 @@ suspend fun RocketChatClient.sendMessage(roomId: String,
     val adapter = moshi.adapter(MessagePayload::class.java)
     val payloadBody = adapter.toJson(payload)
 
-    val body = RequestBody.create(JSON_CONTENT_TYPE, payloadBody)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, "chat.postMessage").build()
     val request = requestBuilder(url).post(body).build()
