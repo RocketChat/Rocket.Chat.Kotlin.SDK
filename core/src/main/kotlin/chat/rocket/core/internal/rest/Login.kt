@@ -30,7 +30,7 @@ suspend fun RocketChatClient.login(username: String, password: String, pin: Stri
     val adapter = moshi.adapter(LoginPayload::class.java)
 
     val paylodBody = adapter.toJson(payload)
-    val body = RequestBody.create(JSON_CONTENT_TYPE, paylodBody)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, paylodBody)
 
     val url = requestUrl(restUrl, "login").build()
 
@@ -62,11 +62,11 @@ suspend fun RocketChatClient.signup(email: String,
                             name: String,
                             username: String,
                             password: String): User = withContext(CommonPool) {
-    val payload = UserPayload(email, name, password, username)
+    val payload = UserPayload(null, email, name, password, username, null)
     val adapter = moshi.adapter(UserPayload::class.java)
 
     val paylodBody = adapter.toJson(payload)
-    val body = RequestBody.create(JSON_CONTENT_TYPE, paylodBody)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, paylodBody)
 
     val url = requestUrl(restUrl, "users.register").build()
     val request = Request.Builder().url(url).post(body).build()

@@ -1,5 +1,6 @@
 package chat.rocket.core.internal.rest
 
+import chat.rocket.common.RocketChatApiException
 import chat.rocket.common.RocketChatAuthException
 import chat.rocket.common.model.BaseUser
 import chat.rocket.common.model.Token
@@ -10,10 +11,13 @@ import io.fabric8.mockwebserver.DefaultMockServer
 import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.OkHttpClient
 import org.hamcrest.CoreMatchers
+import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
@@ -29,6 +33,9 @@ class UserTest {
     private lateinit var tokenProvider: TokenRepository
 
     private val authToken = Token("userId", "authToken")
+
+    @Rule @JvmField
+    val temporaryFolder = TemporaryFolder()
 
     @Before
     fun setup() {
@@ -94,6 +101,105 @@ class UserTest {
         runBlocking {
             val rooms = sut.chatRooms()
             System.out.println("Rooms: $rooms")
+        }
+    }
+
+    @Test
+    fun `updateProfile() should succeed with valid parameters` () {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.update")
+                .andReturn(200, USER_UPDATE_SUCCESS)
+                .once()
+
+        runBlocking {
+            val user = sut.updateProfile("userId", "test@email.com")
+            assertThat(user.id, isEqualTo("userId"))
+        }
+    }
+
+    @Test
+    fun `updateProfile() should fail with RocketChatApiException if email is already in use`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.update")
+                .andReturn(403, FAIL_EMAIL_IN_USE)
+                .once()
+
+        runBlocking {
+            try {
+                sut.updateProfile("userId", "test@email.com")
+                throw RuntimeException("unreachable code")
+            } catch (ex: Exception) {
+                assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
+                assertThat(ex.message, isEqualTo("Email already exists. [403]"))
+                val apiException = ex as RocketChatApiException
+                assertThat(apiException.errorType, isEqualTo("403"))
+            }
+        }
+    }
+
+    @Test
+    fun `updateProfile() should fail with RocketChatApiException if username is already in use`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.update")
+                .andReturn(403, FAIL_EMAIL_IN_USE)
+                .once()
+
+        runBlocking {
+            try {
+                sut.updateProfile("userId", "test@email.com", null, null, "testuser" )
+                throw RuntimeException("unreachable code")
+            } catch (ex: Exception) {
+                assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
+                val apiException = ex as RocketChatApiException
+                assertThat(apiException.errorType, isEqualTo("403"))
+                assertThat(apiException.message, isEqualTo("Email already exists. [403]"))
+            }
+        }
+    }
+
+    @Test
+    fun `resetAvatar() should succeed with valid parameters`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.resetAvatar")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.resetAvatar("userId")
+            assert(result)
+        }
+    }
+
+    @Test
+    fun `setAvatar(file, mimeType) should succeed with valid parameters`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.setAvatar")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val file = temporaryFolder.newFile("avatar.png")
+            val result = sut.setAvatar(file, "image/png")
+            assert(result)
+        }
+    }
+
+    @Test
+    fun `setAvatar(avatarUrl) should succeed with valid parameters`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.setAvatar")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.setAvatar("http://domain.tld/to/my/own/avatar.jpg")
+            assert(result)
         }
     }
 
