@@ -4,6 +4,7 @@ import chat.rocket.common.internal.ISO8601Date
 import chat.rocket.common.model.BaseMessage
 import chat.rocket.common.model.SimpleRoom
 import chat.rocket.common.model.SimpleUser
+import chat.rocket.core.internal.FallbackEnum
 import com.squareup.moshi.Json
 import se.ansman.kotshi.JsonDefaultValueBoolean
 import se.ansman.kotshi.JsonSerializable
@@ -20,6 +21,7 @@ data class Message(
         override val editedBy: SimpleUser?,
         @Json(name = "alias") override val senderAlias: String?,
         override val avatar: String?,
+        @Json(name = "t") val type: MessageType?,
         @JsonDefaultValueBoolean(false)
         val groupable: Boolean,
         @JsonDefaultValueBoolean(false)
@@ -28,3 +30,22 @@ data class Message(
         override val mentions: List<SimpleUser>?,
         override val channels: List<SimpleRoom>?
 ) : BaseMessage
+
+enum @FallbackEnum(name = "UNSPECIFIED") class MessageType {
+        @Json(name = "r")
+        ROOM_NAME_CHANGED,
+        @Json(name = "au")
+        USER_ADDED,
+        @Json(name = "ru")
+        USER_REMOVED,
+        @Json(name = "uj")
+        USER_JOINED,
+        @Json(name = "ul")
+        USER_LEFT,
+        @Json(name = "wm")
+        WELCOME,
+        @Json(name = "rm")
+        MESSAGE_REMOVED,
+        @Json(name = "")
+        UNSPECIFIED
+}

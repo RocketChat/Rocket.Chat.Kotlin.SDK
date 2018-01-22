@@ -7,13 +7,10 @@ import chat.rocket.common.util.CalendarISO8601Converter
 import chat.rocket.common.util.Logger
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.common.util.ifNull
-import chat.rocket.core.internal.CoreJsonAdapterFactory
-import chat.rocket.core.internal.RestMultiResult
-import chat.rocket.core.internal.RestResult
-import chat.rocket.core.internal.SettingsAdapter
+import chat.rocket.core.internal.*
 import chat.rocket.core.internal.model.Subscription
-import chat.rocket.core.internal.realtime.State
 import chat.rocket.core.internal.realtime.Socket
+import chat.rocket.core.internal.realtime.State
 import chat.rocket.core.internal.realtime.StreamMessage
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.Room
@@ -30,6 +27,7 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
                                            internal val logger: Logger) {
 
     internal val moshi: Moshi = Moshi.Builder()
+            .add(FallbackEnum.ADAPTER_FACTORY)
             .add(RestResult.JsonAdapterFactory())
             .add(RestMultiResult.JsonAdapterFactory())
             .add(SettingsAdapter())
