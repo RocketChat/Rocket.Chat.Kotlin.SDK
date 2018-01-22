@@ -170,7 +170,7 @@ class UserTest {
 
         runBlocking {
             val result = sut.resetAvatar("userId")
-            assert(result.success)
+            assert(result)
         }
     }
 
@@ -185,7 +185,7 @@ class UserTest {
         runBlocking {
             val file = temporaryFolder.newFile("avatar.png")
             val result = sut.setAvatar(file, "image/png")
-            assert(result.success)
+            assert(result)
         }
     }
 
@@ -199,7 +199,7 @@ class UserTest {
 
         runBlocking {
             val result = sut.setAvatar("http://domain.tld/to/my/own/avatar.jpg")
-            assert(result.success)
+            assert(result)
         }
     }
 

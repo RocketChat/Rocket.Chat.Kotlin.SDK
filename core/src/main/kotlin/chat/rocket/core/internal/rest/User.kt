@@ -68,7 +68,7 @@ suspend fun RocketChatClient.updateProfile(userId: String,
  *
  * @return True if the avatar was reset, false otherwise.
  */
-suspend fun RocketChatClient.resetAvatar(userId: String): BaseResult {
+suspend fun RocketChatClient.resetAvatar(userId: String): Boolean {
     val payload = UserPayload(userId, null, null, null, null, null)
     val adapter = moshi.adapter(UserPayload::class.java)
 
@@ -78,7 +78,7 @@ suspend fun RocketChatClient.resetAvatar(userId: String): BaseResult {
     val httpUrl = requestUrl(restUrl, "users.resetAvatar").build()
     val request = requestBuilder(httpUrl).post(body).build()
 
-    return handleRestCall(request, BaseResult::class.java)
+    return handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
 
 /**
@@ -89,7 +89,7 @@ suspend fun RocketChatClient.resetAvatar(userId: String): BaseResult {
  *
  * @return True if the avatar was setted up, false otherwise.
  */
-suspend fun RocketChatClient.setAvatar(file: File, mimeType: String): BaseResult {
+suspend fun RocketChatClient.setAvatar(file: File, mimeType: String): Boolean {
     if (mimeType != "image/gif" && mimeType != "image/png" && mimeType != "image/jpeg" && mimeType != "image/bmp" && mimeType != "image/webp") {
         throw RocketChatException("Invalid image type")
     }
@@ -103,7 +103,7 @@ suspend fun RocketChatClient.setAvatar(file: File, mimeType: String): BaseResult
     val httpUrl = requestUrl(restUrl, "users.setAvatar").build()
     val request = requestBuilder(httpUrl).post(body).build()
 
-    return handleRestCall(request, BaseResult::class.java)
+    return handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
 
 /**
@@ -113,7 +113,7 @@ suspend fun RocketChatClient.setAvatar(file: File, mimeType: String): BaseResult
  *
  * @return True if the avatar was setted up, false otherwise.
  */
-suspend fun RocketChatClient.setAvatar(avatarUrl: String): BaseResult {
+suspend fun RocketChatClient.setAvatar(avatarUrl: String): Boolean {
     val payload = UserPayload(null, null, null, null, null, avatarUrl)
     val adapter = moshi.adapter(UserPayload::class.java)
 
@@ -123,7 +123,7 @@ suspend fun RocketChatClient.setAvatar(avatarUrl: String): BaseResult {
     val httpUrl = requestUrl(restUrl, "users.setAvatar").build()
     val request = requestBuilder(httpUrl).post(body).build()
 
-    return handleRestCall(request, BaseResult::class.java)
+    return handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
 
 suspend fun RocketChatClient.chatRooms(timestamp: Long = 0): RestMultiResult<List<ChatRoom>> {
