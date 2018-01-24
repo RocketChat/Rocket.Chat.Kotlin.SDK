@@ -54,7 +54,7 @@ class MessagesTest {
                 .once()
 
         runBlocking {
-            val msg= sut.sendMessage(roomId = "GENERAL",
+            val msg = sut.sendMessage(roomId = "GENERAL",
                     text = "Sending message from SDK to #general and @here",
                     alias = "TestingAlias",
                     emoji = ":smirk:",
@@ -94,6 +94,27 @@ class MessagesTest {
 
                 assertThat(updatedAt, isEqualTo(1511443964808))
                 assertThat(id, isEqualTo("messageId"))
+            }
+        }
+    }
+
+    @Test
+    fun `deleteMessage() should return a DeleteResult object`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/chat.delete")
+                .andReturn(200, DELETE_MESSAGE_OK)
+                .once()
+
+        runBlocking {
+            val result = sut.deleteMessage(roomId = "GENERAL",
+                    msgId = "messageId",
+                    asUser = true)
+
+            with(result) {
+                assertThat(id, isEqualTo("messageId"))
+                assertThat(timestamp, isEqualTo(1511443964815))
+                assertThat(success, isEqualTo(true))
             }
         }
     }
