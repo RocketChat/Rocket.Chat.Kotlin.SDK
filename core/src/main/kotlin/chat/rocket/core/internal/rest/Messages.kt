@@ -5,10 +5,10 @@ import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.model.DeletePayload
 import chat.rocket.core.internal.model.MessagePayload
-import chat.rocket.core.model.Attachment
 import chat.rocket.core.model.DeleteResult
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.PagedResult
+import chat.rocket.core.model.attachment.Attachment
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext

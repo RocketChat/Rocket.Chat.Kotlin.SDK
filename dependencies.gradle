@@ -1,7 +1,7 @@
 ext {
     versions = [
-            kotlin    : '1.2.10',
-            coroutine : '0.21',
+            kotlin    : '1.2.21',
+            coroutine : '0.21.2',
             dokka     : '0.9.15',
             kotshi    : '0.3.0',
             okhttp    : '3.9.0',

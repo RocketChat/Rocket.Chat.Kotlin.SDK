@@ -8,6 +8,7 @@ import chat.rocket.common.util.Logger
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.common.util.ifNull
 import chat.rocket.core.internal.*
+
 import chat.rocket.core.internal.model.Subscription
 import chat.rocket.core.internal.realtime.Socket
 import chat.rocket.core.internal.realtime.State
@@ -31,6 +32,7 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
             .add(RestResult.JsonAdapterFactory())
             .add(RestMultiResult.JsonAdapterFactory())
             .add(SettingsAdapter())
+            .add(AttachmentAdapterFactory(logger))
             .add(java.lang.Long::class.java, ISO8601Date::class.java, TimestampAdapter(CalendarISO8601Converter()))
             .add(Long::class.java, ISO8601Date::class.java, TimestampAdapter(CalendarISO8601Converter()))
             .add(CommonJsonAdapterFactory.INSTANCE)

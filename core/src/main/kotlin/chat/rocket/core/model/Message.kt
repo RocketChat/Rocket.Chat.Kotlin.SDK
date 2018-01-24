@@ -5,6 +5,7 @@ import chat.rocket.common.model.BaseMessage
 import chat.rocket.common.model.SimpleRoom
 import chat.rocket.common.model.SimpleUser
 import chat.rocket.core.internal.FallbackEnum
+import chat.rocket.core.model.attachment.Attachment
 import com.squareup.moshi.Json
 import se.ansman.kotshi.JsonDefaultValueBoolean
 import se.ansman.kotshi.JsonSerializable
@@ -28,7 +29,8 @@ data class Message(
         val parseUrls: Boolean,
         val urls: List<Url>?,
         override val mentions: List<SimpleUser>?,
-        override val channels: List<SimpleRoom>?
+        override val channels: List<SimpleRoom>?,
+        val attachments: List<Attachment>?
 ) : BaseMessage
 
 enum @FallbackEnum(name = "UNSPECIFIED") class MessageType {
