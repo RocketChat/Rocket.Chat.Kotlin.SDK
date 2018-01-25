@@ -10,5 +10,6 @@ data class MessagePayload(
         val alias: String?,
         val emoji: String?,
         val avatar: String?,
-        val attachments: List<Attachment>?
+        val attachments: List<Attachment>?,
+        val msgId: String? = null
 )
