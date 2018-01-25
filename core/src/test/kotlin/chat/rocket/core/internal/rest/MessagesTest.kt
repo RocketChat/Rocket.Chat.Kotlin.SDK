@@ -103,7 +103,7 @@ class MessagesTest {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/chat.update")
-                .andReturn(200, SEND_MESSAGE_OK)
+                .andReturn(200, SEND_MESSAGE_OK_UPDATED)
                 .once()
 
         runBlocking {
