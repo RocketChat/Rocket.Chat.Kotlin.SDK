@@ -17,14 +17,15 @@ public fun <T> callback(context: CoroutineContext = DefaultDispatcher,
                         callback: Callback<T>,
                         block: suspend CoroutineScope.() -> T
 ): Call {
-    val newContext = newCoroutineContext(context)
+    /*val newContext = newCoroutineContext(context)
     val job = Job(newContext[Job])
     val coroutine = CallbackCoroutine(newContext + job, callback)
     block.startCoroutine(coroutine, coroutine)
-    return Call(job)
+    return Call(job)*/
+    return Call(Job())
 }
 
-private class CallbackCoroutine<T>(
+/*private class CallbackCoroutine<T>(
         parentContext: CoroutineContext,
         private val callback: Callback<T>
 ) : AbstractCoroutine<T>(parentContext, true) {
@@ -41,4 +42,5 @@ private class CallbackCoroutine<T>(
         } else
             callback.onSuccess(state as T)
     }
-}
+
+}*/

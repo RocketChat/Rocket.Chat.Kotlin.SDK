@@ -8,7 +8,6 @@ import chat.rocket.common.util.Logger
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.common.util.ifNull
 import chat.rocket.core.internal.*
-
 import chat.rocket.core.internal.model.Subscription
 import chat.rocket.core.internal.realtime.Socket
 import chat.rocket.core.internal.realtime.State
@@ -17,6 +16,7 @@ import chat.rocket.core.model.Message
 import chat.rocket.core.model.Room
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.experimental.channels.Channel
+import kotlinx.coroutines.experimental.launch
 import okhttp3.HttpUrl
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
@@ -41,7 +41,8 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
 
     internal lateinit var restUrl: HttpUrl
     val url: String
-    val statusChannel = Channel<State>()
+    private val statusChannel = Channel<State>()
+    private val statusChannelList = ArrayList<Channel<State>>()
     val roomsChannel = Channel<StreamMessage<Room>>()
     val subscriptionsChannel = Channel<StreamMessage<Subscription>>()
     val messagesChannel = Channel<Message>()
@@ -55,6 +56,14 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
             throw InvalidParameterException("You must pass a valid HTTP or HTTPS URL")
         }
         socket = Socket(this, statusChannel, roomsChannel, subscriptionsChannel, messagesChannel)
+
+        launch {
+            for (status in statusChannel) {
+                for (channel in statusChannelList) {
+                    channel.offer(status)
+                }
+            }
+        }
     }
 
     private fun sanitizeUrl(baseUrl: String): String {
@@ -94,6 +103,14 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
         fun platformLogger(init: Builder.() -> PlatformLogger) = apply { platformLogger = init() }
 
         fun build() = RocketChatClient(this)
+    }
+
+    fun addStateChannel(channel: Channel<State>) {
+        statusChannelList.add(channel)
+    }
+
+    fun removeStateChannel(channel: Channel<State>) {
+        statusChannelList.remove(channel)
     }
 
     val state: State
