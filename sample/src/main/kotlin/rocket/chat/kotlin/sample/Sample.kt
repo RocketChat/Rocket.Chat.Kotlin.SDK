@@ -25,6 +25,7 @@ import chat.rocket.core.rxjava.me
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
@@ -81,7 +82,9 @@ fun main(args: Array<String>) {
         logger.debug("Login: ${token.userId} - ${token.authToken}")
 
         launch {
-            for (status in client.statusChannel) {
+            val statusChannel = Channel<State>()
+            client.addStateChannel(statusChannel)
+            for (status in statusChannel) {
                 logger.debug("Changing status to: $status")
                 when (status) {
                     State.Authenticating -> logger.debug("Authenticating")
