@@ -15,6 +15,28 @@ import kotlinx.coroutines.experimental.withContext
 import okhttp3.FormBody
 import okhttp3.RequestBody
 
+/**
+ * Updates a message.
+ *
+ * @param roomId The room id of where the message is.
+ * @param messageId The message id to update.
+ * @param text Updated text for the message.
+ * @return The updated Message object.
+ */
+suspend fun RocketChatClient.updateMessage(roomId: String, messageId: String, text: String): Message = withContext(CommonPool) {
+    val payload = MessagePayload(roomId, text, null, null, null, null, messageId)
+    val adapter = moshi.adapter(MessagePayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val url = requestUrl(restUrl, "chat.update").build()
+    val request = requestBuilder(url).post(body).build()
+
+    val type = Types.newParameterizedType(RestResult::class.java, Message::class.java)
+    return@withContext handleRestCall<RestResult<Message>>(request, type).result()
+}
+
 suspend fun RocketChatClient.pinMessage(messageId: String): Message = withContext(CommonPool) {
     val body = FormBody.Builder().add("messageId", messageId).build()
 

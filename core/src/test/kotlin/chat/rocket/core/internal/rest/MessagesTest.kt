@@ -119,6 +119,46 @@ class MessagesTest {
         }
     }
 
+    @Test
+    fun `updateMessage() should return a complete updated Message object`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/chat.update")
+                .andReturn(200, SEND_MESSAGE_OK_UPDATED)
+                .once()
+
+        runBlocking {
+            val msg = sut.updateMessage(roomId = "GENERAL",
+                    text = "Updating a message previously sent to #general",
+                    messageId = "messageId")
+
+            with(msg) {
+                assertThat(senderAlias, isEqualTo("TestingAlias"))
+                assertThat(message, isEqualTo("Updating a message previously sent to #general"))
+                assertThat(parseUrls, isEqualTo(true))
+                assertThat(groupable, isEqualTo(false))
+                assertThat(avatar, isEqualTo("https://avatars2.githubusercontent.com/u/224255?s=88&v=4"))
+                assertThat(timestamp, isEqualTo(1511443964798))
+
+                with(sender!!) {
+                    assertThat(id, isEqualTo("userId"))
+                    assertThat(name, isEqualTo("testuser"))
+                    assertThat(username, isEqualTo("testuser"))
+                }
+                assertThat(roomId, isEqualTo("GENERAL"))
+
+                assertThat(channels!!.size, isEqualTo(1))
+                with(channels!![0]) {
+                    assertThat(id, isEqualTo("GENERAL"))
+                    assertThat(name, isEqualTo("general"))
+                }
+
+                assertThat(updatedAt, isEqualTo(1511443964808))
+                assertThat(id, isEqualTo("messageId"))
+            }
+        }
+    }
+
     @After
     fun shutdown() {
         mockServer.shutdown()
