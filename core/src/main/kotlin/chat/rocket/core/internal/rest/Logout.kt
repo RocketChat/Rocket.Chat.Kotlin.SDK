@@ -7,6 +7,11 @@ import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
 
+/**
+ * Logout user from the current logged-in server.
+ *
+ * @return A result String message.
+ */
 suspend fun RocketChatClient.logout(): String? = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl, "logout").build()
     val request = requestBuilder(httpUrl).get().build()
