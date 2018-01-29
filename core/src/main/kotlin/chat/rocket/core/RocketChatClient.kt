@@ -1,6 +1,8 @@
 package chat.rocket.core
 
 import chat.rocket.common.CommonJsonAdapterFactory
+import chat.rocket.common.internal.FallbackSealedClassJsonAdapter
+//import chat.rocket.common.internal.FallbackEnum
 import chat.rocket.common.internal.ISO8601Date
 import chat.rocket.common.model.TimestampAdapter
 import chat.rocket.common.util.CalendarISO8601Converter
@@ -28,7 +30,7 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
                                            internal val logger: Logger) {
 
     internal val moshi: Moshi = Moshi.Builder()
-            .add(FallbackEnum.ADAPTER_FACTORY)
+            .add(FallbackSealedClassJsonAdapter.ADAPTER_FACTORY)
             .add(RestResult.JsonAdapterFactory())
             .add(RestMultiResult.JsonAdapterFactory())
             .add(SettingsAdapter())

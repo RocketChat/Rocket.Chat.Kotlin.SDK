@@ -1,6 +1,7 @@
 package chat.rocket.core.internal.rest
 
 import chat.rocket.common.model.BaseRoom
+import chat.rocket.common.model.RoomType
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.model.DeletePayload
@@ -51,7 +52,7 @@ suspend fun RocketChatClient.pinMessage(messageId: String): Message = withContex
 }
 
 suspend fun RocketChatClient.getRoomFavoriteMessages(roomId: String,
-                                                     roomType: BaseRoom.RoomType,
+                                                     roomType: RoomType,
                                                      offset: Int): PagedResult<List<Message>> = withContext(CommonPool) {
     val userId = tokenRepository.get()?.userId
 
@@ -71,7 +72,7 @@ suspend fun RocketChatClient.getRoomFavoriteMessages(roomId: String,
 }
 
 suspend fun RocketChatClient.getRoomPinnedMessages(roomId: String,
-                                                   roomType: BaseRoom.RoomType,
+                                                   roomType: RoomType,
                                                    offset: Int? = 0): PagedResult<List<Message>> = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl,
             getRestApiMethodNameByRoomType(roomType, "messages"))
@@ -120,7 +121,7 @@ suspend fun RocketChatClient.sendMessage(roomId: String,
 }
 
 suspend fun RocketChatClient.messages(roomId: String,
-                                      roomType: BaseRoom.RoomType,
+                                      roomType: RoomType,
                                       offset: Long,
                                       count: Long): PagedResult<List<Message>> = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl,
@@ -163,7 +164,7 @@ suspend fun RocketChatClient.deleteMessage(roomId: String,
 
 
 internal suspend fun RocketChatClient.history(roomId: String,
-                                              roomType: BaseRoom.RoomType,
+                                              roomType: RoomType,
                                               count: Long,
                                               oldest: String?,
                                               latest: String?): PagedResult<List<Message>> = withContext(CommonPool) {

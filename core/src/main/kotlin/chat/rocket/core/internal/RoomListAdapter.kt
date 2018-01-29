@@ -16,6 +16,8 @@ import java.lang.reflect.Type
  * Kotshi generated Adapter.
  *
  * We are just filtering out this specific error to not mask other future bugs.
+ *
+ * TODO - convert to generic ListAdapter
  */
 internal class RoomListAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<List<Room>>() {
 
@@ -51,7 +53,7 @@ internal class RoomListAdapter(moshi: Moshi, private val logger: Logger) : JsonA
     }
 }
 
-class RoomListAdapterFactory(private val logger: Logger) : JsonAdapter.Factory {
+internal class RoomListAdapterFactory(private val logger: Logger) : JsonAdapter.Factory {
     override fun create(type: Type, annotations: MutableSet<out Annotation>?, moshi: Moshi): JsonAdapter<*>? {
         if (type is ParameterizedType) {
             val rawType = type.rawType
@@ -62,5 +64,4 @@ class RoomListAdapterFactory(private val logger: Logger) : JsonAdapter.Factory {
 
         return null
     }
-
 }

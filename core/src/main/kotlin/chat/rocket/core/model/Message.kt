@@ -1,10 +1,10 @@
 package chat.rocket.core.model
 
+import chat.rocket.common.internal.FallbackSealedClass
 import chat.rocket.common.internal.ISO8601Date
 import chat.rocket.common.model.BaseMessage
 import chat.rocket.common.model.SimpleRoom
 import chat.rocket.common.model.SimpleUser
-import chat.rocket.core.internal.FallbackEnum
 import chat.rocket.core.model.attachment.Attachment
 import com.squareup.moshi.Json
 import se.ansman.kotshi.JsonDefaultValueBoolean
@@ -33,21 +33,14 @@ data class Message(
         val attachments: List<Attachment>?
 ) : BaseMessage
 
-enum @FallbackEnum(name = "UNSPECIFIED") class MessageType {
-        @Json(name = "r")
-        ROOM_NAME_CHANGED,
-        @Json(name = "au")
-        USER_ADDED,
-        @Json(name = "ru")
-        USER_REMOVED,
-        @Json(name = "uj")
-        USER_JOINED,
-        @Json(name = "ul")
-        USER_LEFT,
-        @Json(name = "wm")
-        WELCOME,
-        @Json(name = "rm")
-        MESSAGE_REMOVED,
-        @Json(name = "")
-        UNSPECIFIED
+@FallbackSealedClass(name = "Unspecified", fieldName = "rawType")
+sealed class MessageType {
+        @Json(name = "r") class RoomNameChanged : MessageType()
+        @Json(name = "au") class UserAdded : MessageType()
+        @Json(name = "ru") class UserRemoved : MessageType()
+        @Json(name = "uj") class UserJoined : MessageType()
+        @Json(name = "ul") class UserLeft : MessageType()
+        @Json(name = "wm") class Welcome : MessageType()
+        @Json(name = "rm") class MessageRemoved : MessageType()
+        class Unspecified(val rawType: String) : MessageType()
 }

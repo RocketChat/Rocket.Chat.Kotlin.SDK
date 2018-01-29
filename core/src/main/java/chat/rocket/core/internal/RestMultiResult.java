@@ -41,7 +41,7 @@ public class RestMultiResult<T> {
     }
 
     public static <T> RestMultiResult<T> create(T update, T remove) {
-        return new RestMultiResult<T>(update, remove);
+        return new RestMultiResult<>(update, remove);
     }
 
     public static class MoshiJsonAdapter<T> extends JsonAdapter<RestMultiResult<T>> {

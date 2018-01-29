@@ -1,6 +1,7 @@
 package chat.rocket.core.model
 
 import chat.rocket.common.model.BaseRoom
+import chat.rocket.common.model.RoomType
 import chat.rocket.common.model.SimpleUser
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.model.Subscription
@@ -11,7 +12,7 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
 
 data class ChatRoom(override val id: String,
-                    override val type: BaseRoom.RoomType,
+                    override val type: RoomType,
                     override val user: SimpleUser?,
                     val name: String,
                     override val fullName: String?,
