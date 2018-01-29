@@ -2,6 +2,7 @@ package rocket.chat.kotlin.sample
 
 import chat.rocket.common.RocketChatException
 import chat.rocket.common.model.BaseRoom
+import chat.rocket.common.model.RoomType
 import chat.rocket.common.model.ServerInfo
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
@@ -169,7 +170,7 @@ fun getMeInfoByRx(client: RocketChatClient) {
 }
 
 suspend fun pinMessage(client: RocketChatClient) {
-        val result = client.getRoomFavoriteMessages("GENERAL", BaseRoom.RoomType.PUBLIC, 0)
+        val result = client.getRoomFavoriteMessages("GENERAL", RoomType.PUBLIC, 0)
         println("favoriteMessages: $result")
 }
 
