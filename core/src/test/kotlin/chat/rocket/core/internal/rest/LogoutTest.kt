@@ -56,8 +56,8 @@ class LogoutTest {
                 .once()
 
         runBlocking {
-            val message = sut.logout()
-            assertThat(message, isEqualTo("You've been logged out!"))
+            val any = sut.logout()
+            assertThat(any, isEqualTo(instanceOf(Any::class.java)))
         }
     }
 
