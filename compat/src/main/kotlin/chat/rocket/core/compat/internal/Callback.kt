@@ -13,34 +13,30 @@ import kotlin.coroutines.experimental.CoroutineContext
 import kotlin.coroutines.experimental.startCoroutine
 
 @JvmOverloads
-public fun <T> callback(context: CoroutineContext = DefaultDispatcher,
-                        callback: Callback<T>,
-                        block: suspend CoroutineScope.() -> T
+fun <T> callback(context: CoroutineContext = DefaultDispatcher,
+                 callback: Callback<T>,
+                 block: suspend CoroutineScope.() -> T
 ): Call {
-    /*val newContext = newCoroutineContext(context)
+    val newContext = newCoroutineContext(context)
     val job = Job(newContext[Job])
     val coroutine = CallbackCoroutine(newContext + job, callback)
     block.startCoroutine(coroutine, coroutine)
-    return Call(job)*/
-    return Call(Job())
+    return Call(job)
 }
 
-/*private class CallbackCoroutine<T>(
+private class CallbackCoroutine<in T>(
         parentContext: CoroutineContext,
         private val callback: Callback<T>
 ) : AbstractCoroutine<T>(parentContext, true) {
-    @Suppress("UNCHECKED_CAST")
-    override fun afterCompletion(state: Any?, mode: Int) {
-        if (isCancelled) return
-        if (state is CompletedExceptionally) {
-            if (state.exception is RocketChatException) {
-                callback.onError(state.exception as RocketChatException)
-            } else {
-                callback.onError(RocketChatException(state.exception.message ?: "Unknown Error",
-                        state.exception))
-            }
-        } else
-            callback.onSuccess(state as T)
+    override fun onCompleted(value: T) {
+        callback.onSuccess(value)
     }
 
-}*/
+    override fun onCompletedExceptionally(exception: Throwable) {
+        if (exception is RocketChatException) {
+            callback.onError(exception)
+        } else {
+            callback.onError(RocketChatException(exception.message ?: "Unknown Error", exception))
+        }
+    }
+}
