@@ -6,6 +6,7 @@ import chat.rocket.common.model.RoomType
 import chat.rocket.common.model.SimpleUser
 import com.squareup.moshi.Json
 import se.ansman.kotshi.JsonDefaultValueBoolean
+import se.ansman.kotshi.JsonDefaultValueLong
 import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
@@ -23,9 +24,14 @@ data class Subscription(
         @Json(name = "default")
         @JsonDefaultValueBoolean(false)
         val isDefault: Boolean,
+        @JsonDefaultValueBoolean(false)
         val open: Boolean,
+        @JsonDefaultValueBoolean(false)
         val alert: Boolean,
+        @JsonDefaultValueLong(0)
         val unread: Long,
+        @JsonDefaultValueLong(0)
         val userMentions: Long?,
+        @JsonDefaultValueLong(0)
         val groupMentions: Long?
 ) : BaseRoom
