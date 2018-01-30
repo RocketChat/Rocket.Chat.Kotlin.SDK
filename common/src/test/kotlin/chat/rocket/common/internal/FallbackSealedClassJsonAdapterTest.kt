@@ -1,6 +1,5 @@
 package chat.rocket.common.internal
 
-import chat.rocket.common.util.ifNull
 import com.squareup.moshi.Moshi
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
@@ -59,39 +58,27 @@ class FallbackSealedClassJsonAdapterTest {
     @Test
     fun `should return Fallback(value)`() {
         val adapter = moshi.adapter<ValidFallback>(ValidFallback::class.java)
-        val value = adapter.fromJson(VALID_TEST3)
-        assert(value?.value is ValidFallbackClass.Fallback)
-        value?.value.let { type ->
-            assertThat((type as ValidFallbackClass.Fallback).field, isEqualTo("value"))
-        }.ifNull {
-            throw AssertionError("value should not be null")
-        }
+        val value = adapter.fromJson(VALID_TEST3)!!
+        assert(value.value is ValidFallbackClass.Fallback)
+        assertThat((value.value as ValidFallbackClass.Fallback).field, isEqualTo("value"))
     }
 
     @Test
     fun `should return Fallback(test)`() {
         val adapter = moshi.adapter<ValidFallback>(ValidFallback::class.java)
-        val value = adapter.fromJson(VALID_TEST4)
-        assert(value?.value is ValidFallbackClass.Fallback)
-        value?.value.let { type ->
-            assertThat((type as ValidFallbackClass.Fallback).field, isEqualTo("test"))
-        }.ifNull {
-            throw AssertionError("value should not be null")
-        }
+        val value = adapter.fromJson(VALID_TEST4)!!
+        assert(value.value is ValidFallbackClass.Fallback)
+        assertThat((value.value as ValidFallbackClass.Fallback).field, isEqualTo("test"))
+
     }
 
     @Test
     fun `should parse empty value`() {
         val adapter = moshi.adapter<ValidFallback>(ValidFallback::class.java)
-        val value = adapter.fromJson(VALID_TEST5)
-        assert(value?.value is ValidFallbackClass.Fallback)
-        value?.value.let { type ->
-            assertThat((type as ValidFallbackClass.Fallback).field, isEqualTo(""))
-        }.ifNull {
-            throw AssertionError("value should not be null")
-        }
+        val value = adapter.fromJson(VALID_TEST5)!!
+        assert(value.value is ValidFallbackClass.Fallback)
+        assertThat((value.value as ValidFallbackClass.Fallback).field, isEqualTo(""))
     }
-
 }
 
 @FallbackSealedClass(name = "Fallback", fieldName = "field")
