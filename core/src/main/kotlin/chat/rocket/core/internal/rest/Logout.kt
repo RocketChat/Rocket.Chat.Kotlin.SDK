@@ -10,7 +10,7 @@ import kotlinx.coroutines.experimental.withContext
 /**
  * Logout user from the current logged-in server.
  */
-suspend fun RocketChatClient.logout(): Any = withContext(CommonPool) {
+suspend fun RocketChatClient.logout() = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl, "logout").build()
     val request = requestBuilder(httpUrl).get().build()
 
