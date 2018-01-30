@@ -45,9 +45,9 @@ class RoomListAdapterTest {
         val rooms = adapter.fromJson(ROOMS_TEST1)!!
         assertThat(rooms.size, isEqualTo(4))
         assertThat(rooms[0].id, isEqualTo("GENERAL"))
-        assert(rooms[0].type is RoomType.Public)
+        assert(rooms[0].type is RoomType.Channel)
         assertThat(rooms[1].id, isEqualTo("GENERAL2"))
-        assert(rooms[1].type is RoomType.Private)
+        assert(rooms[1].type is RoomType.PrivateGroup)
         assertThat(rooms[2].id, isEqualTo("GENERAL3"))
         assert(rooms[2].type is RoomType.Livechat)
         assertThat(rooms[3].id, isEqualTo("GENERAL4"))
