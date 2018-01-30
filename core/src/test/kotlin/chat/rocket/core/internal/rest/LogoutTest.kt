@@ -48,7 +48,7 @@ class LogoutTest {
     }
 
     @Test
-    fun `logout() should succeed`() {
+    fun `logout() should succeed without throwing`() {
         mockServer.expect()
                 .get()
                 .withPath("/api/v1/logout")
@@ -56,8 +56,7 @@ class LogoutTest {
                 .once()
 
         runBlocking {
-            val any = sut.logout()
-            assertThat(any, isEqualTo(instanceOf(Any::class.java)))
+            sut.logout()
         }
     }
 
