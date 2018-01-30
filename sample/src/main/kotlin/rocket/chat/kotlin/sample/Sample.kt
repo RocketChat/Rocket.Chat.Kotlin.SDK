@@ -170,7 +170,7 @@ fun getMeInfoByRx(client: RocketChatClient) {
 }
 
 suspend fun pinMessage(client: RocketChatClient) {
-        val result = client.getRoomFavoriteMessages("GENERAL", RoomType.PUBLIC, 0)
+        val result = client.getRoomFavoriteMessages("GENERAL", RoomType.CHANNEL, 0)
         println("favoriteMessages: $result")
 }
 
