@@ -2,6 +2,7 @@ package rocket.chat.kotlin.sample
 
 import chat.rocket.common.RocketChatException
 import chat.rocket.common.model.BaseRoom
+import chat.rocket.common.model.RoomType
 import chat.rocket.common.model.ServerInfo
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
@@ -25,6 +26,7 @@ import chat.rocket.core.rxjava.me
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
@@ -81,7 +83,9 @@ fun main(args: Array<String>) {
         logger.debug("Login: ${token.userId} - ${token.authToken}")
 
         launch {
-            for (status in client.statusChannel) {
+            val statusChannel = Channel<State>()
+            client.addStateChannel(statusChannel)
+            for (status in statusChannel) {
                 logger.debug("Changing status to: $status")
                 when (status) {
                     State.Authenticating -> logger.debug("Authenticating")
@@ -166,7 +170,7 @@ fun getMeInfoByRx(client: RocketChatClient) {
 }
 
 suspend fun pinMessage(client: RocketChatClient) {
-        val result = client.getRoomFavoriteMessages("GENERAL", BaseRoom.RoomType.PUBLIC, 0)
+        val result = client.getRoomFavoriteMessages("GENERAL", RoomType.CHANNEL, 0)
         println("favoriteMessages: $result")
 }
 

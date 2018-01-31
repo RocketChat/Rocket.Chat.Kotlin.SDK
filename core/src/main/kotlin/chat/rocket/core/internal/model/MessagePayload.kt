@@ -1,6 +1,6 @@
 package chat.rocket.core.internal.model
 
-import chat.rocket.core.model.Attachment
+import chat.rocket.core.model.attachment.Attachment
 import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable

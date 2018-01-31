@@ -8,7 +8,7 @@ import chat.rocket.common.RocketChatNetworkErrorException
 import chat.rocket.common.RocketChatTwoFactorException
 import chat.rocket.common.internal.AuthenticationErrorMessage
 import chat.rocket.common.internal.ErrorMessage
-import chat.rocket.common.model.BaseRoom
+import chat.rocket.common.model.RoomType
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.Logger
 import chat.rocket.common.util.ifNull
@@ -28,11 +28,13 @@ import okhttp3.Response
 import java.io.IOException
 import java.lang.reflect.Type
 
-internal fun getRestApiMethodNameByRoomType(roomType: BaseRoom.RoomType, method: String): String {
+internal fun getRestApiMethodNameByRoomType(roomType: RoomType, method: String): String {
     return when (roomType) {
-        BaseRoom.RoomType.PUBLIC -> "channels." + method
-        BaseRoom.RoomType.PRIVATE -> "groups." + method
-        else -> "dm." + method
+        is RoomType.Channel -> "channels.$method"
+        is RoomType.PrivateGroup -> "groups.$method"
+        is RoomType.DirectMessage -> "dm.$method"
+        // TODO - handle custom rooms
+        else -> "channels." + method
     }
 }
 

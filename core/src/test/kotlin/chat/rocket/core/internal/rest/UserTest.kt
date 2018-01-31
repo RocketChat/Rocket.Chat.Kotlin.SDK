@@ -4,6 +4,7 @@ import chat.rocket.common.RocketChatApiException
 import chat.rocket.common.RocketChatAuthException
 import chat.rocket.common.model.BaseUser
 import chat.rocket.common.model.Token
+import chat.rocket.common.model.UserStatus
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
@@ -65,8 +66,8 @@ class UserTest {
             assertThat(user.username, isEqualTo("testuser"))
             assertThat(user.name, isEqualTo("testuser"))
             assertThat(user.active, isEqualTo(true))
-            assertThat(user.status, isEqualTo(BaseUser.Status.OFFLINE))
-            assertThat(user.statusConnection, isEqualTo(BaseUser.Status.OFFLINE))
+            assert(user.status is UserStatus.Offline)
+            assert(user.statusConnection is UserStatus.Offline)
             assertThat(user.utcOffset, isEqualTo((-3).toFloat()))
             assertThat(user.emails?.size, isEqualTo(1))
             val email = user.emails!![0]

@@ -2,6 +2,7 @@ package chat.rocket.core.internal.rest
 
 import chat.rocket.common.RocketChatException
 import chat.rocket.common.model.BaseResult
+import chat.rocket.common.model.RoomType
 import chat.rocket.common.model.User
 import chat.rocket.common.util.CalendarISO8601Converter
 import chat.rocket.core.RocketChatClient
@@ -126,21 +127,29 @@ suspend fun RocketChatClient.setAvatar(avatarUrl: String): Boolean {
     return handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
 
-suspend fun RocketChatClient.chatRooms(timestamp: Long = 0): RestMultiResult<List<ChatRoom>> {
+/**
+ * Return the users ChatRooms (Room + Subscription)
+ *
+ * @param timestamp Timestamp of the last call to get only updates and removes, defaults to 0 which loads all rooms
+ * @param filterCustom Filter custom rooms from the response, default true
+ */
+suspend fun RocketChatClient.chatRooms(timestamp: Long = 0, filterCustom: Boolean = true): RestMultiResult<List<ChatRoom>> {
     val rooms = async { listRooms(timestamp) }
     val subscriptions = async { listSubscriptions(timestamp) }
 
-    return combine(rooms.await(), subscriptions.await())
+    return combine(rooms.await(), subscriptions.await(), filterCustom)
 }
 
-internal fun RocketChatClient.combine(rooms: RestMultiResult<List<Room>>, subscriptions: RestMultiResult<List<Subscription>>): RestMultiResult<List<ChatRoom>> {
-    val update = combine(rooms.update, subscriptions.update)
-    val remove = combine(rooms.remove, subscriptions.remove)
+internal fun RocketChatClient.combine(rooms: RestMultiResult<List<Room>>,
+                                      subscriptions: RestMultiResult<List<Subscription>>,
+                                      filterCustom: Boolean): RestMultiResult<List<ChatRoom>> {
+    val update = combine(rooms.update, subscriptions.update, filterCustom)
+    val remove = combine(rooms.remove, subscriptions.remove, filterCustom)
 
     return RestMultiResult.create(update, remove)
 }
 
-internal fun RocketChatClient.combine(rooms: List<Room>, subscriptions: List<Subscription>): List<ChatRoom> {
+internal fun RocketChatClient.combine(rooms: List<Room>, subscriptions: List<Subscription>, filterCustom: Boolean): List<ChatRoom> {
     val map = HashMap<String, Room>()
     rooms.forEach {
         map[it.id] = it
@@ -159,7 +168,7 @@ internal fun RocketChatClient.combine(rooms: List<Room>, subscriptions: List<Sub
         }
     }
 
-    return chatRooms
+    return chatRooms.filterNot { chatRoom -> filterCustom && chatRoom.type is RoomType.Custom }
 }
 
 internal suspend fun RocketChatClient.listSubscriptions(timestamp: Long = 0): RestMultiResult<List<Subscription>> {
