@@ -1,4 +1,4 @@
-package chat.rocket.core.model
+package chat.rocket.core.model.url
 
 import se.ansman.kotshi.JsonSerializable
 

@@ -15,6 +15,7 @@ import chat.rocket.core.internal.realtime.State
 import chat.rocket.core.internal.realtime.StreamMessage
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.Room
+import chat.rocket.core.model.url.MetaJsonAdapter
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.launch
@@ -35,6 +36,7 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
             .add(SettingsAdapter())
             .add(AttachmentAdapterFactory(logger))
             .add(RoomListAdapterFactory(logger))
+            .add(MetaJsonAdapter.ADAPTER_FACTORY)
             .add(java.lang.Long::class.java, ISO8601Date::class.java, TimestampAdapter(CalendarISO8601Converter()))
             .add(Long::class.java, ISO8601Date::class.java, TimestampAdapter(CalendarISO8601Converter()))
             // XXX - MAKE SURE TO KEEP CommonJsonAdapterFactory and CoreJsonAdapterFactory as the latest Adapters...
