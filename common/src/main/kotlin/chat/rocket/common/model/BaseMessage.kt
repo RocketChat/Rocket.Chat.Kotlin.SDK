@@ -5,7 +5,7 @@ interface BaseMessage {
     val message: String
     val timestamp: Long
     val sender: SimpleUser?
-    val updatedAt: Long
+    val updatedAt: Long?
     val editedAt: Long?
     val editedBy: SimpleUser?
     val senderAlias: String?

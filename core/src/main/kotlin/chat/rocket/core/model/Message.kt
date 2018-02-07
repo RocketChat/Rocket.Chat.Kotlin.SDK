@@ -18,7 +18,7 @@ data class Message(
         @Json(name = "msg") override val message: String,
         @Json(name = "ts") @ISO8601Date override val timestamp: Long,
         @Json(name = "u") override val sender: SimpleUser?,
-        @Json(name = "_updatedAt") @ISO8601Date override val updatedAt: Long,
+        @Json(name = "_updatedAt") @ISO8601Date override val updatedAt: Long?,
         @ISO8601Date override val editedAt: Long?,
         override val editedBy: SimpleUser?,
         @Json(name = "alias") override val senderAlias: String?,
@@ -31,7 +31,9 @@ data class Message(
         val urls: List<Url>?,
         override val mentions: List<SimpleUser>?,
         override val channels: List<SimpleRoom>?,
-        val attachments: List<Attachment>?
+        val attachments: List<Attachment>?,
+        @JsonDefaultValueBoolean(false)
+        val pinned: Boolean
 ) : BaseMessage
 
 @FallbackSealedClass(name = "Unspecified", fieldName = "rawType")
@@ -43,5 +45,6 @@ sealed class MessageType {
         @Json(name = "ul") class UserLeft : MessageType()
         @Json(name = "wm") class Welcome : MessageType()
         @Json(name = "rm") class MessageRemoved : MessageType()
+        @Json(name = "message_pinned") class MessagePinned : MessageType()
         class Unspecified(val rawType: String) : MessageType()
 }
