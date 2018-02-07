@@ -1,6 +1,5 @@
 package chat.rocket.core.internal.rest
 
-import chat.rocket.common.model.BaseRoom
 import chat.rocket.common.model.RoomType
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
@@ -49,6 +48,18 @@ suspend fun RocketChatClient.pinMessage(messageId: String): Message = withContex
             Message::class.java)
 
     return@withContext handleRestCall<RestResult<Message>>(request, type).result()
+}
+
+suspend fun RocketChatClient.unpinMessage(messageId: String) {
+    withContext(CommonPool) {
+        val body = FormBody.Builder().add("messageId", messageId).build()
+
+        val httpUrl = requestUrl(restUrl, "chat.unPinMessage").build()
+
+        val request = requestBuilder(httpUrl).post(body).build()
+
+        handleRestCall<Any>(request, Any::class.java)
+    }
 }
 
 suspend fun RocketChatClient.getRoomFavoriteMessages(roomId: String,
@@ -171,13 +182,13 @@ internal suspend fun RocketChatClient.history(roomId: String,
     val httpUrl = requestUrl(restUrl,
             getRestApiMethodNameByRoomType(roomType, "history"))
             .addQueryParameter("roomId", roomId).apply {
-                oldest?.let {
-                    addQueryParameter("oldest", it)
-                }
-                latest?.let {
-                    addQueryParameter("latest", it)
-                }
-                addQueryParameter("count", count.toString())
+        oldest?.let {
+            addQueryParameter("oldest", it)
+        }
+        latest?.let {
+            addQueryParameter("latest", it)
+        }
+        addQueryParameter("count", count.toString())
     }.build()
 
     val request = requestBuilder(httpUrl).get().build()
