@@ -179,16 +179,15 @@ internal suspend fun RocketChatClient.history(roomId: String,
                                               count: Long,
                                               oldest: String?,
                                               latest: String?): PagedResult<List<Message>> = withContext(CommonPool) {
-    val httpUrl = requestUrl(restUrl,
-            getRestApiMethodNameByRoomType(roomType, "history"))
-            .addQueryParameter("roomId", roomId).apply {
+    val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "history")).apply {
+        addQueryParameter("roomId", roomId)
+        addQueryParameter("count", count.toString())
         oldest?.let {
             addQueryParameter("oldest", it)
         }
         latest?.let {
             addQueryParameter("latest", it)
         }
-        addQueryParameter("count", count.toString())
     }.build()
 
     val request = requestBuilder(httpUrl).get().build()
