@@ -143,27 +143,28 @@ suspend fun RocketChatClient.sendMessage(roomId: String,
  * @param mimeType The MIME type of the file.
  * @param msg The message to send with the file.
  * @param description The file description.
- * @return True if the file was uploaded, false otherwise.
  */
 suspend fun RocketChatClient.uploadFile(roomId: String,
                                         file: File,
                                         mimeType: String,
                                         msg: String,
-                                        description: String): Boolean = withContext(CommonPool) {
-    val body = MultipartBody.Builder()
-            .setType(MultipartBody.FORM)
-            .addFormDataPart("file", file.name,
-                    RequestBody.create(MediaType.parse(mimeType), file))
-            .addFormDataPart("msg", msg)
-            .addFormDataPart("description", description)
-            .build()
+                                        description: String) {
+    withContext(CommonPool) {
+        val body = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("file", file.name,
+                        RequestBody.create(MediaType.parse(mimeType), file))
+                .addFormDataPart("msg", msg)
+                .addFormDataPart("description", description)
+                .build()
 
-    val httpUrl = requestUrl(restUrl, "rooms.upload")
-            .addPathSegment(roomId)
-            .build()
-    val request = requestBuilder(httpUrl).post(body).build()
+        val httpUrl = requestUrl(restUrl, "rooms.upload")
+                .addPathSegment(roomId)
+                .build()
+        val request = requestBuilder(httpUrl).post(body).build()
 
-    return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
+        handleRestCall<Any>(request, Any::class.java)
+    }
 }
 
 suspend fun RocketChatClient.messages(roomId: String,
