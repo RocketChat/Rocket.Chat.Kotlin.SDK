@@ -1,5 +1,6 @@
 package chat.rocket.core.internal.rest
 
+import chat.rocket.common.RocketChatException
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
@@ -109,6 +110,24 @@ class MessagesTest {
                 .post()
                 .withPath("/api/v1/rooms.upload/GENERAL")
                 .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val file = temporaryFolder.newFile("file.png")
+            sut.uploadFile(roomId="GENERAL",
+                    file = file,
+                    mimeType = "image/png",
+                    msg = "Random Message",
+                    description = "File description")
+        }
+    }
+
+    @Test(expected = RocketChatException::class)
+    fun `uploadFile() should fail with RocketChatAuthException if not logged in`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/rooms.upload/GENERAL")
+                .andReturn(401, MUST_BE_LOGGED_ERROR)
                 .once()
 
         runBlocking {
