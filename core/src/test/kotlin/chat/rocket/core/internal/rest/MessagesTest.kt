@@ -104,7 +104,7 @@ class MessagesTest {
     }
 
     @Test
-    fun `uploadFile() should succeed with valid parameters`() {
+    fun `uploadFile() should succeed without throwing`() {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/rooms.upload/GENERAL")
@@ -113,12 +113,11 @@ class MessagesTest {
 
         runBlocking {
             val file = temporaryFolder.newFile("file.png")
-            val result = sut.uploadFile(roomId="GENERAL",
+            sut.uploadFile(roomId="GENERAL",
                     file = file,
                     mimeType = "image/png",
                     msg = "Random Message",
                     description = "File description")
-            assert(result)
         }
     }
 
