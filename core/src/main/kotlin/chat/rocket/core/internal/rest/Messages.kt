@@ -141,6 +141,8 @@ suspend fun RocketChatClient.sendMessage(roomId: String,
  * @param roomId The room where to upload the file.
  * @param file The file to upload.
  * @param mimeType The MIME type of the file.
+ * @param msg The message to send with the file.
+ * @param description The file description.
  * @return True if the file was uploaded, false otherwise.
  */
 suspend fun RocketChatClient.uploadFile(roomId: String,
