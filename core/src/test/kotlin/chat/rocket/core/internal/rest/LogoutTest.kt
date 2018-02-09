@@ -65,7 +65,7 @@ class LogoutTest {
         mockServer.expect()
                 .get()
                 .withPath("/api/v1/logout")
-                .andReturn(401, LOGOUT_ERROR)
+                .andReturn(401, MUST_BE_LOGGED_ERROR)
                 .once()
 
         runBlocking {

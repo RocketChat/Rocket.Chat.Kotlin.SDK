@@ -49,7 +49,7 @@ suspend fun RocketChatClient.updateProfile(userId: String,
                                            name: String? = null,
                                            password: String? = null,
                                            username: String? = null): User {
-    val payload = UserPayload(userId, email, name, password, username,null)
+    val payload = UserPayload(userId, email, name, password, username, null)
     val adapter = moshi.adapter(UserPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)

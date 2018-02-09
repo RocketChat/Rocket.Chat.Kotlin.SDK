@@ -1,5 +1,6 @@
 package chat.rocket.core.internal.rest
 
+import chat.rocket.common.RocketChatException
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
@@ -10,7 +11,9 @@ import okhttp3.OkHttpClient
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
@@ -26,6 +29,9 @@ class MessagesTest {
     private lateinit var tokenProvider: TokenRepository
 
     private val authToken = Token("userId", "authToken")
+
+    @Rule @JvmField
+    val temporaryFolder = TemporaryFolder()
 
     @Before
     fun setup() {
@@ -95,6 +101,42 @@ class MessagesTest {
                 assertThat(updatedAt, isEqualTo(1511443964808))
                 assertThat(id, isEqualTo("messageId"))
             }
+        }
+    }
+
+    @Test
+    fun `uploadFile() should succeed without throwing`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/rooms.upload/GENERAL")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val file = temporaryFolder.newFile("file.png")
+            sut.uploadFile(roomId="GENERAL",
+                    file = file,
+                    mimeType = "image/png",
+                    msg = "Random Message",
+                    description = "File description")
+        }
+    }
+
+    @Test(expected = RocketChatException::class)
+    fun `uploadFile() should fail with RocketChatAuthException if not logged in`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/rooms.upload/GENERAL")
+                .andReturn(401, MUST_BE_LOGGED_ERROR)
+                .once()
+
+        runBlocking {
+            val file = temporaryFolder.newFile("file.png")
+            sut.uploadFile(roomId="GENERAL",
+                    file = file,
+                    mimeType = "image/png",
+                    msg = "Random Message",
+                    description = "File description")
         }
     }
 

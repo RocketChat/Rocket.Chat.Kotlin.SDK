@@ -1,5 +1,6 @@
 package chat.rocket.core.internal.rest
 
+import chat.rocket.common.model.BaseResult
 import chat.rocket.common.model.RoomType
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
@@ -13,7 +14,10 @@ import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
 import okhttp3.FormBody
+import okhttp3.MediaType
+import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import java.io.File
 
 /**
  * Updates a message.
@@ -129,6 +133,38 @@ suspend fun RocketChatClient.sendMessage(roomId: String,
 
     val type = Types.newParameterizedType(RestResult::class.java, Message::class.java)
     return@withContext handleRestCall<RestResult<Message>>(request, type).result()
+}
+
+/**
+ * Uploads a file.
+ *
+ * @param roomId The room where to upload the file.
+ * @param file The file to upload.
+ * @param mimeType The MIME type of the file.
+ * @param msg The message to send with the file.
+ * @param description The file description.
+ */
+suspend fun RocketChatClient.uploadFile(roomId: String,
+                                        file: File,
+                                        mimeType: String,
+                                        msg: String,
+                                        description: String) {
+    withContext(CommonPool) {
+        val body = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("file", file.name,
+                        RequestBody.create(MediaType.parse(mimeType), file))
+                .addFormDataPart("msg", msg)
+                .addFormDataPart("description", description)
+                .build()
+
+        val httpUrl = requestUrl(restUrl, "rooms.upload")
+                .addPathSegment(roomId)
+                .build()
+        val request = requestBuilder(httpUrl).post(body).build()
+
+        handleRestCall<Any>(request, Any::class.java)
+    }
 }
 
 suspend fun RocketChatClient.messages(roomId: String,
