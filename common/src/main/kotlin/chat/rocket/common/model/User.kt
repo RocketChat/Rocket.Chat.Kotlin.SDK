@@ -9,5 +9,6 @@ data class User(
         override val username: String?,
         override val name: String?,
         val status: UserStatus?,
-        val utcOffset: Float?
+        val utcOffset: Float?,
+        val emails: List<Email>?
 ) : BaseUser
