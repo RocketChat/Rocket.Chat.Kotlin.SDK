@@ -27,6 +27,7 @@ import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
 import java.lang.reflect.Type
+import java.util.concurrent.TimeUnit
 
 internal fun getRestApiMethodNameByRoomType(roomType: RoomType, method: String): String {
     return when (roomType) {
@@ -57,12 +58,12 @@ internal fun RocketChatClient.requestBuilder(httpUrl: HttpUrl): Request.Builder 
     return builder
 }
 
-internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type: Type): T =
+internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type: Type, largeFile: Boolean = false): T =
         suspendCancellableCoroutine { continuation ->
 
             val callback = object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    continuation.tryToResume { throw RocketChatNetworkErrorException("network error", e) }
+                    continuation.tryToResume { throw RocketChatNetworkErrorException("Network Error: ${e.message}", e) }
                 }
 
                 override fun onResponse(call: Call, response: Response) {
@@ -101,7 +102,14 @@ internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type:
                 }
             }
 
-            httpClient.newCall(request).enqueue(callback)
+            if (largeFile) {
+                httpClient.newBuilder()
+                    .writeTimeout(90, TimeUnit.SECONDS)
+                    .readTimeout(90, TimeUnit.SECONDS)
+                    .build().newCall(request).enqueue(callback)
+            } else {
+                httpClient.newCall(request).enqueue(callback)
+            }
 
             continuation.invokeOnCompletion {
                 if (continuation.isCancelled) httpClient.cancel(request.tag())
