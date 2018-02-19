@@ -19,7 +19,7 @@ data class Subscription(
         @Json(name = "fname") override val fullName: String?,
         @Json(name = "ro") override val readonly: Boolean? = false,
         @Json(name = "ts") @ISO8601Date val timestamp: Long?,
-        @Json(name = "lm") @ISO8601Date val lastModified: Long?,
+        @Json(name = "ls") @ISO8601Date val lastSeen: Long?,
         @Json(name = "_updatedAt") @ISO8601Date override val updatedAt: Long?,
         @Json(name = "default")
         @JsonDefaultValueBoolean(false)
