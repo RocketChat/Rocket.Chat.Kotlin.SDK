@@ -21,7 +21,7 @@ fun RocketChatClient.subscribeRoomMessages(roomId: String, callback: (Boolean) -
     return socket.subscribeRoomMessages(roomId, callback)
 }
 
-fun RocketChatClient.unsubscibre(subId: String) {
+fun RocketChatClient.unsubscribe(subId: String) {
     socket.unsubscribe(subId)
 }
 
