@@ -1,6 +1,5 @@
 package chat.rocket.core.internal.rest
 
-import chat.rocket.common.model.BaseResult
 import chat.rocket.common.model.RoomType
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
@@ -18,6 +17,7 @@ import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import java.io.File
+import java.io.InputStream
 
 /**
  * Updates a message.
@@ -121,7 +121,7 @@ suspend fun RocketChatClient.sendMessage(roomId: String,
                                          alias: String? = null,
                                          emoji: String? = null,
                                          avatar: String? = null,
-                                         attachments: List<Attachment>? = null): Message = withContext(CommonPool) {
+                                         attachments: List<Attachment>? = emptyList()): Message = withContext(CommonPool) {
     val payload = MessagePayload(roomId, text, alias, emoji, avatar, attachments)
     val adapter = moshi.adapter(MessagePayload::class.java)
     val payloadBody = adapter.toJson(payload)
@@ -147,8 +147,8 @@ suspend fun RocketChatClient.sendMessage(roomId: String,
 suspend fun RocketChatClient.uploadFile(roomId: String,
                                         file: File,
                                         mimeType: String,
-                                        msg: String,
-                                        description: String) {
+                                        msg: String = "",
+                                        description: String = "") {
     withContext(CommonPool) {
         val body = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
@@ -158,13 +158,36 @@ suspend fun RocketChatClient.uploadFile(roomId: String,
                 .addFormDataPart("description", description)
                 .build()
 
-        val httpUrl = requestUrl(restUrl, "rooms.upload")
-                .addPathSegment(roomId)
-                .build()
-        val request = requestBuilder(httpUrl).post(body).build()
-
-        handleRestCall<Any>(request, Any::class.java)
+        uploadFile(roomId, body)
     }
+}
+
+suspend fun RocketChatClient.uploadFile(roomId: String,
+                                        fileName: String,
+                                        mimeType: String,
+                                        msg: String = "",
+                                        description: String = "",
+                                        inputStreamProvider: () -> InputStream?) {
+    withContext(CommonPool) {
+        val body = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("file", fileName,
+                        InputStreamRequestBody(MediaType.parse(mimeType), inputStreamProvider))
+                .addFormDataPart("msg", msg)
+                .addFormDataPart("description", description)
+                .build()
+
+        uploadFile(roomId, body)
+    }
+}
+
+private suspend fun RocketChatClient.uploadFile(roomId: String, body: RequestBody) {
+    val httpUrl = requestUrl(restUrl, "rooms.upload")
+            .addPathSegment(roomId)
+            .build()
+    val request = requestBuilder(httpUrl).post(body).build()
+
+    handleRestCall<Any>(request, Any::class.java, largeFile = true)
 }
 
 suspend fun RocketChatClient.messages(roomId: String,
