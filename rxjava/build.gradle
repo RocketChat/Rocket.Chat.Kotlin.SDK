@@ -8,12 +8,12 @@ apply plugin: 'java'
 apply plugin: 'org.jetbrains.dokka'
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:${versions.kotlin}"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}"
 
     compile 'io.reactivex.rxjava2:rxjava:2.1.6'
     compile 'io.reactivex.rxjava2:rxkotlin:2.1.0'
-    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.19.3'
-    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-rx2:0.19.3'
+    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutine}"
+    compile "org.jetbrains.kotlinx:kotlinx-coroutines-rx2:${versions.coroutine}"
 
     compile project (':core')
 
