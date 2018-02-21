@@ -173,9 +173,12 @@ class Socket(internal val client: RocketChatClient,
             MessageType.READY -> {
                 processSubscriptionResult(text)
             }
+            MessageType.ERROR -> {
+                logger.info { "Error : ${message.errorReason}" }
+            }
             else -> {
                 logger.debug {
-                    "Ingnoring message type: ${message.type}"
+                    "Ignoring message type: ${message.type}"
                 }
             }
         }

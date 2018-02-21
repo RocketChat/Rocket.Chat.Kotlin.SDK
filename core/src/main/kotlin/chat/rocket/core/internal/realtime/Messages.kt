@@ -52,4 +52,12 @@ internal fun unsubscribeMessage(id: String): String {
     return "{\"msg\":\"unsub\", \"id\":\"$id\"}"
 }
 
+internal fun defaultStatusMessage(id: String, status: UserStatus): String {
+    return newMessage("UserPresence:setDefaultStatus", id, "\"${status.value}\"")
+}
+
+internal fun connectionStatusMessage(id: String, status: UserStatus): String {
+    return newMessage("UserPresence:${status.value}", id, "")
+}
+
 internal const val CONNECT_MESSAGE = "{\"msg\":\"connect\",\"version\":\"1\",\"support\":[\"1\",\"pre2\",\"pre1\"]}"
