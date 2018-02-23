@@ -11,7 +11,7 @@ import okhttp3.RequestBody
  *
  * @param roomId The room to mark as read.
  */
-suspend fun RocketChatClient.read(roomId: String) {
+suspend fun RocketChatClient.markAsRead(roomId: String) {
     withContext(CommonPool) {
         val payload = ChatRoomPayload(roomId)
         val adapter = moshi.adapter(ChatRoomPayload::class.java)

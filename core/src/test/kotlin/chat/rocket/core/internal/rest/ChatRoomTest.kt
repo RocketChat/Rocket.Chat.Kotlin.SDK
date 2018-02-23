@@ -43,7 +43,7 @@ class ChatRoomTest {
     }
 
     @Test
-    fun `read() should succeed without throwing`() {
+    fun `markAsRead() should succeed without throwing`() {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/subscriptions.read")
@@ -51,12 +51,12 @@ class ChatRoomTest {
                 .once()
 
         runBlocking {
-            sut.read(roomId="GENERAL")
+            sut.markAsRead(roomId="GENERAL")
         }
     }
 
     @Test(expected = RocketChatException::class)
-    fun `read() should fail with RocketChatAuthException if not logged in`() {
+    fun `markAsRead() should fail with RocketChatAuthException if not logged in`() {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/subscriptions.read")
@@ -64,7 +64,7 @@ class ChatRoomTest {
                 .once()
 
         runBlocking {
-            sut.read(roomId="GENERAL")
+            sut.markAsRead(roomId="GENERAL")
         }
     }
 }
