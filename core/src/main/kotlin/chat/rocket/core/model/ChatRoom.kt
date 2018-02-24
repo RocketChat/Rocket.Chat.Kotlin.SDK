@@ -55,6 +55,9 @@ data class ChatRoom(override val id: String,
                             client = client)
         }
     }
+
+    val lastModified: Long?
+        get() = lastSeen
 }
 
 suspend fun ChatRoom.messages(offset: Long = 0,
