@@ -212,7 +212,7 @@ class LoginTest {
     }
 
     @Test
-    fun `signup() should succeed with valid parameters`() {
+    fun `signUp() should succeed with valid parameters`() {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/users.register")
@@ -226,7 +226,7 @@ class LoginTest {
     }
 
     @Test
-    fun `signup() should fail with RocketChatApiException if email is already in use`() {
+    fun `signUp() should fail with RocketChatApiException if email is already in use`() {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/users.register")
@@ -248,7 +248,7 @@ class LoginTest {
     }
 
     @Test
-    fun `signup() should fail with RocketChatApiException if username is already in use`() {
+    fun `signUp() should fail with RocketChatApiException if username is already in use`() {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/users.register")
