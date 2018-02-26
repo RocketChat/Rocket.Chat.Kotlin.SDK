@@ -1,7 +1,12 @@
 package chat.rocket.core.internal.rest
 
+import chat.rocket.common.model.RoomType
+import chat.rocket.common.model.User
 import chat.rocket.core.RocketChatClient
+import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.model.ChatRoomPayload
+import chat.rocket.core.model.PagedResult
+import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
 import okhttp3.RequestBody
@@ -9,7 +14,7 @@ import okhttp3.RequestBody
 /**
  * Marks a room as read.
  *
- * @param roomId The room to mark as read.
+ * @param roomId The ID of the room.
  */
 suspend fun RocketChatClient.markAsRead(roomId: String) {
     withContext(CommonPool) {
@@ -24,4 +29,26 @@ suspend fun RocketChatClient.markAsRead(roomId: String) {
 
         handleRestCall<Any>(request, Any::class.java)
     }
+}
+
+/**
+ * Returns the list of members of a ChatRoom.
+ *
+ * @param roomId The ID of the room.
+ * @param roomType The type of the room.
+ * @param offset The offset to paging which specifies the first entry to return from a collection.
+ */
+suspend fun RocketChatClient.getMembers(roomId: String,  roomType: RoomType, offset: Int): PagedResult<List<User>> = withContext(CommonPool) {
+    val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "members"))
+            .addQueryParameter("roomId", roomId)
+            .addQueryParameter("offset", offset.toString())
+            .build()
+
+    val request = requestBuilder(httpUrl).get().build()
+
+    val type = Types.newParameterizedType(RestResult::class.java,
+            Types.newParameterizedType(List::class.java, User::class.java))
+    val result = handleRestCall<RestResult<List<User>>>(request, type)
+
+    return@withContext PagedResult<List<User>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
 }
