@@ -121,7 +121,7 @@ suspend fun RocketChatClient.sendMessage(roomId: String,
                                          alias: String? = null,
                                          emoji: String? = null,
                                          avatar: String? = null,
-                                         attachments: List<Attachment>? = emptyList()): Message = withContext(CommonPool) {
+                                         attachments: List<Attachment>? = null): Message = withContext(CommonPool) {
     val payload = MessagePayload(roomId, text, alias, emoji, avatar, attachments)
     val adapter = moshi.adapter(MessagePayload::class.java)
     val payloadBody = adapter.toJson(payload)
