@@ -37,8 +37,9 @@ suspend fun RocketChatClient.markAsRead(roomId: String) {
  * @param roomId The ID of the room.
  * @param roomType The type of the room.
  * @param offset The offset to paging which specifies the first entry to return from a collection.
+ * @param count The amount of item to return from a collection.
  */
-suspend fun RocketChatClient.getMembers(roomId: String,  roomType: RoomType, offset: Int): PagedResult<List<User>> = withContext(CommonPool) {
+suspend fun RocketChatClient.getMembers(roomId: String,  roomType: RoomType, offset: Long, count: Long): PagedResult<List<User>> = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "members"))
             .addQueryParameter("roomId", roomId)
             .addQueryParameter("offset", offset.toString())
