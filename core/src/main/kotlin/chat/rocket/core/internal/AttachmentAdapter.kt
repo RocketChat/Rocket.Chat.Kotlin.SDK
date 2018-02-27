@@ -44,7 +44,8 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
             "attachments",          // 19
             "ts",                   // 20
             "author_icon",          // 21
-            "author_link"           // 22
+            "author_link",          // 22
+            "image_preview"         // 23
     )
 
     private val OPTIONS = JsonReader.Options.of(*NAMES)
@@ -77,6 +78,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
         var timestamp: Long? = null               // 20
         var authorIcon: String? = null            // 21
         var authorLink: String? = null            // 22
+        var imagePreview: String? = null          // 23
 
         reader.beginObject()
         while (reader.hasNext()) {
@@ -104,6 +106,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 20 -> timestamp = tsAdapter.fromJson(reader)
                 21 -> authorIcon = reader.nextStringOrNull()
                 22 -> authorLink = reader.nextStringOrNull()
+                23 -> imagePreview = reader.nextStringOrNull()
                 else -> {
                     logger.debug {
                         "Unknown/unmaped field at ${reader.nextName()}"
@@ -119,7 +122,11 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 imageUrl != null -> {
                     checkNonNull(imageType, "ïmageType")
                     checkNonNull(imageSize, "imageSize")
-                    return ImageAttachment(title, description, titleLink, titleLinkDownload, imageUrl, imageType!!, imageSize!!)
+                    var preview: String? = null
+                    imagePreview?.let {
+                        preview = "data:${imageType!!};base64,$it"
+                    }
+                    return ImageAttachment(title, description, titleLink, titleLinkDownload, imageUrl, imageType!!, imageSize!!, preview)
                 }
                 videoUrl != null -> {
                     checkNonNull(videoType, "videoType")

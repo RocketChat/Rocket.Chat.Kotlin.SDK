@@ -34,6 +34,7 @@ class MetaJsonAdapter(moshi: Moshi) : JsonAdapter<Meta>() {
         rawMeta["title"]?.let { return it }
         rawMeta["pageTitle"]?.let { return it }
         rawMeta["sailthruTitle"]?.let { return it }
+        rawMeta["oembedTitle"]?.let { return it }
         return null
     }
 
@@ -49,6 +50,7 @@ class MetaJsonAdapter(moshi: Moshi) : JsonAdapter<Meta>() {
         rawMeta["ogImage"]?.let { return it }
         rawMeta["twitterImageSrc"]?.let { return it }
         rawMeta["msapplicationTileImage"]?.let { return it }
+        rawMeta["oembedThumbnailUrl"]?.let { return it }
         return null
     }
 
