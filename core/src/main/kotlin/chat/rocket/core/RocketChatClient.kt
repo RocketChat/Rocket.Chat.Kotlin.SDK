@@ -65,7 +65,8 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
         launch {
             for (status in statusChannel) {
                 for (channel in statusChannelList) {
-                    channel.offer(status)
+                    logger.debug { "SDK: sending status $status to $channel: ${channel.isClosedForSend} ${channel.isFull}" }
+                    channel.send(status)
                 }
             }
         }
