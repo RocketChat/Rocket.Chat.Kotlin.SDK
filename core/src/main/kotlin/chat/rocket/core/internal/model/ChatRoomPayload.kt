@@ -4,4 +4,4 @@ import com.squareup.moshi.Json
 import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
-class ChatRoomPayload(@Json(name = "rid") val roomId: String)
+data class ChatRoomPayload(@Json(name = "rid") val roomId: String)

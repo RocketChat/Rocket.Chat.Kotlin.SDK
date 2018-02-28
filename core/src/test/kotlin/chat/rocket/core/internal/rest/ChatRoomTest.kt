@@ -73,7 +73,7 @@ class ChatRoomTest {
     fun `getMembers() should succeed without throwing`() {
         mockServer.expect()
                 .get()
-                .withPath("/api/v1/channels.members?roomId=GENERAL&offset=0")
+                .withPath("/api/v1/channels.members?roomId=GENERAL&offset=0&count=1")
                 .andReturn(200, MEMBERS_OK)
                 .once()
 

@@ -43,6 +43,7 @@ suspend fun RocketChatClient.getMembers(roomId: String,  roomType: RoomType, off
     val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "members"))
             .addQueryParameter("roomId", roomId)
             .addQueryParameter("offset", offset.toString())
+            .addQueryParameter("count", count.toString())
             .build()
 
     val request = requestBuilder(httpUrl).get().build()
