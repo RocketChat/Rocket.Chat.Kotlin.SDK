@@ -13,7 +13,7 @@ internal fun Socket.processLoginResult(text: String) {
         logger.debug {
             "Logged in: $token"
         }
-        setState(State.Connected)
+        setState(State.Connected())
     } catch (ex: Exception) {
         ex.printStackTrace()
     }
