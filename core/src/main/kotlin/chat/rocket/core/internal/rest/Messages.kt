@@ -233,11 +233,11 @@ suspend fun RocketChatClient.deleteMessage(roomId: String,
 }
 
 
-internal suspend fun RocketChatClient.history(roomId: String,
-                                              roomType: RoomType,
-                                              count: Long,
-                                              oldest: String?,
-                                              latest: String?): PagedResult<List<Message>> = withContext(CommonPool) {
+suspend fun RocketChatClient.history(roomId: String,
+                                     roomType: RoomType,
+                                     count: Long = 50,
+                                     oldest: String? = null,
+                                     latest: String? = null): PagedResult<List<Message>> = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "history")).apply {
         addQueryParameter("roomId", roomId)
         addQueryParameter("count", count.toString())

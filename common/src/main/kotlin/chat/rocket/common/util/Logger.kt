@@ -5,14 +5,14 @@ class Logger(val platformLogger: PlatformLogger) {
     val enabled: Boolean = true
 
     fun debug(msg: () -> Any?) {
-        if (enabled) platformLogger.debug(msg.toStringSafe())
+        if (enabled) platformLogger.debug("SDK: ${msg.toStringSafe()}")
     }
 
     fun info(msg: () -> Any?) {
-        if (enabled) platformLogger.info(msg.toStringSafe())
+        if (enabled) platformLogger.info("SDK: ${msg.toStringSafe()}")
     }
 
     fun warn(msg: () -> Any?) {
-        if (enabled) platformLogger.warn(msg.toStringSafe())
+        if (enabled) platformLogger.warn("SDK: ${msg.toStringSafe()}")
     }
 }
