@@ -133,7 +133,86 @@ class LoginTest {
     }
 
     @Test
-    fun `signup() should succeed with valid parameters`() {
+    fun `loginWithEmail() should succeed with right credentials`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/login")
+                .andReturn(200, LOGIN_SUCCESS)
+                .once()
+
+        runBlocking {
+            val token = sut.loginWithEmail("test@email.com", "password")
+            assertThat(token, isEqualTo(authToken))
+            assertThat(token.userId, isEqualTo("userId"))
+            assertThat(token.authToken, isEqualTo("authToken"))
+
+            verify(tokenProvider).save(check {
+                assertThat(it.userId, isEqualTo("userId"))
+                assertThat(it.authToken, isEqualTo("authToken"))
+            })
+        }
+    }
+
+    @Test
+    fun `loginWithEmail() should fail with RocketChatAuthException on wrong credentials`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/login")
+                .andReturn(401, LOGIN_ERROR)
+                .once()
+
+        runBlocking {
+            try {
+                sut.loginWithEmail("wrongemail@gmail.com", "wrongpass")
+
+                throw RuntimeException("unreachable code")
+            } catch (ex: Exception) {
+                assertThat(ex, isEqualTo(instanceOf(RocketChatAuthException::class.java)))
+                assertThat(ex.message, isEqualTo("Unauthorized"))
+            }
+            verify(tokenProvider, never()).save(check { })
+        }
+    }
+
+    @Test
+    fun `loginWithEmail() should fail with RocketChatInvalidResponseException on invalid response`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/login")
+                .andReturn(200, "NOT A JSON")
+                .once()
+
+        runBlocking {
+            try {
+                sut.loginWithEmail("user@email.com", "password")
+
+                throw RuntimeException("unreachable code")
+            } catch (ex: Exception) {
+                assertThat(ex, isEqualTo(instanceOf(RocketChatInvalidResponseException::class.java)))
+                assertThat(ex.message, isEqualTo("Use JsonReader.setLenient(true) to accept malformed JSON at path $"))
+                assertThat(ex.cause, isEqualTo(instanceOf(JsonEncodingException::class.java)))
+            }
+
+            verify(tokenProvider, never()).save(check { })
+        }
+    }
+
+    @Test
+    fun `loginWithEmail() should fail with RocketChatApiException when response is not 200 OK`() {
+        runBlocking {
+            try {
+                sut.loginWithEmail("user@email.com", "password")
+
+                throw RuntimeException("unreachable code")
+            } catch (ex: Exception) {
+                assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
+            }
+            verify(tokenProvider, never()).save(check { })
+        }
+    }
+
+    @Test
+    fun `signUp() should succeed with valid parameters`() {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/users.register")
@@ -147,7 +226,7 @@ class LoginTest {
     }
 
     @Test
-    fun `signup() should fail with RocketChatApiException if email is already in use`() {
+    fun `signUp() should fail with RocketChatApiException if email is already in use`() {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/users.register")
@@ -169,7 +248,7 @@ class LoginTest {
     }
 
     @Test
-    fun `signup() should fail with RocketChatApiException if username is already in use`() {
+    fun `signUp() should fail with RocketChatApiException if username is already in use`() {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/users.register")

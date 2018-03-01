@@ -5,7 +5,8 @@ import chat.rocket.common.model.Token
 import chat.rocket.common.model.User
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
-import chat.rocket.core.internal.model.LoginPayload
+import chat.rocket.core.internal.model.UsernameLoginPayload
+import chat.rocket.core.internal.model.EmailLoginPayload
 import chat.rocket.core.internal.model.UserPayload
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
@@ -17,20 +18,53 @@ import okhttp3.RequestBody
  * Login with username and password. On success this will also call [chat.rocket.core.TokenRepository].save(token)
  *
  * @param username Username
- * @param password Password
- * @param success ([Token]) lambda receiving the Authentication Token
- * @param error ([RocketChatException]) lambda indicating errors
+ * @param password Password of the user
+ *
+ * [Token] -> lambda receiving the Authentication Token
+ * [RocketChatException] -> lambda indicating errors
  * @see Token
  * @see chat.rocket.core.TokenRepository
  *
  * @sample
  */
 suspend fun RocketChatClient.login(username: String, password: String, pin: String? = null): Token = withContext(CommonPool) {
-    val payload = LoginPayload(username, password, pin)
-    val adapter = moshi.adapter(LoginPayload::class.java)
+    val payload = UsernameLoginPayload(username, password, pin)
+    val adapter = moshi.adapter(UsernameLoginPayload::class.java)
 
-    val paylodBody = adapter.toJson(payload)
-    val body = RequestBody.create(MEDIA_TYPE_JSON, paylodBody)
+    val payloadBody = adapter.toJson(payload)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val url = requestUrl(restUrl, "login").build()
+
+    val request = Request.Builder().url(url).post(body).build()
+
+    val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
+    val result = handleRestCall<RestResult<Token>>(request, type).result()
+
+    tokenRepository.save(result)
+
+    result
+}
+
+/**
+ * Login with email and password. On success this will also call [chat.rocket.core.TokenRepository].save(token)
+ *
+ * @param user EmailId of the user
+ * @param password Password of the user
+ *
+ * [Token] -> lambda receiving the Authentication Token
+ * [RocketChatException] -> lambda indicating errors
+ * @see Token
+ * @see chat.rocket.core.TokenRepository
+ *
+ * @sample
+ */
+suspend fun RocketChatClient.loginWithEmail(email: String, password: String, pin: String? = null): Token = withContext(CommonPool) {
+    val payload = EmailLoginPayload(email, password, pin)
+    val adapter = moshi.adapter(EmailLoginPayload::class.java)
+
+    val payloadBody = adapter.toJson(payload)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, "login").build()
 
@@ -50,23 +84,24 @@ suspend fun RocketChatClient.login(username: String, password: String, pin: Stri
  * Note, this doesn't authenticate the user. after a successful registration you still need to
  * call [login]
  *
- * @param email Email
+ * @param email Email of the user
  * @param name Name
  * @param username Username
- * @param password Password
- * @param success ([User]) lambda indicating success
- * @param error ([RocketChatException]) lambda indicating errors
+ * @param password Password of the user
+ *
+ * [Token] -> lambda receiving the Authentication Token
+ * [RocketChatException] -> lambda indicating errors
  * @see User
  */
 suspend fun RocketChatClient.signup(email: String,
-                            name: String,
-                            username: String,
-                            password: String): User = withContext(CommonPool) {
+                                    name: String,
+                                    username: String,
+                                    password: String): User = withContext(CommonPool) {
     val payload = UserPayload(null, email, name, password, username, null)
     val adapter = moshi.adapter(UserPayload::class.java)
 
-    val paylodBody = adapter.toJson(payload)
-    val body = RequestBody.create(MEDIA_TYPE_JSON, paylodBody)
+    val payloadBody = adapter.toJson(payload)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, "users.register").build()
     val request = Request.Builder().url(url).post(body).build()
