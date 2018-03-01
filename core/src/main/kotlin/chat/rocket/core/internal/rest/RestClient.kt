@@ -72,6 +72,7 @@ internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type:
                 override fun onResponse(call: Call, response: Response) {
                     if (!response.isSuccessful) {
                         continuation.resumeWithException(processCallbackError(moshi, response, logger))
+                        return
                     }
 
                     try {
