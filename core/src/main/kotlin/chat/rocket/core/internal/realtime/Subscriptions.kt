@@ -6,18 +6,19 @@ import chat.rocket.core.internal.model.SocketMessage
 import chat.rocket.core.internal.model.Subscription
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.Room
+import kotlinx.coroutines.experimental.launch
 import org.json.JSONObject
 import java.security.InvalidParameterException
 
-fun RocketChatClient.subscribeSubscriptions(callback: (Boolean) -> Unit): String {
+fun RocketChatClient.subscribeSubscriptions(callback: (Boolean, String) -> Unit): String {
     return socket.subscribeSubscriptions(callback)
 }
 
-fun RocketChatClient.subscribeRooms(callback: (Boolean) -> Unit): String {
+fun RocketChatClient.subscribeRooms(callback: (Boolean, String) -> Unit): String {
     return socket.subscribeRooms(callback)
 }
 
-fun RocketChatClient.subscribeRoomMessages(roomId: String, callback: (Boolean) -> Unit): String {
+fun RocketChatClient.subscribeRoomMessages(roomId: String, callback: (Boolean, String) -> Unit): String {
     return socket.subscribeRoomMessages(roomId, callback)
 }
 
@@ -25,10 +26,10 @@ fun RocketChatClient.unsubscribe(subId: String) {
     socket.unsubscribe(subId)
 }
 
-internal fun Socket.subscribeSubscriptions(callback: (Boolean) -> Unit): String {
-    client.tokenRepository.get()?.let { token ->
+internal fun Socket.subscribeSubscriptions(callback: (Boolean, String) -> Unit): String {
+    client.tokenRepository.get()?.let { (userId) ->
         val id = generateId()
-        send(subscriptionsStreamMessage(id, token.userId))
+        send(subscriptionsStreamMessage(id, userId))
         subscriptionsMap[id] = callback
         return id
     }
@@ -36,10 +37,10 @@ internal fun Socket.subscribeSubscriptions(callback: (Boolean) -> Unit): String 
     throw RocketChatAuthException("Missing user id and token")
 }
 
-internal fun Socket.subscribeRooms(callback: (Boolean) -> Unit): String {
-    client.tokenRepository.get()?.let { token ->
+internal fun Socket.subscribeRooms(callback: (Boolean, String) -> Unit): String {
+    client.tokenRepository.get()?.let { (userId) ->
         val id = generateId()
-        send(roomsStreamMessage(id, token.userId))
+        send(roomsStreamMessage(id, userId))
         subscriptionsMap[id] = callback
         return id
     }
@@ -47,7 +48,7 @@ internal fun Socket.subscribeRooms(callback: (Boolean) -> Unit): String {
     throw RocketChatAuthException("Missing user id and token")
 }
 
-internal fun Socket.subscribeRoomMessages(roomId: String, callback: (Boolean) -> Unit): String {
+internal fun Socket.subscribeRoomMessages(roomId: String, callback: (Boolean, String) -> Unit): String {
     val id = generateId()
     send(streamRoomMessages(id, roomId))
     subscriptionsMap[id] = callback
@@ -85,7 +86,7 @@ internal fun Socket.processSubscriptionResult(message: String) {
 
     val callback = subscriptionsMap.remove(subId)
     callback?.let {
-        callback(true)
+        callback(true, subId)
     }
 }
 
@@ -121,7 +122,9 @@ private fun Socket.processRoomMessage(text: String) {
         val message = adapter.fromJson(data.toString())
 
         message?.let {
-            messagesChannel.offer(message)
+            launch(parent = parentJob) {
+                messagesChannel.send(message)
+            }
         }
     } catch (ex: Exception) {
         ex.printStackTrace()
@@ -133,7 +136,9 @@ private fun Socket.processRoomStream(state: String, data: JSONObject) {
     val room = adapter.fromJson(data.toString())
 
     room?.apply {
-        roomsChannel.offer(StreamMessage(getMessageType(state), room))
+        launch(parent = parentJob) {
+            roomsChannel.send(StreamMessage(getMessageType(state), room))
+        }
     }
 }
 
@@ -142,7 +147,9 @@ private fun Socket.processSubscriptionStream(state: String, data: JSONObject) {
     val subscription = adapter.fromJson(data.toString())
 
     subscription?.apply {
-        subscriptionsChannel.offer(StreamMessage(getMessageType(state), subscription))
+        launch(parent = parentJob) {
+            subscriptionsChannel.send(StreamMessage(getMessageType(state), subscription))
+        }
     }
 }
 

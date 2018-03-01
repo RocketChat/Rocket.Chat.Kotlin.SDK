@@ -88,11 +88,11 @@ fun main(args: Array<String>) {
             for (status in statusChannel) {
                 logger.debug("Changing status to: $status")
                 when (status) {
-                    State.Authenticating -> logger.debug("Authenticating")
-                    State.Connected -> {
+                    is State.Authenticating -> logger.debug("Authenticating")
+                    is State.Connected -> {
                         logger.debug("Connected")
-                        client.subscribeSubscriptions { }
-                        client.subscribeRooms { }
+                        client.subscribeSubscriptions { _, _ -> }
+                        client.subscribeRooms { _, _ -> }
                     }
                 }
             }

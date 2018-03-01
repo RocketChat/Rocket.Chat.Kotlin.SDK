@@ -71,6 +71,6 @@ suspend fun ChatRoom.history(count: Long = 50,
     return@withContext client.history(id, type, count, oldest, latest)
 }
 
-fun ChatRoom.subscribeMessages(callback: (Boolean) -> Unit): String {
+fun ChatRoom.subscribeMessages(callback: (Boolean, String) -> Unit): String {
     return client.subscribeRoomMessages(id, callback)
 }

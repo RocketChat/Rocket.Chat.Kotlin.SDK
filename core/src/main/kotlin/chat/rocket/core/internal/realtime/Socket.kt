@@ -9,6 +9,7 @@ import chat.rocket.core.model.Message
 import chat.rocket.core.model.Room
 import com.squareup.moshi.JsonAdapter
 import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.channels.SendChannel
 import kotlinx.coroutines.experimental.delay
@@ -24,7 +25,6 @@ import java.util.concurrent.atomic.AtomicInteger
 const val PING_INTERVAL = 15L
 
 class Socket(internal val client: RocketChatClient,
-             private val statusChannel: SendChannel<State>,
              internal val roomsChannel: SendChannel<StreamMessage<Room>>,
              internal val subscriptionsChannel: SendChannel<StreamMessage<Subscription>>,
              internal val messagesChannel: SendChannel<Message>
@@ -42,24 +42,26 @@ class Socket(internal val client: RocketChatClient,
     private val httpClient = client.httpClient
     internal val logger = client.logger
     internal val moshi = client.moshi
-    internal val messageAdapter: JsonAdapter<SocketMessage>
-    internal var currentState: State = State.Disconnected
+    private val messageAdapter: JsonAdapter<SocketMessage>
+    internal var currentState: State = State.Disconnected()
     internal var socket: WebSocket? = null
-    internal var processingChannel: Channel<String>? = null
+    private var processingChannel: Channel<String>? = null
+    internal val statusChannelList = ArrayList<Channel<State>>()
     internal var parentJob: Job? = null
-    internal var readJob: Job? = null
-    internal var pingJob: Job? = null
+    private var readJob: Job? = null
+    private var pingJob: Job? = null
+    private var reconnectJob: Job? = null
     private var timeoutJob: Job? = null
-    internal val currentId = AtomicInteger(1)
+    private val currentId = AtomicInteger(1)
 
-    internal val subscriptionsMap = HashMap<String, (Boolean) -> Unit>()
+    internal val subscriptionsMap = HashMap<String, (Boolean, String) -> Unit>()
 
-    private val reconnectionStrategy = ReconnectionStrategy(5, 3000)
+    private val reconnectionStrategy = ReconnectionStrategy(Int.MAX_VALUE, 3000)
 
     private var selfDisconnect = false
 
     init {
-        setState(State.Created)
+        setState(State.Created())
         messageAdapter = moshi.adapter(SocketMessage::class.java)
     }
 
@@ -67,21 +69,26 @@ class Socket(internal val client: RocketChatClient,
         selfDisconnect = false
         // reset id counter
         currentId.set(1)
+        parentJob?.cancel()
+        reconnectJob?.cancel()
+
         parentJob = Job()
         processingChannel = Channel()
-        setState(State.Connecting)
+        setState(State.Connecting())
         socket = httpClient.newWebSocket(request, this)
     }
 
     internal fun disconnect() {
         when (currentState) {
-            State.Disconnected -> return
+            State.Disconnected() -> return
             else -> {
+                logger.debug { "SELF DISCONNECT" }
                 selfDisconnect = true
                 socket?.close(1002, "Bye bye!!")
                 pingJob?.cancel()
                 timeoutJob?.cancel()
-                setState(State.Disconnecting)
+                reconnectJob?.cancel()
+                setState(State.Disconnecting())
             }
         }
     }
@@ -92,19 +99,39 @@ class Socket(internal val client: RocketChatClient,
 
         if (!selfDisconnect) {
             if (reconnectionStrategy.numberOfAttempts < reconnectionStrategy.maxAttempts) {
-                launch {
-                    delay(reconnectionStrategy.reconnectInterval)
+                reconnectJob?.cancel()
+                reconnectJob = launch {
+                    logger.debug {
+                        "Reconnecting in: ${reconnectionStrategy.reconnectInterval}"
+                    }
+                    delayReconnection(reconnectionStrategy.reconnectInterval)
                     if (!isActive) return@launch
                     reconnectionStrategy.processAttempts()
                     connect()
                 }
+            } else {
+                logger.info { "Exausted reconnection attempts: ${reconnectionStrategy.numberOfAttempts} - ${reconnectionStrategy.maxAttempts}" }
             }
         }
     }
 
+    private suspend fun delayReconnection(reconnectInterval: Int) {
+        val seconds = reconnectInterval / 1000
+        async {
+            for (second in 0..(seconds -1)) {
+                if (!isActive) return@async
+                val left = seconds - second
+                logger.debug { "$left second(s) left" }
+                setState(State.Waiting(left))
+                delay(1000)
+            }
+        }.await()
+    }
+
     private fun processIncomingMessage(text: String) {
         logger.debug {
-            "Incoming message: $text"
+            val len = Math.min(40, text.length)
+            "Process Incoming message: ${text.substring(0, len)}"
         }
 
         // Ignore empty or invalid messages
@@ -112,6 +139,7 @@ class Socket(internal val client: RocketChatClient,
         try {
             message = messageAdapter.fromJson(text) ?: return
         } catch (ex: Exception) {
+            logger.debug { "Error parsing message, ignoring it" }
             ex.printStackTrace()
             return
         }
@@ -119,13 +147,16 @@ class Socket(internal val client: RocketChatClient,
         reschedulePing(message.type)
 
         when (currentState) {
-            State.Connecting -> {
+            is State.Connecting -> {
+                logger.debug { "State machine: CONNECTING" }
                 processConnectionMessage(message)
             }
-            State.Authenticating -> {
+            is State.Authenticating -> {
+                logger.debug { "State machine: AUTHENTICATING" }
                 processAuthenticationResponse(message, text)
             }
             else -> {
+                logger.debug { "State machine: CONNECTED" }
                 processMessage(message, text)
             }
         }
@@ -134,7 +165,7 @@ class Socket(internal val client: RocketChatClient,
     private fun processConnectionMessage(message: SocketMessage) {
         when (message.type) {
             MessageType.CONNECTED -> {
-                setState(State.Authenticating)
+                setState(State.Authenticating())
                 login(client.tokenRepository.get())
             }
             else -> {
@@ -149,7 +180,7 @@ class Socket(internal val client: RocketChatClient,
         when (message.type) {
             MessageType.ADDED, MessageType.UPDATED -> {
                 // FIXME - for now just set the state to connected
-                setState(State.Connected)
+                setState(State.Connected())
             }
             MessageType.RESULT -> {
                 processLoginResult(text)
@@ -210,14 +241,14 @@ class Socket(internal val client: RocketChatClient,
 
     private suspend fun schedulePingTimeout() {
         val timeout = (PING_INTERVAL * 1.5).toLong()
-        logger.debug { "Scheduling ping timout in $timeout" }
+        logger.debug { "Scheduling ping timeout in $timeout" }
         timeoutJob = launch(parent = parentJob) {
             delay(timeout, TimeUnit.SECONDS)
 
             if (!isActive) return@launch
             when (currentState) {
-                State.Disconnected,
-                State.Disconnecting-> {
+                is State.Disconnected,
+                is State.Disconnecting-> {
                     logger.warn { "PONG not received, but already disconnected" }
                 }
                 else -> {
@@ -230,8 +261,19 @@ class Socket(internal val client: RocketChatClient,
 
     internal fun setState(newState: State) {
         if (newState != currentState) {
+            logger.debug { "Setting state to: $newState - oldState: $currentState, channels: ${statusChannelList.size}" }
             currentState = newState
-            statusChannel.offer(currentState)
+            sendState(newState)
+
+        }
+    }
+
+    private fun sendState(state: State) {
+        launch {
+            for (channel in statusChannelList) {
+                logger.debug { "Sending $state to $channel" }
+                channel.send(state)
+            }
         }
     }
 
@@ -250,6 +292,7 @@ class Socket(internal val client: RocketChatClient,
                 processIncomingMessage(message)
             }
         }
+        reconnectionStrategy.numberOfAttempts = 0
         send(CONNECT_MESSAGE)
     }
 
@@ -258,26 +301,29 @@ class Socket(internal val client: RocketChatClient,
             throwable?.message
         }
         throwable?.printStackTrace()
-        setState(State.Disconnected)
+        setState(State.Disconnected())
         close()
         startReconnection()
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String?) {
-        setState(State.Disconnecting)
+        logger.debug { "webSocket.onClosing - CLOSING SOCKET" }
+        setState(State.Disconnecting())
     }
 
     override fun onMessage(webSocket: WebSocket, text: String?) {
+        logger.debug { "Received text message: $text, channel: $processingChannel" }
         text?.let {
-            processingChannel?.offer(it)
+            launch(parent = parentJob) { processingChannel?.send(it) }
         }
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString?) {
+        logger.debug { "Received ByteString message: ${bytes.toString()}" }
     }
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String?) {
-        setState(State.Disconnected)
+        setState(State.Disconnected())
         close()
         startReconnection()
     }
@@ -286,7 +332,7 @@ class Socket(internal val client: RocketChatClient,
 fun Socket.login(token: Token?) {
     token?.let { authToken ->
         socket?.let {
-            setState(State.Authenticating)
+            setState(State.Authenticating())
             send(loginMethod(generateId(), authToken.authToken))
         }
     }
@@ -301,10 +347,11 @@ fun RocketChatClient.disconnect() {
 }
 
 sealed class State {
-    object Created : State()
-    object Connecting : State()
-    object Authenticating : State()
-    object Connected : State()
-    object Disconnecting : State()
-    object Disconnected : State()
+    class Created : State()
+    class Waiting(val seconds: Int) : State()
+    class Connecting : State()
+    class Authenticating : State()
+    class Connected : State()
+    class Disconnecting : State()
+    class Disconnected : State()
 }

@@ -38,13 +38,24 @@ data class Message(
 
 @FallbackSealedClass(name = "Unspecified", fieldName = "rawType")
 sealed class MessageType {
-        @Json(name = "r") class RoomNameChanged : MessageType()
-        @Json(name = "au") class UserAdded : MessageType()
-        @Json(name = "ru") class UserRemoved : MessageType()
-        @Json(name = "uj") class UserJoined : MessageType()
-        @Json(name = "ul") class UserLeft : MessageType()
-        @Json(name = "wm") class Welcome : MessageType()
-        @Json(name = "rm") class MessageRemoved : MessageType()
-        @Json(name = "message_pinned") class MessagePinned : MessageType()
-        class Unspecified(val rawType: String) : MessageType()
+    @Json(name = "r") class RoomNameChanged : MessageType()
+    @Json(name = "au") class UserAdded : MessageType()
+    @Json(name = "ru") class UserRemoved : MessageType()
+    @Json(name = "uj") class UserJoined : MessageType()
+    @Json(name = "ul") class UserLeft : MessageType()
+    @Json(name = "wm") class Welcome : MessageType()
+    @Json(name = "rm") class MessageRemoved : MessageType()
+    @Json(name = "message_pinned") class MessagePinned : MessageType()
+    class Unspecified(val rawType: String) : MessageType()
+}
+
+fun Message.isSystemMessage() = when (type) {
+    is MessageType.MessageRemoved,
+    is MessageType.UserJoined,
+    is MessageType.UserLeft,
+    is MessageType.UserAdded,
+    is MessageType.RoomNameChanged,
+    is MessageType.UserRemoved,
+    is MessageType.MessagePinned -> true
+    else -> false
 }
