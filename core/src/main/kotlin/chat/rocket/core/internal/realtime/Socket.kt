@@ -95,23 +95,26 @@ class Socket(internal val client: RocketChatClient,
 
     private fun startReconnection() {
         // Ignore  self disconnection
-        if (selfDisconnect) return
+        if (selfDisconnect) {
+            logger.info { "Self disconnected, won't try to reconnect." }
+            return
+        }
 
-        if (!selfDisconnect) {
-            if (reconnectionStrategy.numberOfAttempts < reconnectionStrategy.maxAttempts) {
-                reconnectJob?.cancel()
-                reconnectJob = launch {
-                    logger.debug {
-                        "Reconnecting in: ${reconnectionStrategy.reconnectInterval}"
-                    }
-                    delayReconnection(reconnectionStrategy.reconnectInterval)
-                    if (!isActive) return@launch
-                    reconnectionStrategy.processAttempts()
-                    connect()
+        logger.info { "startReconnection" }
+
+        if (reconnectionStrategy.numberOfAttempts < reconnectionStrategy.maxAttempts) {
+            reconnectJob?.cancel()
+            reconnectJob = launch {
+                logger.debug {
+                    "Reconnecting in: ${reconnectionStrategy.reconnectInterval}"
                 }
-            } else {
-                logger.info { "Exausted reconnection attempts: ${reconnectionStrategy.numberOfAttempts} - ${reconnectionStrategy.maxAttempts}" }
+                delayReconnection(reconnectionStrategy.reconnectInterval)
+                if (!isActive) return@launch
+                reconnectionStrategy.processAttempts()
+                connect()
             }
+        } else {
+            logger.info { "Exhausted reconnection attempts: ${reconnectionStrategy.numberOfAttempts} - ${reconnectionStrategy.maxAttempts}" }
         }
     }
 
@@ -309,6 +312,7 @@ class Socket(internal val client: RocketChatClient,
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String?) {
         logger.debug { "webSocket.onClosing - CLOSING SOCKET" }
         setState(State.Disconnecting())
+        startReconnection()
     }
 
     override fun onMessage(webSocket: WebSocket, text: String?) {
