@@ -66,12 +66,16 @@ internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type:
                     logger.debug {
                         "Failed request: $request"
                     }
-                    continuation.resumeWithException(RocketChatNetworkErrorException("Network Error: ${e.message}", e))
+                    continuation.tryResumeWithException {
+                        RocketChatNetworkErrorException("Network Error: ${e.message}", e)
+                    }
                 }
 
                 override fun onResponse(call: Call, response: Response) {
                     if (!response.isSuccessful) {
-                        continuation.resumeWithException(processCallbackError(moshi, response, logger))
+                        continuation.tryResumeWithException {
+                            processCallbackError(moshi, response, logger)
+                        }
                         return
                     }
 
@@ -83,7 +87,9 @@ internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type:
                             adapter.fromJson(source)?.let {
                                 value -> continuation.tryToResume { value }
                             }.ifNull {
-                                continuation.resumeWithException(RocketChatInvalidResponseException("Error parsing JSON message"))
+                                continuation.tryResumeWithException {
+                                    RocketChatInvalidResponseException("Error parsing JSON message")
+                                }
                             }
                         }
                     } catch (ex: Exception) {
@@ -92,7 +98,9 @@ internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type:
                             is JsonDataException,
                             is IllegalArgumentException,
                             is IOException -> {
-                                continuation.resumeWithException(RocketChatInvalidResponseException(ex.message!!, ex))
+                                continuation.tryResumeWithException {
+                                    RocketChatInvalidResponseException(ex.message!!, ex)
+                                }
                             }
                             else -> continuation.resumeWithException(ex)
                         }
@@ -151,6 +159,11 @@ private inline fun <T> CancellableContinuation<T>.tryToResume(getter: () -> T) {
     } catch (exception: Throwable) {
         resumeWithException(exception)
     }
+}
+
+private inline fun <T> CancellableContinuation<T>.tryResumeWithException(getter: () -> Exception) {
+    isActive || return
+    resumeWithException(getter())
 }
 
 private fun OkHttpClient.cancel(tag: Any) {
