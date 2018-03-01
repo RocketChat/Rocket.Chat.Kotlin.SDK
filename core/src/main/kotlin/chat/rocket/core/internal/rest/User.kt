@@ -146,6 +146,10 @@ internal fun RocketChatClient.combine(rooms: RestMultiResult<List<Room>>,
     val update = combine(rooms.update, subscriptions.update, filterCustom)
     val remove = combine(rooms.remove, subscriptions.remove, filterCustom)
 
+    logger.debug { "Rooms: update(${rooms.update.size}, remove(${rooms.remove.size}" }
+    logger.debug { "Subscriptions: update(${subscriptions.update.size}, remove(${subscriptions.remove.size}" }
+    logger.debug { "Combined: update(${update.size}), remove(${remove.size})" }
+
     return RestMultiResult.create(update, remove)
 }
 
