@@ -5,8 +5,8 @@ import chat.rocket.common.model.Token
 import chat.rocket.common.model.User
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
-import chat.rocket.core.internal.model.LoginPayload
-import chat.rocket.core.internal.model.LoginWithEmail
+import chat.rocket.core.internal.model.UsernameLoginPayload
+import chat.rocket.core.internal.model.EmailLoginPayload
 import chat.rocket.core.internal.model.UserPayload
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
@@ -18,17 +18,18 @@ import okhttp3.RequestBody
  * Login with username and password. On success this will also call [chat.rocket.core.TokenRepository].save(token)
  *
  * @param username Username
- * @param password Password
- * @param success ([Token]) lambda receiving the Authentication Token
- * @param error ([RocketChatException]) lambda indicating errors
+ * @param password Password of the user
+ *
+ * [Token] -> lambda receiving the Authentication Token
+ * [RocketChatException] -> lambda indicating errors
  * @see Token
  * @see chat.rocket.core.TokenRepository
  *
  * @sample
  */
 suspend fun RocketChatClient.login(username: String, password: String, pin: String? = null): Token = withContext(CommonPool) {
-    val payload = LoginPayload(username, password, pin)
-    val adapter = moshi.adapter(LoginPayload::class.java)
+    val payload = UsernameLoginPayload(username, password, pin)
+    val adapter = moshi.adapter(UsernameLoginPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
@@ -48,18 +49,19 @@ suspend fun RocketChatClient.login(username: String, password: String, pin: Stri
 /**
  * Login with email and password. On success this will also call [chat.rocket.core.TokenRepository].save(token)
  *
- * @param user EmailId
- * @param password Password
- * @param success ([Token]) lambda receiving the Authentication Token
- * @param error ([RocketChatException]) lambda indicating errors
+ * @param user EmailId of the user
+ * @param password Password of the user
+ *
+ * [Token] -> lambda receiving the Authentication Token
+ * [RocketChatException] -> lambda indicating errors
  * @see Token
  * @see chat.rocket.core.TokenRepository
  *
  * @sample
  */
-suspend fun RocketChatClient.loginWithEmail(user: String, password: String, pin: String? = null): Token = withContext(CommonPool) {
-    val payload = LoginWithEmail(user, password, pin)
-    val adapter = moshi.adapter(LoginWithEmail::class.java)
+suspend fun RocketChatClient.loginWithEmail(email: String, password: String, pin: String? = null): Token = withContext(CommonPool) {
+    val payload = EmailLoginPayload(email, password, pin)
+    val adapter = moshi.adapter(EmailLoginPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
@@ -82,12 +84,13 @@ suspend fun RocketChatClient.loginWithEmail(user: String, password: String, pin:
  * Note, this doesn't authenticate the user. after a successful registration you still need to
  * call [login]
  *
- * @param email Email
+ * @param email Email of the user
  * @param name Name
  * @param username Username
- * @param password Password
- * @param success ([User]) lambda indicating success
- * @param error ([RocketChatException]) lambda indicating errors
+ * @param password Password of the user
+ *
+ * [Token] -> lambda receiving the Authentication Token
+ * [RocketChatException] -> lambda indicating errors
  * @see User
  */
 suspend fun RocketChatClient.signup(email: String,
