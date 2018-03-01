@@ -9,13 +9,16 @@ import chat.rocket.core.model.attachment.Attachment
 import chat.rocket.core.model.url.Url
 import com.squareup.moshi.Json
 import se.ansman.kotshi.JsonDefaultValueBoolean
+import se.ansman.kotshi.JsonDefaultValueString
 import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
 data class Message(
         @Json(name = "_id") val id: String,
         @Json(name = "rid") override val roomId: String,
-        @Json(name = "msg") override val message: String,
+        @JsonDefaultValueString("")
+        @Json(name = "msg")
+        override val message: String,
         @Json(name = "ts") @ISO8601Date override val timestamp: Long,
         @Json(name = "u") override val sender: SimpleUser?,
         @Json(name = "_updatedAt") @ISO8601Date override val updatedAt: Long?,
