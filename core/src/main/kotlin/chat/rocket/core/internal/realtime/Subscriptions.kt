@@ -155,10 +155,10 @@ private fun Socket.processSubscriptionStream(state: String, data: JSONObject) {
 
 private fun getMessageType(state: String): Type {
     return when (state) {
-        "inserted" -> {
+        "inserted", "added" -> {
             Type.Inserted
         }
-        "updated" -> {
+        "updated", "changed" -> {
             Type.Updated
         }
         "removed" -> Type.Removed
