@@ -20,8 +20,8 @@ import okhttp3.RequestBody
  * @param username Username
  * @param password Password of the user
  *
- * [Token] -> lambda receiving the Authentication Token
- * [RocketChatException] -> lambda indicating errors
+ * @return the authenticated [Token]
+ * @throws [RocketChatException] on errors
  * @see Token
  * @see chat.rocket.core.TokenRepository
  *
@@ -52,8 +52,8 @@ suspend fun RocketChatClient.login(username: String, password: String, pin: Stri
  * @param user EmailId of the user
  * @param password Password of the user
  *
- * [Token] -> lambda receiving the Authentication Token
- * [RocketChatException] -> lambda indicating errors
+ * @return the authenticated [Token]
+ * @throws [RocketChatException] on errors
  * @see Token
  * @see chat.rocket.core.TokenRepository
  *
@@ -89,8 +89,8 @@ suspend fun RocketChatClient.loginWithEmail(email: String, password: String, pin
  * @param username Username
  * @param password Password of the user
  *
- * [Token] -> lambda receiving the Authentication Token
- * [RocketChatException] -> lambda indicating errors
+ * @return the authenticated [Token]
+ * @throws [RocketChatException] on errors
  * @see User
  */
 suspend fun RocketChatClient.signup(email: String,
