@@ -63,12 +63,15 @@ internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type:
 
             val callback = object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    continuation.tryToResume { throw RocketChatNetworkErrorException("Network Error: ${e.message}", e) }
+                    logger.debug {
+                        "Failed request: $request"
+                    }
+                    continuation.resumeWithException(RocketChatNetworkErrorException("Network Error: ${e.message}", e))
                 }
 
                 override fun onResponse(call: Call, response: Response) {
                     if (!response.isSuccessful) {
-                        continuation.tryToResume { throw processCallbackError(moshi, response, logger) }
+                        continuation.resumeWithException(processCallbackError(moshi, response, logger))
                     }
 
                     try {
@@ -77,11 +80,9 @@ internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type:
 
                         response.body()?.source()?.let { source ->
                             adapter.fromJson(source)?.let {
-                                value -> continuation.resume(value)
+                                value -> continuation.tryToResume { value }
                             }.ifNull {
-                                continuation.tryToResume {
-                                    throw RocketChatInvalidResponseException("Error parsing JSON message")
-                                }
+                                continuation.resumeWithException(RocketChatInvalidResponseException("Error parsing JSON message"))
                             }
                         }
                     } catch (ex: Exception) {
@@ -90,11 +91,9 @@ internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type:
                             is JsonDataException,
                             is IllegalArgumentException,
                             is IOException -> {
-                                continuation.tryToResume {
-                                    throw RocketChatInvalidResponseException(ex.message!!, ex)
-                                }
+                                continuation.resumeWithException(RocketChatInvalidResponseException(ex.message!!, ex))
                             }
-                            else -> continuation.tryToResume { throw ex }
+                            else -> continuation.resumeWithException(ex)
                         }
                     } finally {
                         response.body()?.close()

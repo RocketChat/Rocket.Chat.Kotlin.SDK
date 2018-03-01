@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicInteger
 const val PING_INTERVAL = 15L
 
 class Socket(internal val client: RocketChatClient,
-             private val statusChannel: SendChannel<State>,
              internal val roomsChannel: SendChannel<StreamMessage<Room>>,
              internal val subscriptionsChannel: SendChannel<StreamMessage<Subscription>>,
              internal val messagesChannel: SendChannel<Message>
@@ -43,16 +42,17 @@ class Socket(internal val client: RocketChatClient,
     private val httpClient = client.httpClient
     internal val logger = client.logger
     internal val moshi = client.moshi
-    internal val messageAdapter: JsonAdapter<SocketMessage>
+    private val messageAdapter: JsonAdapter<SocketMessage>
     internal var currentState: State = State.Disconnected()
     internal var socket: WebSocket? = null
-    internal var processingChannel: Channel<String>? = null
+    private var processingChannel: Channel<String>? = null
+    internal val statusChannelList = ArrayList<Channel<State>>()
     internal var parentJob: Job? = null
-    internal var readJob: Job? = null
-    internal var pingJob: Job? = null
+    private var readJob: Job? = null
+    private var pingJob: Job? = null
     private var reconnectJob: Job? = null
     private var timeoutJob: Job? = null
-    internal val currentId = AtomicInteger(1)
+    private val currentId = AtomicInteger(1)
 
     internal val subscriptionsMap = HashMap<String, (Boolean, String) -> Unit>()
 
@@ -82,6 +82,7 @@ class Socket(internal val client: RocketChatClient,
         when (currentState) {
             State.Disconnected() -> return
             else -> {
+                logger.debug { "SELF DISCONNECT" }
                 selfDisconnect = true
                 socket?.close(1002, "Bye bye!!")
                 pingJob?.cancel()
@@ -101,13 +102,15 @@ class Socket(internal val client: RocketChatClient,
                 reconnectJob?.cancel()
                 reconnectJob = launch {
                     logger.debug {
-                        "SDK: Reconnecting in: ${reconnectionStrategy.reconnectInterval}"
+                        "Reconnecting in: ${reconnectionStrategy.reconnectInterval}"
                     }
                     delayReconnection(reconnectionStrategy.reconnectInterval)
                     if (!isActive) return@launch
                     reconnectionStrategy.processAttempts()
                     connect()
                 }
+            } else {
+                logger.info { "Exausted reconnection attempts: ${reconnectionStrategy.numberOfAttempts} - ${reconnectionStrategy.maxAttempts}" }
             }
         }
     }
@@ -115,10 +118,10 @@ class Socket(internal val client: RocketChatClient,
     private suspend fun delayReconnection(reconnectInterval: Int) {
         val seconds = reconnectInterval / 1000
         async {
-            for (second in 1..seconds) {
+            for (second in 0..(seconds -1)) {
                 if (!isActive) return@async
                 val left = seconds - second
-                logger.debug { "SDK: $left second(s) left" }
+                logger.debug { "$left second(s) left" }
                 setState(State.Waiting(left))
                 delay(1000)
             }
@@ -127,7 +130,8 @@ class Socket(internal val client: RocketChatClient,
 
     private fun processIncomingMessage(text: String) {
         logger.debug {
-            "SDK: Incoming message: $text"
+            val len = Math.min(40, text.length)
+            "Process Incoming message: ${text.substring(0, len)}"
         }
 
         // Ignore empty or invalid messages
@@ -135,6 +139,7 @@ class Socket(internal val client: RocketChatClient,
         try {
             message = messageAdapter.fromJson(text) ?: return
         } catch (ex: Exception) {
+            logger.debug { "Error parsing message, ignoring it" }
             ex.printStackTrace()
             return
         }
@@ -143,12 +148,15 @@ class Socket(internal val client: RocketChatClient,
 
         when (currentState) {
             is State.Connecting -> {
+                logger.debug { "State machine: CONNECTING" }
                 processConnectionMessage(message)
             }
             is State.Authenticating -> {
+                logger.debug { "State machine: AUTHENTICATING" }
                 processAuthenticationResponse(message, text)
             }
             else -> {
+                logger.debug { "State machine: CONNECTED" }
                 processMessage(message, text)
             }
         }
@@ -162,7 +170,7 @@ class Socket(internal val client: RocketChatClient,
             }
             else -> {
                 logger.warn {
-                    "SDK: Invalid message type on state Connecting: ${message.type}"
+                    "Invalid message type on state Connecting: ${message.type}"
                 }
             }
         }
@@ -198,7 +206,7 @@ class Socket(internal val client: RocketChatClient,
             }
             else -> {
                 logger.debug {
-                    "SDK: Ingnoring message type: ${message.type}"
+                    "Ingnoring message type: ${message.type}"
                 }
             }
         }
@@ -206,34 +214,34 @@ class Socket(internal val client: RocketChatClient,
 
     internal fun send(message: String) {
         logger.debug {
-            "SDK: Sending message: $message"
+            "Sending message: $message"
         }
         socket?.send(message)
     }
 
     private fun reschedulePing(type: MessageType) {
         logger.debug {
-            "SDK: Rescheduling ping in $PING_INTERVAL seconds"
+            "Rescheduling ping in $PING_INTERVAL seconds"
         }
 
         timeoutJob?.cancel()
 
         pingJob?.cancel()
         pingJob = launch(parent = parentJob) {
-            logger.debug { "SDK: Scheduling ping" }
+            logger.debug { "Scheduling ping" }
             delay(PING_INTERVAL, TimeUnit.SECONDS)
 
-            logger.debug { "SDK: running ping if active" }
+            logger.debug { "running ping if active" }
             if (!isActive) return@launch
             schedulePingTimeout()
-            logger.debug { "SDK: sending ping" }
+            logger.debug { "sending ping" }
             send(pingMessage())
         }
     }
 
     private suspend fun schedulePingTimeout() {
         val timeout = (PING_INTERVAL * 1.5).toLong()
-        logger.debug { "SDK: Scheduling ping timeout in $timeout" }
+        logger.debug { "Scheduling ping timeout in $timeout" }
         timeoutJob = launch(parent = parentJob) {
             delay(timeout, TimeUnit.SECONDS)
 
@@ -241,10 +249,10 @@ class Socket(internal val client: RocketChatClient,
             when (currentState) {
                 is State.Disconnected,
                 is State.Disconnecting-> {
-                    logger.warn { "SDK: PONG not received, but already disconnected" }
+                    logger.warn { "PONG not received, but already disconnected" }
                 }
                 else -> {
-                    logger.warn { "SDK: PONG not received" }
+                    logger.warn { "PONG not received" }
                     socket?.cancel()
                 }
             }
@@ -253,9 +261,18 @@ class Socket(internal val client: RocketChatClient,
 
     internal fun setState(newState: State) {
         if (newState != currentState) {
+            logger.debug { "Setting state to: $newState - oldState: $currentState, channels: ${statusChannelList.size}" }
             currentState = newState
-            launch() {
-                statusChannel.send(currentState)
+            sendState(newState)
+
+        }
+    }
+
+    private fun sendState(state: State) {
+        launch {
+            for (channel in statusChannelList) {
+                logger.debug { "Sending $state to $channel" }
+                channel.send(state)
             }
         }
     }
@@ -290,18 +307,19 @@ class Socket(internal val client: RocketChatClient,
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String?) {
+        logger.debug { "webSocket.onClosing - CLOSING SOCKET" }
         setState(State.Disconnecting())
     }
 
     override fun onMessage(webSocket: WebSocket, text: String?) {
-        logger.debug { "SDK: Received text message: $text, channel: $processingChannel" }
+        logger.debug { "Received text message: $text, channel: $processingChannel" }
         text?.let {
             launch(parent = parentJob) { processingChannel?.send(it) }
         }
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString?) {
-        logger.debug { "SDK: Received ByteString message: ${bytes.toString()}" }
+        logger.debug { "Received ByteString message: ${bytes.toString()}" }
     }
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String?) {

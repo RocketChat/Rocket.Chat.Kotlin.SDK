@@ -46,8 +46,6 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
 
     internal lateinit var restUrl: HttpUrl
     val url: String
-    private val statusChannel = Channel<State>()
-    private val statusChannelList = ArrayList<Channel<State>>()
     val roomsChannel = Channel<StreamMessage<Room>>()
     val subscriptionsChannel = Channel<StreamMessage<Subscription>>()
     val messagesChannel = Channel<Message>()
@@ -60,16 +58,7 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
         }.ifNull {
             throw InvalidParameterException("You must pass a valid HTTP or HTTPS URL")
         }
-        socket = Socket(this, statusChannel, roomsChannel, subscriptionsChannel, messagesChannel)
-
-        launch {
-            for (status in statusChannel) {
-                for (channel in statusChannelList) {
-                    logger.debug { "SDK: sending status $status to $channel: ${channel.isClosedForSend} ${channel.isFull}" }
-                    channel.send(status)
-                }
-            }
-        }
+        socket = Socket(this, roomsChannel, subscriptionsChannel, messagesChannel)
     }
 
     private fun sanitizeUrl(baseUrl: String): String {
@@ -112,11 +101,11 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
     }
 
     fun addStateChannel(channel: Channel<State>) {
-        statusChannelList.add(channel)
+        socket.statusChannelList.add(channel)
     }
 
     fun removeStateChannel(channel: Channel<State>) {
-        statusChannelList.remove(channel)
+        socket.statusChannelList.remove(channel)
     }
 
     val state: State
