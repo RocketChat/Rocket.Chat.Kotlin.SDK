@@ -11,9 +11,7 @@ import okhttp3.OkHttpClient
 import org.hamcrest.CoreMatchers.isA
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TemporaryFolder
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
@@ -28,10 +26,6 @@ class SpotlightTest {
     private lateinit var tokenProvider: TokenRepository
 
     private val authToken = Token("userId", "authToken")
-
-    @Rule
-    @JvmField
-    val temporaryFolder = TemporaryFolder()
 
     @Before
     fun setup() {
