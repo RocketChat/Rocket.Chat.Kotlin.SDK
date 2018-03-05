@@ -1,7 +1,9 @@
 package chat.rocket.core.internal.model
 
+import se.ansman.kotshi.JsonSerializable
 import java.util.*
 
+@JsonSerializable
 data class LdapLoginPayload(val ldap: Boolean = true,
                             val username: String,
                             val ldapPass: String,
@@ -28,6 +30,4 @@ data class LdapLoginPayload(val ldap: Boolean = true,
         result = 31 * result + Arrays.hashCode(ldapOptions)
         return result
     }
-
-
 }
