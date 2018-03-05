@@ -97,7 +97,7 @@ suspend fun RocketChatClient.setAvatar(file: File, mimeType: String): Boolean {
 
     val body = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
-            .addFormDataPart("image=", file.name,
+            .addFormDataPart("image", file.name,
                     RequestBody.create(MediaType.parse(mimeType), file))
             .build()
 
