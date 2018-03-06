@@ -10,6 +10,7 @@ import chat.rocket.core.internal.RestMultiResult
 import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.model.Subscription
 import chat.rocket.core.internal.model.UserPayload
+import chat.rocket.core.internal.model.UserPayloadData
 import chat.rocket.core.model.ChatRoom
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room
@@ -49,7 +50,7 @@ suspend fun RocketChatClient.updateProfile(userId: String,
                                            name: String? = null,
                                            password: String? = null,
                                            username: String? = null): User {
-    val payload = UserPayload(userId, email, name, password, username, null)
+    val payload = UserPayload(userId, UserPayloadData(name, password, username, email), null)
     val adapter = moshi.adapter(UserPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
@@ -70,7 +71,7 @@ suspend fun RocketChatClient.updateProfile(userId: String,
  * @return True if the avatar was reset, false otherwise.
  */
 suspend fun RocketChatClient.resetAvatar(userId: String): Boolean {
-    val payload = UserPayload(userId, null, null, null, null, null)
+    val payload = UserPayload(userId, null, null)
     val adapter = moshi.adapter(UserPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
@@ -115,7 +116,7 @@ suspend fun RocketChatClient.setAvatar(file: File, mimeType: String): Boolean {
  * @return True if the avatar was setted up, false otherwise.
  */
 suspend fun RocketChatClient.setAvatar(avatarUrl: String): Boolean {
-    val payload = UserPayload(null, null, null, null, null, avatarUrl)
+    val payload = UserPayload(null, null, avatarUrl)
     val adapter = moshi.adapter(UserPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
