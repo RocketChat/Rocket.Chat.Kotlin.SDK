@@ -109,15 +109,15 @@ suspend fun RocketChatClient.loginWithLdap(username: String, password: String): 
  * Login through CAS protocol.
  * On success this will also call [chat.rocket.core.TokenRepository].save(token)
  *
- * @param casCredentialToken The CAS credential token to authenticate with.
+ * @param casCredential The CAS credential to authenticate with.
  *
  * @return [Token]
  * @throws [RocketChatException] on errors.
  * @see [Token]
  * @see [chat.rocket.core.TokenRepository]
  */
-suspend fun RocketChatClient.loginWithCas(casCredentialToken: String): Token = withContext(CommonPool) {
-    val payload = CasLoginPayload(casCredentialToken)
+suspend fun RocketChatClient.loginWithCas(casCredential: String): Token = withContext(CommonPool) {
+    val payload = CasLoginPayload(Data(casCredential))
     val adapter = moshi.adapter(CasLoginPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
