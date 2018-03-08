@@ -13,9 +13,12 @@ import chat.rocket.core.internal.model.UserPayload
 import chat.rocket.core.internal.model.UserPayloadData
 import chat.rocket.core.model.ChatRoom
 import chat.rocket.core.model.Myself
+import chat.rocket.core.model.UserRole
 import chat.rocket.core.model.Room
 import com.squareup.moshi.Types
+import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.withContext
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -139,6 +142,17 @@ suspend fun RocketChatClient.chatRooms(timestamp: Long = 0, filterCustom: Boolea
     val subscriptions = async { listSubscriptions(timestamp) }
 
     return combine(rooms.await(), subscriptions.await(), filterCustom)
+}
+
+/**
+ * Return all the roles specific to the current user.
+ *
+ * @return UserRole object specifying current user roles.
+ */
+suspend fun RocketChatClient.roles(): UserRole = withContext(CommonPool) {
+    val httpUrl = requestUrl(restUrl, "user.roles").build()
+    val request = requestBuilder(httpUrl).get().build()
+    return@withContext handleRestCall<UserRole>(request, UserRole::class.java)
 }
 
 internal fun RocketChatClient.combine(rooms: RestMultiResult<List<Room>>,

@@ -2,7 +2,6 @@ package chat.rocket.core.internal.rest
 
 import chat.rocket.common.RocketChatApiException
 import chat.rocket.common.RocketChatAuthException
-import chat.rocket.common.model.BaseUser
 import chat.rocket.common.model.Token
 import chat.rocket.common.model.UserStatus
 import chat.rocket.common.util.PlatformLogger
@@ -201,6 +200,24 @@ class UserTest {
         runBlocking {
             val result = sut.setAvatar("http://domain.tld/to/my/own/avatar.jpg")
             assert(result)
+        }
+    }
+
+    @Test
+    fun `roles() should return current user roles in a UserRoles object`() {
+        mockServer.expect()
+                .get()
+                .withPath("/api/v1/user.roles")
+                .andReturn(200, ROLES_OK)
+                .once()
+
+        runBlocking {
+            val roles = sut.roles()
+
+            assertThat(roles.id, isEqualTo("hvzu8z6mHFigiXy6Y"))
+            assertThat(roles.username, isEqualTo("rafaelks"))
+            assertThat(roles.roles.size, isEqualTo(1))
+            assertThat(roles.roles[0], isEqualTo("admin"))
         }
     }
 
