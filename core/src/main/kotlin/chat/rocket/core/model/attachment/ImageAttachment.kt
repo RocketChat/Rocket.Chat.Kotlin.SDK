@@ -5,7 +5,7 @@ import se.ansman.kotshi.JsonSerializable
 
 data class ImageAttachment(override val title: String?,
                            override val description: String?,
-                           @Json(name = "title_link") override val titleLink: String,
+                           @Json(name = "title_link") override val titleLink: String?,
                            @Json(name = "title_link_download") override val titleLinkDownload: Boolean,
                            @Json(name = "image_url") private val imageUrl: String,
                            @Json(name = "image_type") private val imageType: String,
