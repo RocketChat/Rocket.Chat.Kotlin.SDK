@@ -3,7 +3,7 @@ package chat.rocket.core.internal.rest
 const val PERMISSIONS_OK = """
 [
   {
-    "id": "access-mailer",
+    "_id": "access-mailer",
     "roles": [
       "admin"
     ],
@@ -17,7 +17,7 @@ const val PERMISSIONS_OK = """
     "loki": 1
   },
   {
-    "id": "access-permissions",
+    "_id": "access-permissions",
     "roles": [
       "admin"
     ],
@@ -29,7 +29,7 @@ const val PERMISSIONS_OK = """
     "loki": 2
   },
   {
-    "id": "access-rocket-mailer",
+    "_id": "access-rocket-mailer",
     "roles": [
       "admin"
     ],
@@ -41,7 +41,7 @@ const val PERMISSIONS_OK = """
     "loki": 3
   },
   {
-    "id": "add-oath-service",
+    "_id": "add-oath-service",
     "roles": [
       "admin"
     ],
@@ -53,7 +53,7 @@ const val PERMISSIONS_OK = """
     "loki": 4
   },
   {
-    "id": "add-oauth-service",
+    "_id": "add-oauth-service",
     "roles": [
       "admin"
     ],
@@ -65,7 +65,7 @@ const val PERMISSIONS_OK = """
     "loki": 5
   },
   {
-    "id": "add-user",
+    "_id": "add-user",
     "roles": [
       "admin"
     ],
@@ -77,7 +77,7 @@ const val PERMISSIONS_OK = """
     "loki": 6
   },
   {
-    "id": "add-user-to-any-c-room",
+    "_id": "add-user-to-any-c-room",
     "roles": [
       "admin"
     ],
@@ -90,7 +90,7 @@ const val PERMISSIONS_OK = """
     "loki": 7
   },
   {
-    "id": "add-user-to-any-p-room",
+    "_id": "add-user-to-any-p-room",
     "roles": [],
     "_updatedAt": "2017-02-03T14:22:56.088Z",
     "meta": {
@@ -101,7 +101,7 @@ const val PERMISSIONS_OK = """
     "loki": 8
   },
   {
-    "id": "add-user-to-joined-room",
+    "_id": "add-user-to-joined-room",
     "roles": [
       "admin",
       "owner",
@@ -116,7 +116,7 @@ const val PERMISSIONS_OK = """
     "loki": 9
   },
   {
-    "id": "archive-room",
+    "_id": "archive-room",
     "roles": [
       "admin",
       "owner"
@@ -129,7 +129,7 @@ const val PERMISSIONS_OK = """
     "loki": 10
   },
   {
-    "id": "assign-admin-role",
+    "_id": "assign-admin-role",
     "roles": [
       "admin"
     ],
@@ -141,7 +141,7 @@ const val PERMISSIONS_OK = """
     "loki": 11
   },
   {
-    "id": "auto-translate",
+    "_id": "auto-translate",
     "roles": [
       "admin"
     ],
@@ -154,7 +154,7 @@ const val PERMISSIONS_OK = """
     "loki": 12
   },
   {
-    "id": "ban-user",
+    "_id": "ban-user",
     "roles": [
       "admin",
       "moderator",
@@ -168,7 +168,7 @@ const val PERMISSIONS_OK = """
     "loki": 13
   },
   {
-    "id": "bulk-create-c",
+    "_id": "bulk-create-c",
     "roles": [
       "admin"
     ],
@@ -180,7 +180,7 @@ const val PERMISSIONS_OK = """
     "loki": 14
   },
   {
-    "id": "bulk-register-user",
+    "_id": "bulk-register-user",
     "roles": [
       "admin"
     ],
@@ -192,7 +192,7 @@ const val PERMISSIONS_OK = """
     "loki": 15
   },
   {
-    "id": "clean-channel-history",
+    "_id": "clean-channel-history",
     "roles": [
       "admin"
     ],
@@ -205,7 +205,7 @@ const val PERMISSIONS_OK = """
     "loki": 16
   },
   {
-    "id": "close-livechat-room",
+    "_id": "close-livechat-room",
     "roles": [
       "livechat-agent",
       "livechat-manager",
@@ -221,7 +221,7 @@ const val PERMISSIONS_OK = """
     "loki": 17
   },
   {
-    "id": "close-others-livechat-room",
+    "_id": "close-others-livechat-room",
     "roles": [
       "livechat-manager",
       "admin"
@@ -236,7 +236,7 @@ const val PERMISSIONS_OK = """
     "loki": 18
   },
   {
-    "id": "create-c",
+    "_id": "create-c",
     "roles": [
       "admin",
       "user",
@@ -251,7 +251,7 @@ const val PERMISSIONS_OK = """
     "loki": 19
   },
   {
-    "id": "create-d",
+    "_id": "create-d",
     "roles": [
       "admin",
       "user",
@@ -266,7 +266,7 @@ const val PERMISSIONS_OK = """
     "loki": 20
   },
   {
-    "id": "create-p",
+    "_id": "create-p",
     "roles": [
       "admin",
       "user",
@@ -281,7 +281,7 @@ const val PERMISSIONS_OK = """
     "loki": 21
   },
   {
-    "id": "create-user",
+    "_id": "create-user",
     "roles": [
       "admin"
     ],
@@ -293,7 +293,7 @@ const val PERMISSIONS_OK = """
     "loki": 22
   },
   {
-    "id": "delete-c",
+    "_id": "delete-c",
     "roles": [
       "admin",
       "owner"
@@ -307,7 +307,7 @@ const val PERMISSIONS_OK = """
     "loki": 23
   },
   {
-    "id": "delete-d",
+    "_id": "delete-d",
     "roles": [
       "admin"
     ],
@@ -319,7 +319,7 @@ const val PERMISSIONS_OK = """
     "loki": 24
   },
   {
-    "id": "delete-message",
+    "_id": "delete-message",
     "roles": [
       "admin",
       "moderator",
@@ -333,7 +333,7 @@ const val PERMISSIONS_OK = """
     "loki": 25
   },
   {
-    "id": "delete-p",
+    "_id": "delete-p",
     "roles": [
       "admin",
       "owner"
@@ -347,7 +347,7 @@ const val PERMISSIONS_OK = """
     "loki": 26
   },
   {
-    "id": "delete-user",
+    "_id": "delete-user",
     "roles": [
       "admin"
     ],
@@ -359,7 +359,7 @@ const val PERMISSIONS_OK = """
     "loki": 27
   },
   {
-    "id": "edit-livechat-settings",
+    "_id": "edit-livechat-settings",
     "roles": [
       "livechat-manager"
     ],
@@ -371,7 +371,7 @@ const val PERMISSIONS_OK = """
     "loki": 28
   },
   {
-    "id": "edit-message",
+    "_id": "edit-message",
     "roles": [
       "admin",
       "moderator",
@@ -385,7 +385,7 @@ const val PERMISSIONS_OK = """
     "loki": 29
   },
   {
-    "id": "edit-other-user-active-status",
+    "_id": "edit-other-user-active-status",
     "roles": [
       "admin"
     ],
@@ -397,7 +397,7 @@ const val PERMISSIONS_OK = """
     "loki": 30
   },
   {
-    "id": "edit-other-user-info",
+    "_id": "edit-other-user-info",
     "roles": [
       "admin"
     ],
@@ -410,7 +410,7 @@ const val PERMISSIONS_OK = """
     "loki": 31
   },
   {
-    "id": "edit-other-user-password",
+    "_id": "edit-other-user-password",
     "roles": [
       "admin"
     ],
@@ -422,7 +422,7 @@ const val PERMISSIONS_OK = """
     "loki": 32
   },
   {
-    "id": "edit-privileged-setting",
+    "_id": "edit-privileged-setting",
     "roles": [
       "admin"
     ],
@@ -434,7 +434,7 @@ const val PERMISSIONS_OK = """
     "loki": 33
   },
   {
-    "id": "edit-room",
+    "_id": "edit-room",
     "roles": [
       "admin",
       "moderator",
@@ -448,7 +448,7 @@ const val PERMISSIONS_OK = """
     "loki": 34
   },
   {
-    "id": "force-delete-message",
+    "_id": "force-delete-message",
     "roles": [
       "admin",
       "owner"
@@ -462,7 +462,7 @@ const val PERMISSIONS_OK = """
     "loki": 35
   },
   {
-    "id": "join-without-join-code",
+    "_id": "join-without-join-code",
     "roles": [
       "admin",
       "bot"
@@ -476,7 +476,7 @@ const val PERMISSIONS_OK = """
     "loki": 36
   },
   {
-    "id": "mail-messages",
+    "_id": "mail-messages",
     "roles": [
       "admin",
       "owner"
@@ -491,7 +491,7 @@ const val PERMISSIONS_OK = """
     "loki": 37
   },
   {
-    "id": "manage-assets",
+    "_id": "manage-assets",
     "roles": [
       "admin"
     ],
@@ -503,7 +503,7 @@ const val PERMISSIONS_OK = """
     "loki": 38
   },
   {
-    "id": "manage-emoji",
+    "_id": "manage-emoji",
     "roles": [
       "admin"
     ],
@@ -516,7 +516,7 @@ const val PERMISSIONS_OK = """
     "loki": 39
   },
   {
-    "id": "manage-integrations",
+    "_id": "manage-integrations",
     "roles": [
       "admin",
       "bot"
@@ -529,7 +529,7 @@ const val PERMISSIONS_OK = """
     "loki": 40
   },
   {
-    "id": "manage-oauth-apps",
+    "_id": "manage-oauth-apps",
     "roles": [
       "admin"
     ],
@@ -541,7 +541,7 @@ const val PERMISSIONS_OK = """
     "loki": 41
   },
   {
-    "id": "manage-own-integrations",
+    "_id": "manage-own-integrations",
     "roles": [
       "bot"
     ],
@@ -553,7 +553,7 @@ const val PERMISSIONS_OK = """
     "loki": 42
   },
   {
-    "id": "manage-sounds",
+    "_id": "manage-sounds",
     "roles": [
       "admin"
     ],
@@ -567,7 +567,7 @@ const val PERMISSIONS_OK = """
     "loki": 43
   },
   {
-    "id": "mention-all",
+    "_id": "mention-all",
     "roles": [
       "admin",
       "moderator",
@@ -583,7 +583,7 @@ const val PERMISSIONS_OK = """
     "loki": 44
   },
   {
-    "id": "mute-user",
+    "_id": "mute-user",
     "roles": [
       "admin",
       "moderator",
@@ -597,7 +597,7 @@ const val PERMISSIONS_OK = """
     "loki": 45
   },
   {
-    "id": "pin-message",
+    "_id": "pin-message",
     "roles": [
       "owner",
       "moderator",
@@ -613,7 +613,7 @@ const val PERMISSIONS_OK = """
     "loki": 46
   },
   {
-    "id": "post-readonly",
+    "_id": "post-readonly",
     "roles": [
       "admin",
       "owner",
@@ -629,7 +629,7 @@ const val PERMISSIONS_OK = """
     "loki": 47
   },
   {
-    "id": "preview-c-room",
+    "_id": "preview-c-room",
     "roles": [
       "admin",
       "user",
@@ -644,7 +644,7 @@ const val PERMISSIONS_OK = """
     "loki": 48
   },
   {
-    "id": "receive-livechat",
+    "_id": "receive-livechat",
     "roles": [
       "livechat-agent"
     ],
@@ -656,7 +656,7 @@ const val PERMISSIONS_OK = """
     "loki": 49
   },
   {
-    "id": "remove-user",
+    "_id": "remove-user",
     "roles": [
       "admin",
       "moderator",
@@ -670,7 +670,7 @@ const val PERMISSIONS_OK = """
     "loki": 50
   },
   {
-    "id": "run-import",
+    "_id": "run-import",
     "roles": [
       "admin"
     ],
@@ -682,7 +682,7 @@ const val PERMISSIONS_OK = """
     "loki": 51
   },
   {
-    "id": "run-migration",
+    "_id": "run-migration",
     "roles": [
       "admin"
     ],
@@ -694,7 +694,7 @@ const val PERMISSIONS_OK = """
     "loki": 52
   },
   {
-    "id": "save-others-livechat-room-info",
+    "_id": "save-others-livechat-room-info",
     "roles": [
       "livechat-manager"
     ],
@@ -708,7 +708,7 @@ const val PERMISSIONS_OK = """
     "loki": 53
   },
   {
-    "id": "set-moderator",
+    "_id": "set-moderator",
     "roles": [
       "admin",
       "owner"
@@ -721,7 +721,7 @@ const val PERMISSIONS_OK = """
     "loki": 54
   },
   {
-    "id": "set-owner",
+    "_id": "set-owner",
     "roles": [
       "admin",
       "owner"
@@ -734,7 +734,7 @@ const val PERMISSIONS_OK = """
     "loki": 55
   },
   {
-    "id": "set-react-when-readonly",
+    "_id": "set-react-when-readonly",
     "roles": [
       "admin",
       "owner"
@@ -749,7 +749,7 @@ const val PERMISSIONS_OK = """
     "loki": 56
   },
   {
-    "id": "set-readonly",
+    "_id": "set-readonly",
     "roles": [
       "admin",
       "owner"
@@ -764,7 +764,7 @@ const val PERMISSIONS_OK = """
     "loki": 57
   },
   {
-    "id": "snippet-message",
+    "_id": "snippet-message",
     "roles": [
       "owner",
       "moderator",
@@ -780,7 +780,7 @@ const val PERMISSIONS_OK = """
     "loki": 58
   },
   {
-    "id": "unarchive-room",
+    "_id": "unarchive-room",
     "roles": [
       "admin",
       "owner"
@@ -794,7 +794,7 @@ const val PERMISSIONS_OK = """
     "loki": 59
   },
   {
-    "id": "user-generate-access-token",
+    "_id": "user-generate-access-token",
     "roles": [
       "admin"
     ],
@@ -807,7 +807,7 @@ const val PERMISSIONS_OK = """
     "loki": 60
   },
   {
-    "id": "view-c-room",
+    "_id": "view-c-room",
     "roles": [
       "admin",
       "user",
@@ -823,7 +823,7 @@ const val PERMISSIONS_OK = """
     "loki": 61
   },
   {
-    "id": "view-d-room",
+    "_id": "view-d-room",
     "roles": [
       "admin",
       "user"
@@ -836,7 +836,7 @@ const val PERMISSIONS_OK = """
     "loki": 62
   },
   {
-    "id": "view-full-other-user-info",
+    "_id": "view-full-other-user-info",
     "roles": [
       "admin"
     ],
@@ -849,7 +849,7 @@ const val PERMISSIONS_OK = """
     "loki": 63
   },
   {
-    "id": "view-history",
+    "_id": "view-history",
     "roles": [
       "user",
       "guest",
@@ -864,7 +864,7 @@ const val PERMISSIONS_OK = """
     "loki": 64
   },
   {
-    "id": "view-join-code",
+    "_id": "view-join-code",
     "roles": [
       "admin"
     ],
@@ -877,7 +877,7 @@ const val PERMISSIONS_OK = """
     "loki": 65
   },
   {
-    "id": "view-joined-room",
+    "_id": "view-joined-room",
     "roles": [
       "guest",
       "anonymous"
@@ -891,7 +891,7 @@ const val PERMISSIONS_OK = """
     "loki": 66
   },
   {
-    "id": "view-l-room",
+    "_id": "view-l-room",
     "roles": [
       "livechat-agent",
       "livechat-manager",
@@ -907,7 +907,7 @@ const val PERMISSIONS_OK = """
     "loki": 67
   },
   {
-    "id": "view-livechat-manager",
+    "_id": "view-livechat-manager",
     "roles": [
       "livechat-manager",
       "admin"
@@ -922,7 +922,7 @@ const val PERMISSIONS_OK = """
     "loki": 68
   },
   {
-    "id": "view-livechat-rooms",
+    "_id": "view-livechat-rooms",
     "roles": [
       "livechat-manager",
       "admin"
@@ -937,7 +937,7 @@ const val PERMISSIONS_OK = """
     "loki": 69
   },
   {
-    "id": "view-logs",
+    "_id": "view-logs",
     "roles": [
       "admin"
     ],
@@ -949,7 +949,7 @@ const val PERMISSIONS_OK = """
     "loki": 70
   },
   {
-    "id": "view-other-user-channels",
+    "_id": "view-other-user-channels",
     "roles": [
       "admin"
     ],
@@ -961,7 +961,7 @@ const val PERMISSIONS_OK = """
     "loki": 71
   },
   {
-    "id": "view-p-room",
+    "_id": "view-p-room",
     "roles": [
       "admin",
       "user",
@@ -976,7 +976,7 @@ const val PERMISSIONS_OK = """
     "loki": 72
   },
   {
-    "id": "view-privileged-setting",
+    "_id": "view-privileged-setting",
     "roles": [
       "admin"
     ],
@@ -988,7 +988,7 @@ const val PERMISSIONS_OK = """
     "loki": 73
   },
   {
-    "id": "view-room-administration",
+    "_id": "view-room-administration",
     "roles": [
       "admin"
     ],
@@ -1000,7 +1000,7 @@ const val PERMISSIONS_OK = """
     "loki": 74
   },
   {
-    "id": "view-statistics",
+    "_id": "view-statistics",
     "roles": [
       "admin"
     ],
@@ -1012,7 +1012,7 @@ const val PERMISSIONS_OK = """
     "loki": 75
   },
   {
-    "id": "view-user-administration",
+    "_id": "view-user-administration",
     "roles": [
       "admin"
     ],
@@ -1024,7 +1024,7 @@ const val PERMISSIONS_OK = """
     "loki": 76
   },
   {
-    "id": "send-many-messages",
+    "_id": "send-many-messages",
     "roles": [
       "admin",
       "bot"
@@ -1038,7 +1038,7 @@ const val PERMISSIONS_OK = """
     "loki": 77
   },
   {
-    "id": "set-leader",
+    "_id": "set-leader",
     "roles": [
       "admin",
       "owner"
@@ -1052,7 +1052,7 @@ const val PERMISSIONS_OK = """
     "loki": 78
   },
   {
-    "id": "view-outside-room",
+    "_id": "view-outside-room",
     "roles": [
       "admin",
       "owner",
@@ -1068,7 +1068,7 @@ const val PERMISSIONS_OK = """
     "loki": 79
   },
   {
-    "id": "mention-here",
+    "_id": "mention-here",
     "roles": [
       "admin",
       "owner",
@@ -1084,7 +1084,7 @@ const val PERMISSIONS_OK = """
     "loki": 80
   },
   {
-    "id": "manage-apps",
+    "_id": "manage-apps",
     "roles": [
       "admin"
     ],
