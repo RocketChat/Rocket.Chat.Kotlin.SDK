@@ -7,6 +7,6 @@ import se.ansman.kotshi.JsonSerializable
 data class Command(
     val command: String,
     val params: String?,
-    val description: String?,
-    @JsonDefaultValueBoolean(false) val clientOnly: Boolean
+    val description: String? = null,
+    @JsonDefaultValueBoolean(false) val clientOnly: Boolean = false
 )
