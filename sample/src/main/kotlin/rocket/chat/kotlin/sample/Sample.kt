@@ -69,16 +69,7 @@ fun main(args: Array<String>) {
 
     // using coroutines
     val job = launch(CommonPool) {
-//        val configs = client.configurations()
-//        logger.debug("Configurations: $configs")
-//
-          //val settings = client.settings()
-//        logger.debug("Settings: $settings")
-//        logger.debug("Site url: ${settings["Site_Url"]}")
-//        val value = settings["Site_Url"]
-//        logger.debug("Value: ${value?.value}")
 
-        //val token = client.login("testuser", "testpass")
         val token = client.login("luciofm-testing", "vpnfe5lnv!")
         logger.debug("Login: ${token.userId} - ${token.authToken}")
 
@@ -109,6 +100,13 @@ fun main(args: Array<String>) {
             for (subscription in client.subscriptionsChannel) {
                 logger.debug("Subscription: $subscription")
             }
+        }
+
+        launch {
+            delay(10000)
+            client.setConnectionStatus(UserStatus.Online)
+            delay(2000)
+            client.setDefaultStatus(UserStatus.Away)
         }
 
         client.connect()
