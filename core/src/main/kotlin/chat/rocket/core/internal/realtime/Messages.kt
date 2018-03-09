@@ -53,11 +53,11 @@ internal fun unsubscribeMessage(id: String): String {
 }
 
 internal fun defaultStatusMessage(id: String, status: UserStatus): String {
-    return newMessage("UserPresence:setDefaultStatus", id, "\"${status.value}\"")
+    return newMessage("UserPresence:setDefaultStatus", id, "\"$status\"")
 }
 
 internal fun connectionStatusMessage(id: String, status: UserStatus): String {
-    return newMessage("UserPresence:${status.value}", id, "")
+    return newMessage("UserPresence:$status", id, "")
 }
 
 internal const val CONNECT_MESSAGE = "{\"msg\":\"connect\",\"version\":\"1\",\"support\":[\"1\",\"pre2\",\"pre1\"]}"

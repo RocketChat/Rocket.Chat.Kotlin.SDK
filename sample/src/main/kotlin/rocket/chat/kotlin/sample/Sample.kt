@@ -104,9 +104,9 @@ fun main(args: Array<String>) {
 
         launch {
             delay(10000)
-            client.setConnectionStatus(UserStatus.ONLINE)
+            client.setConnectionStatus(UserStatus.Online)
             delay(2000)
-            client.setDefaultStatus(UserStatus.AWAY)
+            client.setDefaultStatus(UserStatus.Away)
         }
 
         client.connect()
