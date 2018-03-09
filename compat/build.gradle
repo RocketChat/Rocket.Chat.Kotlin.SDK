@@ -9,8 +9,8 @@ apply plugin: 'org.jetbrains.dokka'
 apply plugin: "org.jmailen.kotlinter"
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:${versions.kotlin}"
-    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.19.3'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}"
+    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutine}"
 
     compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
 

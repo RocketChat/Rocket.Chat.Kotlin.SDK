@@ -7,7 +7,9 @@ import se.ansman.kotshi.JsonSerializable
 data class SocketMessage(
         @Json(name = "msg") val type: MessageType,
         val id: String?,
-        val collection: String?
+        val collection: String?,
+        @Json(name  = "reason")
+        val errorReason: String?
 )
 
 enum class MessageType {
@@ -30,5 +32,7 @@ enum class MessageType {
     @Json(name = "ping")
     PING,
     @Json(name = "pong")
-    PONG
+    PONG,
+    @Json(name = "error")
+    ERROR
 }

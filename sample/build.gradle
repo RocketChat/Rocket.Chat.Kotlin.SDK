@@ -9,8 +9,8 @@ apply plugin: 'kotlin'
 sourceCompatibility = 1.8
 
 dependencies {
-    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.19.3'
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:${versions.kotlin}"
+    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutine}"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}"
 
     compile 'org.json:json:20090211'
 
