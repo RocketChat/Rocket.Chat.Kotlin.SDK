@@ -36,7 +36,8 @@ data class Message(
         override val channels: List<SimpleRoom>?,
         val attachments: List<Attachment>?,
         @JsonDefaultValueBoolean(false)
-        val pinned: Boolean
+        val pinned: Boolean,
+        val reaction: List<Reaction>?
 ) : BaseMessage
 
 @FallbackSealedClass(name = "Unspecified", fieldName = "rawType")

@@ -42,6 +42,7 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
             // XXX - MAKE SURE TO KEEP CommonJsonAdapterFactory and CoreJsonAdapterFactory as the latest Adapters...
             .add(CommonJsonAdapterFactory.INSTANCE)
             .add(CoreJsonAdapterFactory.INSTANCE)
+            .add(ReactionsAdapter())
             .build()
 
     internal lateinit var restUrl: HttpUrl
