@@ -261,12 +261,13 @@ suspend fun RocketChatClient.history(roomId: String,
 }
 
 /**
- * Send a reaction to an associated message.
+ * Toggle a reaction to an associated message. If the message already has an associated :vulcan: reaction it will
+ * clear it or else it will request server to add one.
  *
- * @param messageId The message id to react to.
- * @param emoji The emoji to react with.
+ * @param messageId The message id to reaction refers.
+ * @param emoji The emoji to react with or clear.
  */
-suspend fun RocketChatClient.react(messageId: String, emoji: String): Boolean = withContext(CommonPool) {
+suspend fun RocketChatClient.toggleReaction(messageId: String, emoji: String): Boolean = withContext(CommonPool) {
     val url = requestUrl(restUrl, "chat.react").build()
 
     val payload = ReactionPayload(messageId, emoji)

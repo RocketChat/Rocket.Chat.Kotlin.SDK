@@ -210,7 +210,7 @@ class MessagesTest {
                 .once()
 
         runBlocking {
-            val result = sut.react("FCHGvHLyanhbaWjpxWz", "vulcan")
+            val result = sut.toggleReaction("FCHGvHLyanhbaWjpxWz", "vulcan")
             assertThat(result, isEqualTo(true))
         }
     }
