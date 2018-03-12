@@ -12,7 +12,7 @@ data class Myself(
         override val name: String?,
         val status: UserStatus?,
         val statusConnection: UserStatus?,
-        val utcOffset: Float,
+        val utcOffset: Float?,
         val active: Boolean,
         val emails: List<Email>?
 ) : BaseUser
