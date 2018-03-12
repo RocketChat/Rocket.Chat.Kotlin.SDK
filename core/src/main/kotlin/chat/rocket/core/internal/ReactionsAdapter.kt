@@ -1,17 +1,22 @@
 package chat.rocket.core.internal
 
-import chat.rocket.core.model.Reaction
+import chat.rocket.core.model.Reactions
 import com.squareup.moshi.*
 
-class ReactionsAdapter : JsonAdapter<List<Reaction>>() {
+internal class ReactionsAdapter : JsonAdapter<Reactions>() {
 
     @FromJson
-    override fun fromJson(reader: JsonReader): List<Reaction> {
-        val reactions = mutableListOf<Reaction>()
+    override fun fromJson(reader: JsonReader): Reactions {
+        val reactions = Reactions()
+        if (reader.peek() == JsonReader.Token.BEGIN_ARRAY) {
+            reader.beginArray()
+            reader.endArray()
+            return reactions
+        }
         reader.beginObject()
         while (reader.hasNext()) {
             val usernames = mutableListOf<String>()
-            val name = reader.nextName()
+            val shortname = reader.nextName()
             reader.beginObject()
             if (reader.nextName() == "usernames") {
                 reader.beginArray()
@@ -22,14 +27,14 @@ class ReactionsAdapter : JsonAdapter<List<Reaction>>() {
                 reader.endArray()
             }
             reader.endObject()
-            reactions.add(Reaction(name, usernames))
+            reactions.put(shortname, usernames)
         }
         reader.endObject()
         return reactions
     }
 
     @ToJson
-    override fun toJson(writer: JsonWriter, value: List<Reaction>?) {
+    override fun toJson(writer: JsonWriter, value: Reactions?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }
