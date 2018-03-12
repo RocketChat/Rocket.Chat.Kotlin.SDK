@@ -1,10 +1,12 @@
 package chat.rocket.core.internal.rest
 
+import chat.rocket.common.model.BaseResult
 import chat.rocket.common.model.RoomType
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.model.DeletePayload
 import chat.rocket.core.internal.model.MessagePayload
+import chat.rocket.core.internal.model.ReactionPayload
 import chat.rocket.core.model.DeleteResult
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.PagedResult
@@ -256,4 +258,23 @@ suspend fun RocketChatClient.history(roomId: String,
     val result = handleRestCall<RestResult<List<Message>>>(request, type)
 
     return@withContext PagedResult<List<Message>>(result.result(), result.total() ?: -1, result.offset() ?: -1)
+}
+
+/**
+ * Send a reaction to an associated message.
+ *
+ * @param messageId The message id to react to.
+ * @param emoji The emoji to react with.
+ */
+suspend fun RocketChatClient.react(messageId: String, emoji: String): Boolean = withContext(CommonPool) {
+    val url = requestUrl(restUrl, "chat.react").build()
+
+    val payload = ReactionPayload(messageId, emoji)
+    val adapter = moshi.adapter(ReactionPayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val request = requestBuilder(url).post(body).build()
+
+    return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }

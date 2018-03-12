@@ -201,6 +201,20 @@ class MessagesTest {
         }
     }
 
+    @Test
+    fun `react() should return true and yield no exceptions`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/chat.react")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.react("FCHGvHLyanhbaWjpxWz", "vulcan")
+            assertThat(result, isEqualTo(true))
+        }
+    }
+
     @After
     fun shutdown() {
         mockServer.shutdown()
