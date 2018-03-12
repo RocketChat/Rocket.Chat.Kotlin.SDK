@@ -4,10 +4,11 @@ import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
+import chat.rocket.core.internal.model.CommandPayload
+import chat.rocket.core.model.Command
 import io.fabric8.mockwebserver.DefaultMockServer
 import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.OkHttpClient
-import org.hamcrest.CoreMatchers.`is` as isEqualTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
 import org.junit.Before
@@ -15,6 +16,7 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
+import org.hamcrest.CoreMatchers.`is` as isEqualTo
 
 class CommandsTest {
     private lateinit var mockServer: DefaultMockServer
@@ -88,6 +90,20 @@ class CommandsTest {
                 assertThat(command, isEqualTo("unarchive"))
                 assertThat(clientOnly, isEqualTo(false))
             }
+        }
+    }
+
+    @Test
+    fun `runCommand() should signal the backend to run the specified command`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/commands.run")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.runCommand(Command("unmute", "@user123"), "ByehQjC44FwMeiLbX")
+            assertThat(result, isEqualTo(true))
         }
     }
 
