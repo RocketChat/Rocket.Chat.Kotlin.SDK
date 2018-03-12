@@ -370,6 +370,85 @@ class LoginTest {
     }
 
     @Test
+    fun `loginWithSaml() should succeed with right credentials`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/login")
+                .andReturn(200, LOGIN_SUCCESS)
+                .once()
+
+        runBlocking {
+            val token = sut.loginWithSaml("12345678901234567")
+            assertThat(token, isEqualTo(authToken))
+            assertThat(token.userId, isEqualTo("userId"))
+            assertThat(token.authToken, isEqualTo("authToken"))
+
+            verify(tokenProvider).save(check {
+                assertThat(it.userId, isEqualTo("userId"))
+                assertThat(it.authToken, isEqualTo("authToken"))
+            })
+        }
+    }
+
+    @Test
+    fun `loginWithSaml() should fail with RocketChatAuthException on wrong credentials`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/login")
+                .andReturn(401, LOGIN_ERROR)
+                .once()
+
+        runBlocking {
+            try {
+                sut.loginWithSaml("12345678901234567")
+
+                throw RuntimeException("unreachable code")
+            } catch (ex: Exception) {
+                assertThat(ex, isEqualTo(instanceOf(RocketChatAuthException::class.java)))
+                assertThat(ex.message, isEqualTo("Unauthorized"))
+            }
+            verify(tokenProvider, never()).save(check { })
+        }
+    }
+
+    @Test
+    fun `loginWithSaml() should fail with RocketChatInvalidResponseException on invalid response`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/login")
+                .andReturn(200, "NOT A JSON")
+                .once()
+
+        runBlocking {
+            try {
+                sut.loginWithSaml("12345678901234567")
+
+                throw RuntimeException("unreachable code")
+            } catch (ex: Exception) {
+                assertThat(ex, isEqualTo(instanceOf(RocketChatInvalidResponseException::class.java)))
+                assertThat(ex.message, isEqualTo("Use JsonReader.setLenient(true) to accept malformed JSON at path $"))
+                assertThat(ex.cause, isEqualTo(instanceOf(JsonEncodingException::class.java)))
+            }
+
+            verify(tokenProvider, never()).save(check { })
+        }
+    }
+
+    @Test
+    fun `loginWithSaml() should fail with RocketChatApiException when response is not 200 OK`() {
+        runBlocking {
+            try {
+                sut.loginWithSaml("12345678901234567")
+
+                throw RuntimeException("unreachable code")
+            } catch (ex: Exception) {
+                assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
+            }
+            verify(tokenProvider, never()).save(check { })
+        }
+    }
+
+    @Test
     fun `signup() should succeed with valid parameters`() {
         mockServer.expect()
                 .post()

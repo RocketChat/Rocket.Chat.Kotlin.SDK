@@ -136,6 +136,36 @@ suspend fun RocketChatClient.loginWithCas(casCredential: String): Token = withCo
 }
 
 /**
+ * Login through SAML.
+ * On success this will also call [chat.rocket.core.TokenRepository].save(token)
+ *
+ * @param samlCredential The SAML credential to authenticate with.
+ *
+ * @return [Token]
+ * @throws [RocketChatException] on errors.
+ * @see [Token]
+ * @see [chat.rocket.core.TokenRepository]
+ */
+suspend fun RocketChatClient.loginWithSaml(samlCredential: String): Token = withContext(CommonPool) {
+    val payload = SamlLoginPayload(true, samlCredential)
+    val adapter = moshi.adapter(SamlLoginPayload::class.java)
+
+    val payloadBody = adapter.toJson(payload)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val url = requestUrl(restUrl, "login").build()
+
+    val request = Request.Builder().url(url).post(body).build()
+
+    val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
+    val result = handleRestCall<RestResult<Token>>(request, type).result()
+
+    tokenRepository.save(result)
+
+    result
+}
+
+/**
  * Registers a new user within the server.
  * Note, this doesn't authenticate the user.
  * After a successful registration you still need to call [login].
