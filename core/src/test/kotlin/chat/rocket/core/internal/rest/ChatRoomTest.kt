@@ -14,6 +14,7 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
+import kotlin.test.assertTrue
 
 class ChatRoomTest {
     private lateinit var mockServer: DefaultMockServer
@@ -93,6 +94,20 @@ class ChatRoomTest {
 
         runBlocking {
             sut.getMembers(roomId="GENERAL", roomType = RoomType.CHANNEL, offset = 0, count = 1)
+        }
+    }
+
+    @Test
+    fun `joinChat() should succeed without throwing`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/channels.join")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.joinChat(roomId="GENERAL")
+            assertTrue(result)
         }
     }
 }

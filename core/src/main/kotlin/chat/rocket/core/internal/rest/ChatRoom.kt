@@ -1,9 +1,11 @@
 package chat.rocket.core.internal.rest
 
+import chat.rocket.common.model.BaseResult
 import chat.rocket.common.model.RoomType
 import chat.rocket.common.model.User
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
+import chat.rocket.core.internal.model.ChatRoomJoinPayload
 import chat.rocket.core.internal.model.ChatRoomPayload
 import chat.rocket.core.model.PagedResult
 import com.squareup.moshi.Types
@@ -39,7 +41,7 @@ suspend fun RocketChatClient.markAsRead(roomId: String) {
  * @param offset The offset to paging which specifies the first entry to return from a collection.
  * @param count The amount of item to return from a collection.
  */
-suspend fun RocketChatClient.getMembers(roomId: String,  roomType: RoomType, offset: Long, count: Long): PagedResult<List<User>> = withContext(CommonPool) {
+suspend fun RocketChatClient.getMembers(roomId: String, roomType: RoomType, offset: Long, count: Long): PagedResult<List<User>> = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "members"))
             .addQueryParameter("roomId", roomId)
             .addQueryParameter("offset", offset.toString())
@@ -53,4 +55,17 @@ suspend fun RocketChatClient.getMembers(roomId: String,  roomType: RoomType, off
     val result = handleRestCall<RestResult<List<User>>>(request, type)
 
     return@withContext PagedResult<List<User>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
+}
+
+suspend fun RocketChatClient.joinChat(roomId: String): Boolean = withContext(CommonPool) {
+    val payload = ChatRoomJoinPayload(roomId)
+    val adapter = moshi.adapter(ChatRoomJoinPayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val url = requestUrl(restUrl, "channels.join").build()
+    val request = requestBuilder(url).post(body).build()
+
+    return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
