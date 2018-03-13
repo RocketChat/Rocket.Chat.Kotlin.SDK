@@ -36,6 +36,8 @@ const val SPOTLIGHT_OK = """
 {"users":[{"_id":"chhtYqts4toAbrZa5","status":"offline","name":"Juli Aaron","username":".JULIUS."},{"_id":"XNC9LLDjDNHuTShaT","status":"offline","name":"0xBAADF00D","username":"0xBAADF00D"},{"_id":"X3C5EE8zJvaK5qf4R","status":"offline","name":"Chris Chan","username":"1111aaaa"},{"_id":"ham9RwxvovNiaYL86","status":"offline","name":"11qqaazz","username":"11qqaazz"},{"_id":"qan7vwcb8KdzqcDgt","status":"offline","name":"213123","username":"213123"}],"rooms":[{"_id":"s6To7BxcMCz7NhGbs","name":"....aaa","t":"c","lastMessage":{"_id":"bhDt3YP3QxThCrWTs","rid":"s6To7BxcMCz7NhGbs","msg":"anyone","ts":"2018-03-01T12:58:35.533Z","u":{"_id":"kkwJYjvX4AJwKQsDu","username":"KALI_x","name":"madest yut"},"mentions":[],"channels":[],"_updatedAt":"2018-03-01T12:58:35.611Z","sandstormSessionId":null}},{"_id":"6ajjqC89zxhAt2osE","name":"111aaabogie","t":"c"},{"_id":"EcnGDW25oXgAdKt55","name":"12aasdfasdf","t":"c"},{"_id":"b262hW5tRW5suK8oy","name":"3333aaa","t":"c"},{"_id":"kCbAciMgsEqXnnNqN","name":"Aa123123123","t":"c"}],"success":true}
 """
 
+const val CREATE_CHANNEL_SUCCESS ="{\"channel\":{\"_id\":\"JeJcd4PE9d9fvjakf\",\"name\":\"elf\",\"fname\":\"elf\",\"t\":\"c\",\"msgs\":0,\"u\":{\"_id\":\"MaBK2dquY8TbaH6d3\",\"username\":\"aniket03\"},\"customFields\":{},\"ts\":\"2018-03-13T14:42:46.849Z\",\"ro\":false,\"sysMes\":true,\"_updatedAt\":\"2018-03-13T14:42:46.850Z\"},\"success\":true}"
+
 const val ROLES_OK = """
 {
   "username": "rafaelks",
