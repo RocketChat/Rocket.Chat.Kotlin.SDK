@@ -9,7 +9,7 @@ import kotlinx.coroutines.experimental.withContext
 import okhttp3.Request
 import okhttp3.RequestBody
 
-suspend fun RocketChatClient.createChannel(roomType: RoomType, name: String, usersList: List<String>, readOnly: Boolean): CreateChannelResponse = withContext(CommonPool) {
+suspend fun RocketChatClient.createChannel(roomType: RoomType, name: String, usersList: List<String>?, readOnly: Boolean? = false): CreateChannelResponse = withContext(CommonPool) {
     val payload = CreateNewChannelPayload(name, usersList, readOnly)
     val adapter = moshi.adapter(CreateNewChannelPayload::class.java)
     val payloadBody = adapter.toJson(payload)
