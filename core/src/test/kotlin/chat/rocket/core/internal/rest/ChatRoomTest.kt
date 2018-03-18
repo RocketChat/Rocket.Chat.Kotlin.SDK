@@ -53,7 +53,7 @@ class ChatRoomTest {
                 .once()
 
         runBlocking {
-            sut.markAsRead(roomId="GENERAL")
+            sut.markAsRead(roomId = "GENERAL")
         }
     }
 
@@ -66,7 +66,7 @@ class ChatRoomTest {
                 .once()
 
         runBlocking {
-            sut.markAsRead(roomId="GENERAL")
+            sut.markAsRead(roomId = "GENERAL")
         }
     }
 
@@ -79,7 +79,7 @@ class ChatRoomTest {
                 .once()
 
         runBlocking {
-            val members = sut.getMembers(roomId="GENERAL", roomType = RoomType.CHANNEL, offset = 0, count = 1)
+            val members = sut.getMembers(roomId = "GENERAL", roomType = RoomType.CHANNEL, offset = 0, count = 1)
             System.out.println("Members: $members")
         }
     }
@@ -93,7 +93,7 @@ class ChatRoomTest {
                 .once()
 
         runBlocking {
-            sut.getMembers(roomId="GENERAL", roomType = RoomType.CHANNEL, offset = 0, count = 1)
+            sut.getMembers(roomId = "GENERAL", roomType = RoomType.CHANNEL, offset = 0, count = 1)
         }
     }
 
@@ -106,8 +106,50 @@ class ChatRoomTest {
                 .once()
 
         runBlocking {
-            val result = sut.joinChat(roomId="GENERAL")
+            val result = sut.joinChat(roomId = "GENERAL")
             assertTrue(result)
         }
     }
+
+    @Test
+    fun `queryUsers() should succeed without throwing`() {
+        mockServer.expect()
+                .get()
+                .withPath("api/v1/users.list?query={ \"name\": { \"\\u0024regex\": \"g\" } }")
+                .andReturn(200, QUERY_USERS_SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.queryUsers("g")
+        }
+    }
+
+    @Test
+    fun `queryUsers() should fail with RocketChatAuthException if not logged in`() {
+        mockServer.expect()
+                .get()
+                .withPath("api/v1/users.list?query={ \"name\": { \"\\u0024regex\": \"g\" } }")
+                .andReturn(401, MUST_BE_LOGGED_ERROR)
+                .once()
+
+        runBlocking {
+            val result = sut.queryUsers("g")
+        }
+    }
+
+    //request fails because the query param is malformed for eg '{ "name": { "$dummy": "g" } }'
+    // instead of '{ "name": { "$regex": "g" } }'
+    @Test
+    fun `queryUsers() should fail because of incorrect param`() {
+        mockServer.expect()
+                .get()
+                .withPath("api/v1/users.list?query={ \"name\": { \"\\u0024regex\": \"g\" } }")
+                .andReturn(400, INCORRECT_PARAM_PROVIDED)
+                .once()
+
+        runBlocking {
+            val result = sut.queryUsers("g")
+        }
+    }
+
 }
