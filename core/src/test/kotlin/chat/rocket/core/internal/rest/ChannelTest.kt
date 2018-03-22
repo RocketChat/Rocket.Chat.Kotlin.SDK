@@ -56,8 +56,7 @@ class ChannelTest {
                 .andReturn(200, CREATE_CHANNEL_SUCCESS)
 
         runBlocking {
-            val createChannel = sut.createChannel(roomType = RoomType.CHANNEL, name = "duplicate", usersList = listOf("aniket03"), readOnly = false)
-            assertThat(createChannel.status, isEqualTo(true))
+                sut.createChannel(roomType = RoomType.CHANNEL, name = "duplicate", usersList = listOf("aniket03"), readOnly = false)
         }
     }
 
