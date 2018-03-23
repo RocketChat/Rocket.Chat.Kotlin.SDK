@@ -174,11 +174,11 @@ suspend fun pinMessage(client: RocketChatClient) {
 
 class SimpleTokenRepository : TokenRepository {
     private var savedToken: Token? = null
-    override fun save(token: Token) {
+    override fun save(url: String, token: Token) {
         savedToken = token
     }
 
-    override fun get(): Token? {
+    override fun get(url: String): Token? {
         return savedToken
     }
 }

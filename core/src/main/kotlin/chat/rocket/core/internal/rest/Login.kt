@@ -38,7 +38,7 @@ suspend fun RocketChatClient.login(username: String, password: String, pin: Stri
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
     val result = handleRestCall<RestResult<Token>>(request, type).result()
 
-    tokenRepository.save(result)
+    tokenRepository.save(this.url, result)
 
     result
 }
@@ -69,7 +69,7 @@ suspend fun RocketChatClient.loginWithEmail(email: String, password: String, pin
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
     val result = handleRestCall<RestResult<Token>>(request, type).result()
 
-    tokenRepository.save(result)
+    tokenRepository.save(this.url, result)
 
     result
 }
@@ -100,7 +100,7 @@ suspend fun RocketChatClient.loginWithLdap(username: String, password: String): 
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
     val result = handleRestCall<RestResult<Token>>(request, type).result()
 
-    tokenRepository.save(result)
+    tokenRepository.save(this.url, result)
 
     result
 }
@@ -130,7 +130,7 @@ suspend fun RocketChatClient.loginWithCas(casCredential: String): Token = withCo
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
     val result = handleRestCall<RestResult<Token>>(request, type).result()
 
-    tokenRepository.save(result)
+    tokenRepository.save(this.url, result)
 
     result
 }
@@ -160,7 +160,7 @@ suspend fun RocketChatClient.loginWithSaml(samlCredential: String): Token = with
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
     val result = handleRestCall<RestResult<Token>>(request, type).result()
 
-    tokenRepository.save(result)
+    tokenRepository.save(this.url, result)
 
     result
 }

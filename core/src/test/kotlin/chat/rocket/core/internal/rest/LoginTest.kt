@@ -18,9 +18,9 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.never
+import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
 import org.hamcrest.CoreMatchers.`is` as isEqualTo
 
@@ -50,7 +50,7 @@ class LoginTest {
             platformLogger = PlatformLogger.NoOpLogger()
         }
 
-        `when`(tokenProvider.get()).thenReturn(authToken)
+        `when`(tokenProvider.get(sut.url)).thenReturn(authToken)
     }
 
     @Test
@@ -67,7 +67,7 @@ class LoginTest {
             assertThat(token.userId, isEqualTo("userId"))
             assertThat(token.authToken, isEqualTo("authToken"))
 
-            verify(tokenProvider).save(check {
+            verify(tokenProvider).save(ArgumentMatchers.anyString(), check {
                 assertThat(it.userId, isEqualTo("userId"))
                 assertThat(it.authToken, isEqualTo("authToken"))
             })
@@ -91,7 +91,7 @@ class LoginTest {
                 assertThat(ex, isEqualTo(instanceOf(RocketChatAuthException::class.java)))
                 assertThat(ex.message, isEqualTo("Unauthorized"))
             }
-            verify(tokenProvider, never()).save(check { })
+            verify(tokenProvider, never()).save(ArgumentMatchers.anyString(), check { })
         }
     }
 
@@ -114,7 +114,7 @@ class LoginTest {
                 assertThat(ex.cause, isEqualTo(instanceOf(JsonEncodingException::class.java)))
             }
 
-            verify(tokenProvider, never()).save(check { })
+            verify(tokenProvider, never()).save(ArgumentMatchers.anyString(), check { })
         }
     }
 
@@ -128,7 +128,7 @@ class LoginTest {
             } catch (ex: Exception) {
                 assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
             }
-            verify(tokenProvider, never()).save(check { })
+            verify(tokenProvider, never()).save(ArgumentMatchers.anyString(), check { })
         }
     }
 
@@ -146,7 +146,7 @@ class LoginTest {
             assertThat(token.userId, isEqualTo("userId"))
             assertThat(token.authToken, isEqualTo("authToken"))
 
-            verify(tokenProvider).save(check {
+            verify(tokenProvider).save(ArgumentMatchers.anyString(), check {
                 assertThat(it.userId, isEqualTo("userId"))
                 assertThat(it.authToken, isEqualTo("authToken"))
             })
@@ -170,7 +170,7 @@ class LoginTest {
                 assertThat(ex, isEqualTo(instanceOf(RocketChatAuthException::class.java)))
                 assertThat(ex.message, isEqualTo("Unauthorized"))
             }
-            verify(tokenProvider, never()).save(check { })
+            verify(tokenProvider, never()).save(ArgumentMatchers.anyString(), check { })
         }
     }
 
@@ -193,7 +193,7 @@ class LoginTest {
                 assertThat(ex.cause, isEqualTo(instanceOf(JsonEncodingException::class.java)))
             }
 
-            verify(tokenProvider, never()).save(check { })
+            verify(tokenProvider, never()).save(ArgumentMatchers.anyString(), check { })
         }
     }
 
@@ -207,7 +207,7 @@ class LoginTest {
             } catch (ex: Exception) {
                 assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
             }
-            verify(tokenProvider, never()).save(check { })
+            verify(tokenProvider, never()).save(ArgumentMatchers.anyString(), check { })
         }
     }
 
@@ -225,7 +225,7 @@ class LoginTest {
             assertThat(token.userId, isEqualTo("userId"))
             assertThat(token.authToken, isEqualTo("authToken"))
 
-            verify(tokenProvider).save(check {
+            verify(tokenProvider).save(ArgumentMatchers.anyString(), check {
                 assertThat(it.userId, isEqualTo("userId"))
                 assertThat(it.authToken, isEqualTo("authToken"))
             })
@@ -249,7 +249,7 @@ class LoginTest {
                 assertThat(ex, isEqualTo(instanceOf(RocketChatAuthException::class.java)))
                 assertThat(ex.message, isEqualTo("Unauthorized"))
             }
-            verify(tokenProvider, never()).save(check { })
+            verify(tokenProvider, never()).save(ArgumentMatchers.anyString(), check { })
         }
     }
 
@@ -272,7 +272,7 @@ class LoginTest {
                 assertThat(ex.cause, isEqualTo(instanceOf(JsonEncodingException::class.java)))
             }
 
-            verify(tokenProvider, never()).save(check { })
+            verify(tokenProvider, never()).save(ArgumentMatchers.anyString(), check { })
         }
     }
 
@@ -286,7 +286,7 @@ class LoginTest {
             } catch (ex: Exception) {
                 assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
             }
-            verify(tokenProvider, never()).save(check { })
+            verify(tokenProvider, never()).save(ArgumentMatchers.anyString(), check { })
         }
     }
 
@@ -304,7 +304,7 @@ class LoginTest {
             assertThat(token.userId, isEqualTo("userId"))
             assertThat(token.authToken, isEqualTo("authToken"))
 
-            verify(tokenProvider).save(check {
+            verify(tokenProvider).save(ArgumentMatchers.anyString(), check {
                 assertThat(it.userId, isEqualTo("userId"))
                 assertThat(it.authToken, isEqualTo("authToken"))
             })
@@ -328,7 +328,7 @@ class LoginTest {
                 assertThat(ex, isEqualTo(instanceOf(RocketChatAuthException::class.java)))
                 assertThat(ex.message, isEqualTo("Unauthorized"))
             }
-            verify(tokenProvider, never()).save(check { })
+            verify(tokenProvider, never()).save(ArgumentMatchers.anyString(), check { })
         }
     }
 
@@ -351,7 +351,7 @@ class LoginTest {
                 assertThat(ex.cause, isEqualTo(instanceOf(JsonEncodingException::class.java)))
             }
 
-            verify(tokenProvider, never()).save(check { })
+            verify(tokenProvider, never()).save(ArgumentMatchers.anyString(), check { })
         }
     }
 
@@ -365,7 +365,7 @@ class LoginTest {
             } catch (ex: Exception) {
                 assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
             }
-            verify(tokenProvider, never()).save(check { })
+            verify(tokenProvider, never()).save(ArgumentMatchers.anyString(), check { })
         }
     }
 
@@ -383,7 +383,7 @@ class LoginTest {
             assertThat(token.userId, isEqualTo("userId"))
             assertThat(token.authToken, isEqualTo("authToken"))
 
-            verify(tokenProvider).save(check {
+            verify(tokenProvider).save(ArgumentMatchers.anyString(), check {
                 assertThat(it.userId, isEqualTo("userId"))
                 assertThat(it.authToken, isEqualTo("authToken"))
             })
@@ -407,7 +407,7 @@ class LoginTest {
                 assertThat(ex, isEqualTo(instanceOf(RocketChatAuthException::class.java)))
                 assertThat(ex.message, isEqualTo("Unauthorized"))
             }
-            verify(tokenProvider, never()).save(check { })
+            verify(tokenProvider, never()).save(ArgumentMatchers.anyString(), check { })
         }
     }
 
@@ -430,7 +430,7 @@ class LoginTest {
                 assertThat(ex.cause, isEqualTo(instanceOf(JsonEncodingException::class.java)))
             }
 
-            verify(tokenProvider, never()).save(check { })
+            verify(tokenProvider, never()).save(ArgumentMatchers.anyString(), check { })
         }
     }
 
@@ -444,7 +444,7 @@ class LoginTest {
             } catch (ex: Exception) {
                 assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
             }
-            verify(tokenProvider, never()).save(check { })
+            verify(tokenProvider, never()).save(ArgumentMatchers.anyString(), check { })
         }
     }
 

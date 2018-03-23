@@ -169,7 +169,7 @@ class Socket(internal val client: RocketChatClient,
         when (message.type) {
             MessageType.CONNECTED -> {
                 setState(State.Authenticating())
-                login(client.tokenRepository.get())
+                login(client.tokenRepository.get(client.url))
             }
             else -> {
                 logger.warn {
