@@ -1,19 +1,20 @@
 package chat.rocket.core.internal.rest
 
 import chat.rocket.common.model.ServerInfo
+import chat.rocket.common.model.SettingsOauth
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.model.Value
+import chat.rocket.core.internal.model.ConfigurationsPayload
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
 import okhttp3.Request
-import se.ansman.kotshi.JsonSerializable
 
 suspend fun RocketChatClient.serverInfo(): ServerInfo = withContext(CommonPool) {
     val url = restUrl.newBuilder()
-            .addPathSegment("api")
-            .addPathSegment("info")
-            .build()
+        .addPathSegment("api")
+        .addPathSegment("info")
+        .build()
 
     val request = Request.Builder().url(url).get().build()
 
@@ -29,8 +30,10 @@ suspend fun RocketChatClient.configurations(): Map<String, Map<String, String>> 
 
     val request = Request.Builder().url(url).get().build()
 
-    val payload = handleRestCall<ConfigurationsPayload>(request,
-            ConfigurationsPayload::class.java)
+    val payload = handleRestCall<ConfigurationsPayload>(
+        request,
+        ConfigurationsPayload::class.java
+    )
 
     val result = HashMap<String, Map<String, String>>()
     payload.configurations.map { map ->
@@ -47,6 +50,23 @@ suspend fun RocketChatClient.configurations(): Map<String, Map<String, String>> 
     return@withContext result
 }
 
+/**
+ * A simple method, requires no authentication, that returns list of all available oauth services.
+ *
+ * @since 0.63.0
+ */
+suspend fun RocketChatClient.settingsOauth(): SettingsOauth = withContext(CommonPool) {
+    val url = restUrl.newBuilder()
+        .addPathSegment("api")
+        .addPathSegment("v1")
+        .addPathSegment("settings.oauth")
+        .build()
+
+    val request = Request.Builder().url(url).get().build()
+
+    handleRestCall<SettingsOauth>(request, SettingsOauth::class.java)
+}
+
 suspend fun RocketChatClient.settings(vararg filter: String): Map<String, Value<Any>> = withContext(CommonPool) {
     val url = restUrl.newBuilder().apply {
         addPathSegment("api")
@@ -57,18 +77,15 @@ suspend fun RocketChatClient.settings(vararg filter: String): Map<String, Value<
         if (filter.isNotEmpty()) {
             val adapter = moshi.adapter<List<String>>(Types.newParameterizedType(List::class.java, String::class.java))
             val fields = adapter.toJson(filter.asList())
-            addQueryParameter("query", "{\"_id\": {\"\$in\": " + fields + "}}")
+            addQueryParameter("query", "{\"_id\": {\"\$in\": $fields}}")
         }
     }.build()
 
     val request = Request.Builder().url(url).get().build()
 
-    val type = Types.newParameterizedType(Map::class.java, String::class.java,
-            Types.newParameterizedType(Value::class.java, Any::class.java))
+    val type = Types.newParameterizedType(
+        Map::class.java, String::class.java,
+        Types.newParameterizedType(Value::class.java, Any::class.java)
+    )
     handleRestCall<Map<String, Value<Any>>>(request, type)
 }
-
-@JsonSerializable
-data class ConfigurationsPayload(
-    val configurations: List<Map<String, String>>
-)
