@@ -5,7 +5,13 @@ import chat.rocket.common.model.Token
 import chat.rocket.common.model.User
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
-import chat.rocket.core.internal.model.*
+import chat.rocket.core.internal.model.CasLoginPayload
+import chat.rocket.core.internal.model.UsernameLoginPayload
+import chat.rocket.core.internal.model.EmailLoginPayload
+import chat.rocket.core.internal.model.LdapLoginPayload
+import chat.rocket.core.internal.model.SamlLoginPayload
+import chat.rocket.core.internal.model.SignUpPayload
+import chat.rocket.core.internal.model.Data
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
