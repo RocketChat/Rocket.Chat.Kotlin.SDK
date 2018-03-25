@@ -6,7 +6,7 @@ import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
 data class SocketToken(
-        @Json(name = "id") val userId: String,
-        @Json(name = "token") val authToken: String,
-        @Json(name = "tokenExpires") @ISO8601Date val expiresAt: Long?
+    @Json(name = "id") val userId: String,
+    @Json(name = "token") val authToken: String,
+    @Json(name = "tokenExpires") @ISO8601Date val expiresAt: Long?
 )

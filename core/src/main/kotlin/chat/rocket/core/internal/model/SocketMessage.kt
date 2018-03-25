@@ -5,11 +5,11 @@ import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
 data class SocketMessage(
-        @Json(name = "msg") val type: MessageType,
-        val id: String?,
-        val collection: String?,
-        @Json(name  = "reason")
-        val errorReason: String?
+    @Json(name = "msg") val type: MessageType,
+    val id: String?,
+    val collection: String?,
+    @Json(name = "reason")
+    val errorReason: String?
 )
 
 enum class MessageType {

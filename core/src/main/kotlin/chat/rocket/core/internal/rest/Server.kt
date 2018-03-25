@@ -70,5 +70,5 @@ suspend fun RocketChatClient.settings(vararg filter: String): Map<String, Value<
 
 @JsonSerializable
 data class ConfigurationsPayload(
-        val configurations: List<Map<String, String>>
+    val configurations: List<Map<String, String>>
 )

@@ -18,16 +18,17 @@ import chat.rocket.core.model.Room
 import chat.rocket.core.model.url.MetaJsonAdapter
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.experimental.channels.Channel
-import kotlinx.coroutines.experimental.launch
 import okhttp3.HttpUrl
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import java.security.InvalidParameterException
 
-class RocketChatClient private constructor(internal val httpClient: OkHttpClient,
-                                           baseUrl: String,
-                                           internal val tokenRepository: TokenRepository,
-                                           internal val logger: Logger) {
+class RocketChatClient private constructor(
+    internal val httpClient: OkHttpClient,
+    baseUrl: String,
+    internal val tokenRepository: TokenRepository,
+    internal val logger: Logger
+) {
 
     internal val moshi: Moshi = Moshi.Builder()
             .add(FallbackSealedClassJsonAdapter.ADAPTER_FACTORY)

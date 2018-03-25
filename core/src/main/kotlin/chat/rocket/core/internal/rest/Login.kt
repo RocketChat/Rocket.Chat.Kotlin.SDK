@@ -179,10 +179,12 @@ suspend fun RocketChatClient.loginWithSaml(samlCredential: String): Token = with
  * @throws [RocketChatException] on errors.
  * @see [User]
  */
-suspend fun RocketChatClient.signup(email: String,
-                                    name: String,
-                                    username: String,
-                                    password: String): User = withContext(CommonPool) {
+suspend fun RocketChatClient.signup(
+    email: String,
+    name: String,
+    username: String,
+    password: String
+): User = withContext(CommonPool) {
     val payload = SignUpPayload(username, email, password, name)
     val adapter = moshi.adapter(SignUpPayload::class.java)
 
