@@ -17,7 +17,6 @@ package chat.rocket.common.internal
  */
 
 import com.squareup.moshi.Moshi
-import java.lang.annotation.Documented
 
 /**
  * Indicates that the annotated sealed class has a fallback value. The fallback must be set via
@@ -45,7 +44,7 @@ import java.lang.annotation.Documented
  * }
  * `</pre>
  */
-@Documented
+@MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FILE)
 annotation class FallbackSealedClass(val name: String, val fieldName:  String)

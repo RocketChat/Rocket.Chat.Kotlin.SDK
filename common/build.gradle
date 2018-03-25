@@ -12,6 +12,7 @@ sourceCompatibility = 1.8
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}"
+    compile "org.jetbrains.kotlin:kotlin-reflect:${versions.kotlinReflect}"
 
     compile "se.ansman.kotshi:api:${versions.kotshi}"
     kapt "se.ansman.kotshi:compiler:${versions.kotshi}"
