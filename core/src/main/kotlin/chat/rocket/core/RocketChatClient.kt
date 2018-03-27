@@ -18,7 +18,6 @@ import chat.rocket.core.model.Room
 import chat.rocket.core.model.url.MetaJsonAdapter
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.experimental.channels.Channel
-import kotlinx.coroutines.experimental.launch
 import okhttp3.HttpUrl
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
@@ -72,7 +71,7 @@ class RocketChatClient private constructor(internal val httpClient: OkHttpClient
     }
 
     private constructor(builder: Builder) : this(builder.httpClient, builder.restUrl,
-            builder.tokenRepository, Logger(builder.platformLogger))
+            builder.tokenRepository, Logger(builder.platformLogger, builder.restUrl))
 
     companion object {
         val CONTENT_TYPE_JSON = MediaType.parse("application/json; charset=utf-8")
