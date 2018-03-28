@@ -5,8 +5,8 @@ import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
 class SignUpPayload(
-        val username: String?,
-        val email: String?,
-        @Json(name = "pass") val password: String?,
-        val name: String?
+    val username: String?,
+    val email: String?,
+    @Json(name = "pass") val password: String?,
+    val name: String?
 )

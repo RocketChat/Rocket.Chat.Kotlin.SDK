@@ -8,7 +8,13 @@ import chat.rocket.common.util.CalendarISO8601Converter
 import chat.rocket.common.util.Logger
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.common.util.ifNull
-import chat.rocket.core.internal.*
+import chat.rocket.core.internal.RestResult
+import chat.rocket.core.internal.RestMultiResult
+import chat.rocket.core.internal.SettingsAdapter
+import chat.rocket.core.internal.AttachmentAdapterFactory
+import chat.rocket.core.internal.RoomListAdapterFactory
+import chat.rocket.core.internal.CoreJsonAdapterFactory
+import chat.rocket.core.internal.ReactionsAdapter
 import chat.rocket.core.internal.model.Subscription
 import chat.rocket.core.internal.realtime.Socket
 import chat.rocket.core.internal.realtime.State
@@ -18,16 +24,17 @@ import chat.rocket.core.model.Room
 import chat.rocket.core.model.url.MetaJsonAdapter
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.experimental.channels.Channel
-import kotlinx.coroutines.experimental.launch
 import okhttp3.HttpUrl
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import java.security.InvalidParameterException
 
-class RocketChatClient private constructor(internal val httpClient: OkHttpClient,
-                                           baseUrl: String,
-                                           internal val tokenRepository: TokenRepository,
-                                           internal val logger: Logger) {
+class RocketChatClient private constructor(
+    internal val httpClient: OkHttpClient,
+    baseUrl: String,
+    internal val tokenRepository: TokenRepository,
+    internal val logger: Logger
+) {
 
     internal val moshi: Moshi = Moshi.Builder()
             .add(FallbackSealedClassJsonAdapter.ADAPTER_FACTORY)

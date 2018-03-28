@@ -4,7 +4,6 @@ import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
-import chat.rocket.core.internal.model.CommandPayload
 import chat.rocket.core.model.Command
 import io.fabric8.mockwebserver.DefaultMockServer
 import kotlinx.coroutines.experimental.runBlocking

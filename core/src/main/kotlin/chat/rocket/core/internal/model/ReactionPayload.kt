@@ -4,6 +4,6 @@ import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
 data class ReactionPayload(
-     val messageId: String,
-     val emoji: String
+    val messageId: String,
+    val emoji: String
 )

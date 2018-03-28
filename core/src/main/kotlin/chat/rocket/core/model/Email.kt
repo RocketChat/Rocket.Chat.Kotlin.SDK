@@ -5,7 +5,7 @@ import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
 data class Email(
-        val address: String?,
-        @JsonDefaultValueBoolean(false)
-        val verified: Boolean
+    val address: String?,
+    @JsonDefaultValueBoolean(false)
+    val verified: Boolean
 )
