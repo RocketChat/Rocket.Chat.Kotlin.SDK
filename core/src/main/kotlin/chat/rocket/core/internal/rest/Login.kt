@@ -199,7 +199,7 @@ suspend fun RocketChatClient.loginWithOauth(credentialToken: String, credentialS
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
     val result = handleRestCall<RestResult<Token>>(request, type).result()
 
-    tokenRepository.save(result)
+    tokenRepository.save(this.url, result)
 
     result
 }
