@@ -27,7 +27,7 @@ fun RocketChatClient.unsubscribe(subId: String) {
 }
 
 internal fun Socket.subscribeSubscriptions(callback: (Boolean, String) -> Unit): String {
-    client.tokenRepository.get()?.let { (userId) ->
+    client.tokenRepository.get(client.url)?.let { (userId) ->
         val id = generateId()
         send(subscriptionsStreamMessage(id, userId))
         subscriptionsMap[id] = callback
@@ -38,7 +38,7 @@ internal fun Socket.subscribeSubscriptions(callback: (Boolean, String) -> Unit):
 }
 
 internal fun Socket.subscribeRooms(callback: (Boolean, String) -> Unit): String {
-    client.tokenRepository.get()?.let { (userId) ->
+    client.tokenRepository.get(client.url)?.let { (userId) ->
         val id = generateId()
         send(roomsStreamMessage(id, userId))
         subscriptionsMap[id] = callback

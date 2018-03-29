@@ -41,7 +41,7 @@ class ChatRoomTest {
             platformLogger = PlatformLogger.NoOpLogger()
         }
 
-        Mockito.`when`(tokenProvider.get()).thenReturn(authToken)
+        Mockito.`when`(tokenProvider.get(sut.url)).thenReturn(authToken)
     }
 
     @Test

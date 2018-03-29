@@ -44,7 +44,7 @@ class LogoutTest {
             platformLogger = PlatformLogger.NoOpLogger()
         }
 
-        `when`(tokenProvider.get()).thenReturn(authToken)
+        `when`(tokenProvider.get(sut.url)).thenReturn(authToken)
     }
 
     @Test
