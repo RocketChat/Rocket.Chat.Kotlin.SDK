@@ -12,13 +12,7 @@ import chat.rocket.core.TokenRepository
 import chat.rocket.core.compat.Callback
 import chat.rocket.core.compat.serverInfo
 import chat.rocket.core.internal.realtime.*
-import chat.rocket.core.internal.rest.chatRooms
-import chat.rocket.core.internal.rest.configurations
-import chat.rocket.core.internal.rest.getRoomFavoriteMessages
-import chat.rocket.core.internal.rest.login
-import chat.rocket.core.internal.rest.sendMessage
-import chat.rocket.core.internal.rest.settings
-import chat.rocket.core.internal.rest.signup
+import chat.rocket.core.internal.rest.*
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.history
 import chat.rocket.core.model.messages
@@ -69,6 +63,9 @@ fun main(args: Array<String>) {
 
     // using coroutines
     val job = launch(CommonPool) {
+
+        val services = client.settingsOauth().services
+        logger.debug("Services: $services")
 
         val token = client.login("luciofm-testing", "vpnfe5lnv!")
         logger.debug("Login: ${token.userId} - ${token.authToken}")

@@ -26,7 +26,7 @@ sealed class UserStatus {
     @Json(name = "offline") object Offline : UserStatus()
 
     override fun toString(): String {
-        return when(this) {
+        return when (this) {
             is Online -> "online"
             is Busy -> "busy"
             is Away -> "away"

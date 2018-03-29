@@ -138,7 +138,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
             }
             text != null -> {
                 return MessageAttachment(author, authorIcon, text, thumbUrl, color, messageLink, attachments, timestamp)
-            }/*
+            } /*
             authorLink != null -> {
                 return MessageAttachment(title, author, authorIcon, text, thumbUrl, color, authorLink, attachments, timestamp)
             }*/

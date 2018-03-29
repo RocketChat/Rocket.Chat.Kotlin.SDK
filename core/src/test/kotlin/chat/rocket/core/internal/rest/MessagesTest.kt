@@ -114,7 +114,7 @@ class MessagesTest {
 
         runBlocking {
             val file = temporaryFolder.newFile("file.png")
-            sut.uploadFile(roomId="GENERAL",
+            sut.uploadFile(roomId = "GENERAL",
                     file = file,
                     mimeType = "image/png",
                     msg = "Random Message",
@@ -132,7 +132,7 @@ class MessagesTest {
 
         runBlocking {
             val file = temporaryFolder.newFile("file.png")
-            sut.uploadFile(roomId="GENERAL",
+            sut.uploadFile(roomId = "GENERAL",
                     file = file,
                     mimeType = "image/png",
                     msg = "Random Message",

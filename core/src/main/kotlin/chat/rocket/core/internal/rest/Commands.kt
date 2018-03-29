@@ -4,7 +4,6 @@ import chat.rocket.common.model.BaseResult
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.model.CommandPayload
-import chat.rocket.core.internal.model.UserPayload
 import chat.rocket.core.model.Command
 import chat.rocket.core.model.PagedResult
 import com.squareup.moshi.Types
