@@ -18,6 +18,7 @@ data class Room(
     @Json(name = "ro") @JsonDefaultValueBoolean(false) override val readonly: Boolean,
     @Json(name = "_updatedAt") @ISO8601Date override val updatedAt: Long?,
     val topic: String?,
+    val description: String?,
     val announcement: String?,
     val lastMessage: Message?
 ) : BaseRoom
