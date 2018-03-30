@@ -110,4 +110,63 @@ class ChatRoomTest {
             assertTrue(result)
         }
     }
+
+    @Test
+    fun `leaveChat() should succeed without throwing`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/channels.leave")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.leaveChat(roomId = "GENERAL", roomType = RoomType.CHANNEL)
+            assertTrue(result)
+        }
+    }
+
+    @Test
+    fun `setTopic() should succeed without throwing`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/channels.setTopic")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.setTopic(roomId = "GENERAL", roomType = RoomType.CHANNEL,
+                    topic = "New Topic")
+            assertTrue(result)
+        }
+    }
+
+    @Test
+    fun `setDescription() should succeed without throwing`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/channels.setDescription")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.setDescription(roomId = "GENERAL", roomType = RoomType.CHANNEL,
+                    description = "New Description")
+            assertTrue(result)
+        }
+    }
+
+    @Test
+    fun `setAnnouncement() should succeed without throwing`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/channels.setAnnouncement")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.setAnnouncement(roomId = "GENERAL", roomType = RoomType.CHANNEL,
+                    announcement = "New Announcement")
+            assertTrue(result)
+        }
+    }
 }
