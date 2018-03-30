@@ -170,7 +170,7 @@ class Socket(
         when (message.type) {
             MessageType.CONNECTED -> {
                 setState(State.Authenticating())
-                login(client.tokenRepository.get())
+                login(client.tokenRepository.get(client.url))
             }
             else -> {
                 logger.warn {

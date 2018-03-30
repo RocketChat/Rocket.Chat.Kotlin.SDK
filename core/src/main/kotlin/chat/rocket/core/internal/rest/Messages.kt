@@ -73,7 +73,7 @@ suspend fun RocketChatClient.getRoomFavoriteMessages(
     roomType: RoomType,
     offset: Int
 ): PagedResult<List<Message>> = withContext(CommonPool) {
-    val userId = tokenRepository.get()?.userId
+    val userId = tokenRepository.get(this.url)?.userId
 
     val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "messages"))
             .addQueryParameter("roomId", roomId)

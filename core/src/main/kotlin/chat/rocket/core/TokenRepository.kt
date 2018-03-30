@@ -6,7 +6,7 @@ import chat.rocket.common.model.Token
  *
  */
 interface TokenRepository {
-    fun save(token: Token)
+    fun save(url: String, token: Token)
 
-    fun get(): Token?
+    fun get(url: String): Token?
 }

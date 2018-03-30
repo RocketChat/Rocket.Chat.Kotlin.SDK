@@ -79,7 +79,7 @@ class RocketChatClient private constructor(
     }
 
     private constructor(builder: Builder) : this(builder.httpClient, builder.restUrl,
-            builder.tokenRepository, Logger(builder.platformLogger))
+            builder.tokenRepository, Logger(builder.platformLogger, builder.restUrl))
 
     companion object {
         val CONTENT_TYPE_JSON = MediaType.parse("application/json; charset=utf-8")
