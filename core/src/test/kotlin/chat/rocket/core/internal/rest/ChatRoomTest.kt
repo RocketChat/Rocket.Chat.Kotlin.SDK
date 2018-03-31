@@ -125,6 +125,20 @@ class ChatRoomTest {
         }
     }
 
+    @Test(expected = RocketChatException::class)
+    fun `leaveChat() should fail with RocketChatAuthException if not logged in`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/channels.leave")
+                .andReturn(401, MUST_BE_LOGGED_ERROR)
+                .once()
+
+        runBlocking {
+            val result = sut.leaveChat(roomId = "GENERAL", roomType = RoomType.CHANNEL)
+            assertTrue(result)
+        }
+    }
+
     @Test
     fun `setTopic() should succeed without throwing`() {
         mockServer.expect()
@@ -145,7 +159,7 @@ class ChatRoomTest {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/channels.setDescription")
-                .andReturn(200, SUCCESS)
+                .andReturn(200, MEMBERS_OK)
                 .once()
 
         runBlocking {
@@ -166,6 +180,51 @@ class ChatRoomTest {
         runBlocking {
             val result = sut.setAnnouncement(roomId = "GENERAL", roomType = RoomType.CHANNEL,
                     announcement = "New Announcement")
+            assertTrue(result)
+        }
+    }
+
+    @Test
+    fun `setReadOnly() should succeed without throwing`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/channels.setReadOnly")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.setReadOnly(roomId = "GENERAL", roomType = RoomType.CHANNEL,
+                    readOnly = true)
+            assertTrue(result)
+        }
+    }
+
+    @Test
+    fun `setType() should succeed without throwing`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/channels.setType")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.setType(roomId = "GENERAL", roomType = RoomType.CHANNEL,
+                    type = "c")
+            assertTrue(result)
+        }
+    }
+
+    @Test
+    fun `setJoinCode() should succeed without throwing`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/channels.setJoinCode")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.setJoinCode(roomId = "GENERAL", roomType = RoomType.CHANNEL,
+                    joinCode = "some_password")
             assertTrue(result)
         }
     }

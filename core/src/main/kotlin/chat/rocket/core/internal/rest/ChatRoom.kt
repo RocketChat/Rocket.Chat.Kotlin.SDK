@@ -82,6 +82,45 @@ suspend fun RocketChatClient.leaveChat(roomId: String, roomType: RoomType): Bool
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
 
+suspend fun RocketChatClient.setReadOnly(roomId: String, roomType: RoomType, readOnly: Boolean) = withContext(CommonPool) {
+    val payload = ChatRoomReadOnlyPayload(roomId, readOnly)
+    val adapter = moshi.adapter(ChatRoomReadOnlyPayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "setReadOnly")).build()
+    val request = requestBuilder(url).post(body).build()
+
+    return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
+}
+
+suspend fun RocketChatClient.setType(roomId: String, roomType: RoomType, type: String) = withContext(CommonPool) {
+    val payload = ChatRoomTypePayload(roomId, type)
+    val adapter = moshi.adapter(ChatRoomTypePayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "setType")).build()
+    val request = requestBuilder(url).post(body).build()
+
+    return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
+}
+
+suspend fun RocketChatClient.setJoinCode(roomId: String, roomType: RoomType, joinCode: String) = withContext(CommonPool) {
+    val payload = ChatRoomJoinCodePayload(roomId, joinCode)
+    val adapter = moshi.adapter(ChatRoomJoinCodePayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "setJoinCode")).build()
+    val request = requestBuilder(url).post(body).build()
+
+    return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
+}
+
 suspend fun RocketChatClient.setTopic(roomId: String, roomType: RoomType, topic: String): Boolean = withContext(CommonPool) {
     val payload = ChatRoomTopicPayload(roomId, topic)
     val adapter = moshi.adapter(ChatRoomTopicPayload::class.java)

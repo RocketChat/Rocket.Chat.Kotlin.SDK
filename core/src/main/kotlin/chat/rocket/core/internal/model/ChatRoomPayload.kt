@@ -26,3 +26,21 @@ data class ChatRoomAnnouncementPayload(
     val roomId: String,
     val announcement: String
 )
+
+@JsonSerializable
+data class ChatRoomReadOnlyPayload(
+    val roomId: String,
+    val readOnly: Boolean
+)
+
+@JsonSerializable
+data class ChatRoomTypePayload(
+    val roomId: String,
+    val type: String
+)
+
+@JsonSerializable
+data class ChatRoomJoinCodePayload(
+    val roomId: String,
+    val joinCode: String
+)
