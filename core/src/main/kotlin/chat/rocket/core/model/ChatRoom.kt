@@ -26,6 +26,7 @@ data class ChatRoom(
     val announcement: String?,
     @get:JvmName("isDefault")
     val default: Boolean = false,
+    val favourite: Boolean = false,
     val open: Boolean,
     val alert: Boolean,
     val unread: Long,
@@ -49,6 +50,7 @@ data class ChatRoom(
                             description = room.description,
                             announcement = room.announcement,
                             default = subscription.isDefault,
+                            favourite = subscription.isFavorite,
                             open = subscription.open,
                             alert = subscription.alert,
                             unread = subscription.unread,
