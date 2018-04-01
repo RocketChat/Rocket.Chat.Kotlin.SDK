@@ -29,7 +29,8 @@ data class ChatRoom(
     val open: Boolean,
     val alert: Boolean,
     val unread: Long,
-    val userMenstions: Long?,
+    val roles: List<String>?,
+    val userMentions: Long?,
     val groupMentions: Long?,
     val lastMessage: Message?,
     val client: RocketChatClient
@@ -52,7 +53,8 @@ data class ChatRoom(
                             open = subscription.open,
                             alert = subscription.alert,
                             unread = subscription.unread,
-                            userMenstions = subscription.userMentions,
+                            roles = subscription.roles,
+                            userMentions = subscription.userMentions,
                             groupMentions = subscription.groupMentions,
                             lastMessage = room.lastMessage,
                             client = client)

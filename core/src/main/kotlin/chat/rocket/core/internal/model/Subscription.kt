@@ -21,6 +21,7 @@ data class Subscription(
     @Json(name = "ts") @ISO8601Date val timestamp: Long?,
     @Json(name = "ls") @ISO8601Date val lastSeen: Long?,
     @Json(name = "_updatedAt") @ISO8601Date override val updatedAt: Long?,
+    val roles: List<String>?,
     @Json(name = "default")
     @JsonDefaultValueBoolean(false)
     val isDefault: Boolean,

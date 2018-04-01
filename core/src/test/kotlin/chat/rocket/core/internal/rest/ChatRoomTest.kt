@@ -159,7 +159,7 @@ class ChatRoomTest {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/channels.setDescription")
-                .andReturn(200, MEMBERS_OK)
+                .andReturn(200, SUCCESS)
                 .once()
 
         runBlocking {
