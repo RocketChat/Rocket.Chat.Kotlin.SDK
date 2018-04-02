@@ -25,6 +25,9 @@ data class Subscription(
     @Json(name = "default")
     @JsonDefaultValueBoolean(false)
     val isDefault: Boolean,
+    @Json(name = "f")
+    @JsonDefaultValueBoolean(false)
+    val isFavorite: Boolean,
     @JsonDefaultValueBoolean(false)
     val open: Boolean,
     @JsonDefaultValueBoolean(false)
