@@ -4,7 +4,7 @@ interface FileAttachment : Attachment {
     val title: String?
     val description: String?
     val titleLink: String?
-    val titleLinkDownload: Boolean
-    val type: String
-    val size: Long
+    val titleLinkDownload: Boolean?
+    val type: String?
+    val size: Long?
 }

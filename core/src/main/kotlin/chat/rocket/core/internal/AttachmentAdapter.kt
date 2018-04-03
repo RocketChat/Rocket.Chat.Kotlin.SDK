@@ -119,36 +119,26 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
         reader.endObject()
 
         when {
-            type?.contentEquals("file") == true -> when {
-                imageUrl != null -> {
-                    checkNonNull(imageType, "ïmageType")
-                    checkNonNull(imageSize, "imageSize")
-                    var preview: String? = null
-                    imagePreview?.let {
-                        preview = "data:${imageType!!};base64,$it"
-                    }
-                    return ImageAttachment(title, description, titleLink, titleLinkDownload, imageUrl, imageType!!, imageSize!!, preview)
+            imageUrl != null -> {
+                var preview: String? = null
+                imagePreview?.let {
+                    preview = "data:${imageType!!};base64,$it"
                 }
-                videoUrl != null -> {
-                    checkNonNull(videoType, "videoType")
-                    checkNonNull(videoSize, "videoSize")
-                    return VideoAttachment(title, description, titleLink, titleLinkDownload, videoUrl, videoType!!, videoSize!!)
-                }
-                audioUrl != null -> {
-                    checkNonNull(audioType, "audioType")
-                    checkNonNull(audioSize, "audioSize")
-                    return AudioAttachment(title, description, titleLink, titleLinkDownload, audioUrl, audioType!!, audioSize!!)
-                }
-                else -> {
-                    logger.debug {
-                        "Invalid FILE Attachment type: supported are image, video, audio"
-                    }
-                    return null
-                }
+                return ImageAttachment(title, description, titleLink, titleLinkDownload, imageUrl, imageType, imageSize, preview)
+            }
+            videoUrl != null -> {
+                checkNonNull(videoType, "videoType")
+                checkNonNull(videoSize, "videoSize")
+                return VideoAttachment(title, description, titleLink, titleLinkDownload, videoUrl, videoType!!, videoSize!!)
+            }
+            audioUrl != null -> {
+                checkNonNull(audioType, "audioType")
+                checkNonNull(audioSize, "audioSize")
+                return AudioAttachment(title, description, titleLink, titleLinkDownload, audioUrl, audioType!!, audioSize!!)
             }
             text != null -> {
                 return MessageAttachment(author, authorIcon, text, thumbUrl, color, messageLink, attachments, timestamp)
-            }/*
+            } /*
             authorLink != null -> {
                 return MessageAttachment(title, author, authorIcon, text, thumbUrl, color, authorLink, attachments, timestamp)
             }*/

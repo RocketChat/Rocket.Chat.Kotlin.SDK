@@ -5,11 +5,11 @@ import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
 data class MessagePayload(
-        val roomId: String,
-        val text: String?,
-        val alias: String?,
-        val emoji: String?,
-        val avatar: String?,
-        val attachments: List<Attachment>?,
-        val msgId: String? = null
+    val roomId: String,
+    val text: String?,
+    val alias: String?,
+    val emoji: String?,
+    val avatar: String?,
+    val attachments: List<Attachment>?,
+    val msgId: String? = null
 )

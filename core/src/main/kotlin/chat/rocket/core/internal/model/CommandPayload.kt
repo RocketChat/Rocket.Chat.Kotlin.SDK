@@ -3,8 +3,8 @@ package chat.rocket.core.internal.model
 import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
-data class DeletePayload(
+data class CommandPayload(
+    val command: String,
     val roomId: String,
-    val msgId: String,
-    val asUser: Boolean = false
+    val params: String?
 )

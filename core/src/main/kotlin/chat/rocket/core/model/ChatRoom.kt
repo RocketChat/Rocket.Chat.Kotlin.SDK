@@ -11,26 +11,29 @@ import chat.rocket.core.internal.rest.messages
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
 
-data class ChatRoom(override val id: String,
-                    override val type: RoomType,
-                    override val user: SimpleUser?,
-                    val name: String,
-                    override val fullName: String?,
-                    override val readonly: Boolean? = false,
-                    override val updatedAt: Long?,
-                    val timestamp: Long?,
-                    val lastSeen: Long?,
-                    val topic: String?,
-                    val announcement: String?,
-                    @get:JvmName("isDefault")
-                    val default: Boolean = false,
-                    val open: Boolean,
-                    val alert: Boolean,
-                    val unread: Long,
-                    val userMenstions: Long?,
-                    val groupMentions: Long?,
-                    val lastMessage: Message?,
-                    val client: RocketChatClient
+data class ChatRoom(
+    override val id: String,
+    override val type: RoomType,
+    override val user: SimpleUser?,
+    val name: String,
+    override val fullName: String?,
+    override val readonly: Boolean? = false,
+    override val updatedAt: Long?,
+    val timestamp: Long?,
+    val lastSeen: Long?,
+    val topic: String?,
+    val description: String?,
+    val announcement: String?,
+    @get:JvmName("isDefault")
+    val default: Boolean = false,
+    val favorite: Boolean = false,
+    val open: Boolean,
+    val alert: Boolean,
+    val unread: Long,
+    val userMenstions: Long?,
+    val groupMentions: Long?,
+    val lastMessage: Message?,
+    val client: RocketChatClient
 ) : BaseRoom {
     companion object {
         fun create(room: Room, subscription: Subscription, client: RocketChatClient): ChatRoom {
@@ -44,8 +47,10 @@ data class ChatRoom(override val id: String,
                             timestamp = subscription.timestamp,
                             lastSeen = subscription.lastSeen,
                             topic = room.topic,
+                            description = room.description,
                             announcement = room.announcement,
                             default = subscription.isDefault,
+                            favorite = subscription.isFavorite,
                             open = subscription.open,
                             alert = subscription.alert,
                             unread = subscription.unread,
@@ -60,14 +65,18 @@ data class ChatRoom(override val id: String,
         get() = lastSeen
 }
 
-suspend fun ChatRoom.messages(offset: Long = 0,
-                              count: Long = 50): PagedResult<List<Message>> = withContext(CommonPool) {
+suspend fun ChatRoom.messages(
+    offset: Long = 0,
+    count: Long = 50
+): PagedResult<List<Message>> = withContext(CommonPool) {
     return@withContext client.messages(id, type, offset, count)
 }
 
-suspend fun ChatRoom.history(count: Long = 50,
-                             oldest: String? = null,
-                             latest: String? = null): PagedResult<List<Message>> = withContext(CommonPool) {
+suspend fun ChatRoom.history(
+    count: Long = 50,
+    oldest: String? = null,
+    latest: String? = null
+): PagedResult<List<Message>> = withContext(CommonPool) {
     return@withContext client.history(id, type, count, oldest, latest)
 }
 

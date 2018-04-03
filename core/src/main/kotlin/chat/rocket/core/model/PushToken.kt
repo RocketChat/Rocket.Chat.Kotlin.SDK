@@ -6,10 +6,10 @@ import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
 data class PushToken(
-        @Json(name = "_id") val id: String,
-        val appName: String,
-        val userId: String,
-        val enabled: Boolean,
-        @Json(name = "createdAt") @ISO8601Date val createdAt: Long?,
-        @Json(name = "updatedAt") @ISO8601Date val updatedAt: Long?
+    @Json(name = "_id") val id: String,
+    val appName: String,
+    val userId: String,
+    val enabled: Boolean,
+    @Json(name = "createdAt") @ISO8601Date val createdAt: Long?,
+    @Json(name = "updatedAt") @ISO8601Date val updatedAt: Long?
 )

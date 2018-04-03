@@ -24,10 +24,11 @@ import java.util.concurrent.atomic.AtomicInteger
 
 const val PING_INTERVAL = 15L
 
-class Socket(internal val client: RocketChatClient,
-             internal val roomsChannel: SendChannel<StreamMessage<Room>>,
-             internal val subscriptionsChannel: SendChannel<StreamMessage<Subscription>>,
-             internal val messagesChannel: SendChannel<Message>
+class Socket(
+    internal val client: RocketChatClient,
+    internal val roomsChannel: SendChannel<StreamMessage<Room>>,
+    internal val subscriptionsChannel: SendChannel<StreamMessage<Subscription>>,
+    internal val messagesChannel: SendChannel<Message>
 ) : WebSocketListener() {
 
     private val request: Request = Request.Builder()
@@ -121,7 +122,7 @@ class Socket(internal val client: RocketChatClient,
     private suspend fun delayReconnection(reconnectInterval: Int) {
         val seconds = reconnectInterval / 1000
         async {
-            for (second in 0..(seconds -1)) {
+            for (second in 0..(seconds - 1)) {
                 if (!isActive) return@async
                 val left = seconds - second
                 logger.debug { "$left second(s) left" }
@@ -169,7 +170,7 @@ class Socket(internal val client: RocketChatClient,
         when (message.type) {
             MessageType.CONNECTED -> {
                 setState(State.Authenticating())
-                login(client.tokenRepository.get())
+                login(client.tokenRepository.get(client.url))
             }
             else -> {
                 logger.warn {
@@ -254,7 +255,7 @@ class Socket(internal val client: RocketChatClient,
             if (!isActive) return@launch
             when (currentState) {
                 is State.Disconnected,
-                is State.Disconnecting-> {
+                is State.Disconnecting -> {
                     logger.warn { "PONG not received, but already disconnected" }
                 }
                 else -> {
@@ -270,7 +271,6 @@ class Socket(internal val client: RocketChatClient,
             logger.debug { "Setting state to: $newState - oldState: $currentState, channels: ${statusChannelList.size}" }
             currentState = newState
             sendState(newState)
-
         }
     }
 
@@ -326,7 +326,7 @@ class Socket(internal val client: RocketChatClient,
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString?) {
-        logger.debug { "Received ByteString message: ${bytes.toString()}" }
+        logger.debug { "Received ByteString message: $bytes" }
     }
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String?) {

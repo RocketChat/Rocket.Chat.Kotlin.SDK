@@ -48,11 +48,13 @@ suspend fun RocketChatClient.me(): Myself {
  * @param username The username for the user.
  * @return An [User] with an updated profile.
  */
-suspend fun RocketChatClient.updateProfile(userId: String,
-                                           email: String? = null,
-                                           name: String? = null,
-                                           password: String? = null,
-                                           username: String? = null): User {
+suspend fun RocketChatClient.updateProfile(
+    userId: String,
+    email: String? = null,
+    name: String? = null,
+    password: String? = null,
+    username: String? = null
+): User {
     val payload = UserPayload(userId, UserPayloadData(name, password, username, email), null)
     val adapter = moshi.adapter(UserPayload::class.java)
 
@@ -155,9 +157,11 @@ suspend fun RocketChatClient.roles(): UserRole = withContext(CommonPool) {
     return@withContext handleRestCall<UserRole>(request, UserRole::class.java)
 }
 
-internal fun RocketChatClient.combine(rooms: RestMultiResult<List<Room>>,
-                                      subscriptions: RestMultiResult<List<Subscription>>,
-                                      filterCustom: Boolean): RestMultiResult<List<ChatRoom>> {
+internal fun RocketChatClient.combine(
+    rooms: RestMultiResult<List<Room>>,
+    subscriptions: RestMultiResult<List<Subscription>>,
+    filterCustom: Boolean
+): RestMultiResult<List<ChatRoom>> {
     val update = combine(rooms.update, subscriptions.update, filterCustom)
     val remove = combine(rooms.remove, subscriptions.remove, filterCustom)
 

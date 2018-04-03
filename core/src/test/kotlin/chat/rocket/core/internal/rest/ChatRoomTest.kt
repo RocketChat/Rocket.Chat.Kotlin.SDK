@@ -14,6 +14,7 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
+import kotlin.test.assertTrue
 
 class ChatRoomTest {
     private lateinit var mockServer: DefaultMockServer
@@ -40,7 +41,7 @@ class ChatRoomTest {
             platformLogger = PlatformLogger.NoOpLogger()
         }
 
-        Mockito.`when`(tokenProvider.get()).thenReturn(authToken)
+        Mockito.`when`(tokenProvider.get(sut.url)).thenReturn(authToken)
     }
 
     @Test
@@ -52,7 +53,7 @@ class ChatRoomTest {
                 .once()
 
         runBlocking {
-            sut.markAsRead(roomId="GENERAL")
+            sut.markAsRead(roomId = "GENERAL")
         }
     }
 
@@ -65,7 +66,7 @@ class ChatRoomTest {
                 .once()
 
         runBlocking {
-            sut.markAsRead(roomId="GENERAL")
+            sut.markAsRead(roomId = "GENERAL")
         }
     }
 
@@ -78,7 +79,7 @@ class ChatRoomTest {
                 .once()
 
         runBlocking {
-            val members = sut.getMembers(roomId="GENERAL", roomType = RoomType.CHANNEL, offset = 0, count = 1)
+            val members = sut.getMembers(roomId = "GENERAL", roomType = RoomType.CHANNEL, offset = 0, count = 1)
             System.out.println("Members: $members")
         }
     }
@@ -92,7 +93,21 @@ class ChatRoomTest {
                 .once()
 
         runBlocking {
-            sut.getMembers(roomId="GENERAL", roomType = RoomType.CHANNEL, offset = 0, count = 1)
+            sut.getMembers(roomId = "GENERAL", roomType = RoomType.CHANNEL, offset = 0, count = 1)
+        }
+    }
+
+    @Test
+    fun `joinChat() should succeed without throwing`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/channels.join")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.joinChat(roomId = "GENERAL")
+            assertTrue(result)
         }
     }
 }

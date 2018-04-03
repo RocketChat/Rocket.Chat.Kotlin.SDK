@@ -48,7 +48,7 @@ class MessagesTest {
             platformLogger = PlatformLogger.NoOpLogger()
         }
 
-        Mockito.`when`(tokenProvider.get()).thenReturn(authToken)
+        Mockito.`when`(tokenProvider.get(sut.url)).thenReturn(authToken)
     }
 
     @Test
@@ -114,7 +114,7 @@ class MessagesTest {
 
         runBlocking {
             val file = temporaryFolder.newFile("file.png")
-            sut.uploadFile(roomId="GENERAL",
+            sut.uploadFile(roomId = "GENERAL",
                     file = file,
                     mimeType = "image/png",
                     msg = "Random Message",
@@ -132,7 +132,7 @@ class MessagesTest {
 
         runBlocking {
             val file = temporaryFolder.newFile("file.png")
-            sut.uploadFile(roomId="GENERAL",
+            sut.uploadFile(roomId = "GENERAL",
                     file = file,
                     mimeType = "image/png",
                     msg = "Random Message",
@@ -198,6 +198,20 @@ class MessagesTest {
                 assertThat(updatedAt, isEqualTo(1511443964808))
                 assertThat(id, isEqualTo("messageId"))
             }
+        }
+    }
+
+    @Test
+    fun `react() should return true and yield no exceptions`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/chat.react")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.toggleReaction("FCHGvHLyanhbaWjpxWz", "vulcan")
+            assertThat(result, isEqualTo(true))
         }
     }
 
