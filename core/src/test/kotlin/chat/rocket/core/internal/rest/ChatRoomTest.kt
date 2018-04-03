@@ -228,4 +228,64 @@ class ChatRoomTest {
             assertTrue(result)
         }
     }
+
+    @Test
+    fun `archive() should succeed without throwing`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/channels.archive")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.archive(roomId = "GENERAL", roomType = RoomType.CHANNEL,
+                    archiveRoom = true)
+            assertTrue(result)
+        }
+    }
+
+    @Test
+    fun `unarchive() should succeed without throwing`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/channels.unarchive")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.archive(roomId = "GENERAL", roomType = RoomType.CHANNEL,
+                    archiveRoom = false)
+            assertTrue(result)
+        }
+    }
+
+    @Test
+    fun `open() should succeed without throwing`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/channels.open")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.hide(roomId = "GENERAL", roomType = RoomType.CHANNEL,
+                    hideRoom = false)
+            assertTrue(result)
+        }
+    }
+
+    @Test
+    fun `close() should succeed without throwing`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/channels.close")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.hide(roomId = "GENERAL", roomType = RoomType.CHANNEL,
+                    hideRoom = true)
+            assertTrue(result)
+        }
+    }
 }

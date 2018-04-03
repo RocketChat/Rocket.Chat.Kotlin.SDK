@@ -159,3 +159,31 @@ suspend fun RocketChatClient.setAnnouncement(roomId: String, roomType: RoomType,
 
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
+
+suspend fun RocketChatClient.archive(roomId: String, roomType: RoomType, archiveRoom: Boolean) = withContext(CommonPool) {
+    val payload = RoomIdPayload(roomId)
+    val adapter = moshi.adapter(RoomIdPayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val method: String = if (archiveRoom) "archive" else "unarchive"
+    val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, method)).build()
+    val request = requestBuilder(url).post(body).build()
+
+    return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
+}
+
+suspend fun RocketChatClient.hide(roomId: String, roomType: RoomType, hideRoom: Boolean) = withContext(CommonPool) {
+    val payload = RoomIdPayload(roomId)
+    val adapter = moshi.adapter(RoomIdPayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val method: String = if (hideRoom) "close" else "open"
+    val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, method)).build()
+    val request = requestBuilder(url).post(body).build()
+
+    return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
+}
