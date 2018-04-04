@@ -54,6 +54,7 @@ class ChannelTest {
                 .post()
                 .withPath("/api/v1/channels.create")
                 .andReturn(200, CREATE_CHANNEL_SUCCESS)
+                .once()
 
         runBlocking {
                 sut.createChannel(roomType = RoomType.CHANNEL, name = "duplicate", usersList = listOf("aniket03"), readOnly = false)
@@ -66,16 +67,16 @@ class ChannelTest {
                 .post()
                 .withPath("/api/v1/channels.create")
                 .andReturn(400, FAIL_DUPLICATE_CHANNEL)
+                .once()
 
         runBlocking {
             try {
                 val createChannel = sut.createChannel(roomType = RoomType.CHANNEL, name = "elf", usersList = listOf("aniket03"), readOnly = false)
                 throw RocketChatException("unreachable code")
             } catch (ex: Exception) {
-                assertThat(ex.message, isEqualTo("duplicate_channel"))
+                assertThat(ex.message, isEqualTo("A channel with name 'elf' exists [error-duplicate-channel-name]"))
             }
         }
-
     }
 
     @Test
@@ -92,7 +93,7 @@ class ChannelTest {
                 throw RocketChatException("unreachable code")
             } catch (ex: Exception) {
                 assertThat(ex, isEqualTo(instanceOf(RocketChatAuthException::class.java)))
-                assertThat(ex.message, isEqualTo("Unauthorized"))
+                assertThat(ex.message, isEqualTo("You must be logged in to do this."))
             }
         }
     }
