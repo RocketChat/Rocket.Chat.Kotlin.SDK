@@ -4,9 +4,7 @@ import chat.rocket.common.model.BaseResult
 import chat.rocket.common.model.RoomType
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
-import chat.rocket.core.internal.model.DeletePayload
-import chat.rocket.core.internal.model.MessagePayload
-import chat.rocket.core.internal.model.ReactionPayload
+import chat.rocket.core.internal.model.*
 import chat.rocket.core.model.DeleteResult
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.PagedResult
@@ -30,8 +28,8 @@ import java.io.InputStream
  * @return The updated Message object.
  */
 suspend fun RocketChatClient.updateMessage(roomId: String, messageId: String, text: String): Message = withContext(CommonPool) {
-    val payload = MessagePayload(roomId, text, null, null, null, null, messageId)
-    val adapter = moshi.adapter(MessagePayload::class.java)
+    val payload = PostMessagePayload(roomId, text, null, null, null, null, messageId)
+    val adapter = moshi.adapter(PostMessagePayload::class.java)
     val payloadBody = adapter.toJson(payload)
 
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
@@ -112,17 +110,17 @@ suspend fun RocketChatClient.getRoomPinnedMessages(
 }
 
 /**
- * Sends a new message
+ * Posts a new message.
  *
- * @param roomId the room where to send the message (works with all types)
+ * @param roomId The room where to send the message (works with all types)
  * @param text Optional text message to send
- * @param alias Optianal alias to be used as the sender of the message
+ * @param alias Optional alias to be used as the sender of the message
  * @param emoji Optional emoji to be used as the sender's avatar
  * @param avatar Optional avatar url to be used as the sender's avatar
  * @param attachments Optional List of [Attachment]
  * @return
  */
-suspend fun RocketChatClient.sendMessage(
+suspend fun RocketChatClient.postMessage(
     roomId: String,
     text: String? = null,
     alias: String? = null,
@@ -130,13 +128,49 @@ suspend fun RocketChatClient.sendMessage(
     avatar: String? = null,
     attachments: List<Attachment>? = null
 ): Message = withContext(CommonPool) {
-    val payload = MessagePayload(roomId, text, alias, emoji, avatar, attachments)
-    val adapter = moshi.adapter(MessagePayload::class.java)
+    val payload = PostMessagePayload(roomId, text, alias, emoji, avatar, attachments)
+    val adapter = moshi.adapter(PostMessagePayload::class.java)
     val payloadBody = adapter.toJson(payload)
 
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, "chat.postMessage").build()
+    val request = requestBuilder(url).post(body).build()
+
+    val type = Types.newParameterizedType(RestResult::class.java, Message::class.java)
+    return@withContext handleRestCall<RestResult<Message>>(request, type).result()
+}
+
+/**
+ * Sends a new message with the given message id.
+ *
+ * @param messageId The id of message.
+ * @param roomId The room where to send the message (works with all types)
+ * @param text Optional text message to send
+ * @param alias Optional alias to be used as the sender of the message
+ * @param emoji Optional emoji to be used as the sender's avatar
+ * @param avatar Optional avatar url to be used as the sender's avatar
+ * @param attachments Optional List of [Attachment]
+ * @return
+ */
+suspend fun RocketChatClient.sendMessage(
+        messageId: String,
+        roomId: String,
+        message: String? = null,
+        alias: String? = null,
+        emoji: String? = null,
+        avatar: String? = null,
+        attachments: List<Attachment>? = null
+): Message = withContext(CommonPool) {
+    val payload = SendMessagePayload(
+            SendMessageBody(messageId, roomId, message, alias, emoji, avatar, attachments)
+    )
+    val adapter = moshi.adapter(SendMessagePayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val url = requestUrl(restUrl, "chat.sendMessage").build()
     val request = requestBuilder(url).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, Message::class.java)
