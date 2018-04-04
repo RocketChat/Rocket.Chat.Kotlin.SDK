@@ -11,6 +11,15 @@ import kotlinx.coroutines.experimental.withContext
 import okhttp3.Request
 import okhttp3.RequestBody
 
+/**
+ * Creates a new chat room.
+ *
+ * @param roomType The type of the room.
+ * @param name Name of the chat room
+ * @param usersList The list of users who are invited to join the chat room.
+ * @param readOnly Tells whether to keep the new chat room read only or not.
+ */
+
 suspend fun RocketChatClient.createChannel(roomType: RoomType, name: String, usersList: List<String>?, readOnly: Boolean? = false): Room = withContext(CommonPool) {
     val payload = CreateNewChannelPayload(name, usersList, readOnly)
     val adapter = moshi.adapter(CreateNewChannelPayload::class.java)
