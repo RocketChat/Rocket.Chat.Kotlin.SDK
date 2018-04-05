@@ -131,7 +131,7 @@ suspend fun RocketChatClient.resetAvatar(userId: String): Boolean {
  */
 suspend fun RocketChatClient.setAvatar(file: File, mimeType: String): Boolean {
     if (mimeType != "image/gif" && mimeType != "image/png" && mimeType != "image/jpeg" && mimeType != "image/bmp" && mimeType != "image/webp") {
-        throw RocketChatException("Invalid image type")
+        throw RocketChatException("Invalid image type $mimeType")
     }
 
     val body = MultipartBody.Builder()

@@ -1,3 +1,3 @@
 package chat.rocket.common
 
-class RocketChatAuthException(message: String) : RocketChatException(message)
+class RocketChatAuthException(message: String, url: String? = null) : RocketChatException(message, null, url)

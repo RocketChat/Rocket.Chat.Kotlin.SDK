@@ -1,3 +1,3 @@
 package chat.rocket.common
 
-class RocketChatNetworkErrorException(message: String, cause: Throwable? = null) : RocketChatException(message, cause)
+class RocketChatNetworkErrorException(message: String, cause: Throwable? = null, val url: String?) : RocketChatException(message, cause, url)
