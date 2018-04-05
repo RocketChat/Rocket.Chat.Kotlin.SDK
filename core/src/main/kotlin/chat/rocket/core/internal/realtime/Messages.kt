@@ -22,9 +22,8 @@ private fun newSubscriptionMessage(name: String, id: String, params: String): St
             "}"
 }
 
-internal fun loginMethod(id: String, token: String): String {
-    return newMessage("login", id, "{\"resume\":\"$token\"}")
-}
+internal fun loginMethod(id: String, token: String): String =
+    newMessage("login", id, "{\"resume\":\"$token\"}")
 
 internal fun pongMessage(): String =
     "{\"msg\":\"pong\"}"
