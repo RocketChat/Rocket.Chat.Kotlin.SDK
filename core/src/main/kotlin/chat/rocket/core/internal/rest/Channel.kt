@@ -33,4 +33,3 @@ suspend fun RocketChatClient.createChannel(roomType: RoomType, name: String, use
 
     return@withContext handleRestCall<RestResult<Room>>(request, type).result()
 }
-
