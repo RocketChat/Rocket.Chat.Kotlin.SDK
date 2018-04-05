@@ -6,17 +6,22 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
 
 suspend fun RocketChatClient.setDefaultStatus(status: UserStatus) = withContext(CommonPool) {
-    // Should we track the response???
     socket.send(defaultStatusMessage(socket.generateId(), status))
 }
 
-suspend fun RocketChatClient.setConnectionStatus(status: UserStatus) = withContext(CommonPool) {
-    // Should we track the response???
-    if (status is UserStatus.Online || status is UserStatus.Away) {
-        socket.send(connectionStatusMessage(socket.generateId(), status))
-    } else {
-        logger.warn { "Only \"away\" and \"online\" are accepted as connection status" }
+suspend fun RocketChatClient.setTemporaryStatus(status: UserStatus) = withContext(CommonPool) {
+    when {
+        (status == UserStatus.Online || status == UserStatus.Away) -> {
+            socket.send(temporaryStatusMessage(socket.generateId(), status))
+        }
+        else -> {
+            logger.warn { "Only \"UserStatus.Online\" and \"UserStatus.Away\" are accepted as temporary status" }
+        }
     }
+}
+
+suspend fun RocketChatClient.getUserDataChanges() = withContext(CommonPool) {
+    socket.send(userDataChangesMessage(socket.generateId()))
 }
 
 sealed class UserStatus {
