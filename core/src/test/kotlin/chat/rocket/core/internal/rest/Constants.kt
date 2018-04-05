@@ -50,3 +50,23 @@ const val ROLES_OK = """
   "success": true
 }
 """
+//{"message":{"_id":"1abbbf94-c839-4436-9476-6de03011c1e0","rid":"GS3Ceh7BLJGzfto78","msg":"Não"}}
+const val SEND_MESSAGE_WITH_ID_OK = """
+{
+  "message": {
+    "_id": "1abbbf94-c839-4436-9476-6de03011c1e0",
+    "rid": "GENERAL",
+    "msg": "Sending message from SDK to #general and @here",
+    "ts": "2018-04-04T22:37:59.167Z",
+    "u": {
+      "_id": "vKjyfQkgekhXykvKk",
+      "username": "bruce.lee",
+      "name": "Bruce Lee"
+    },
+    "mentions": [],
+    "channels": [],
+    "_updatedAt": "2018-04-04T22:37:59.248Z"
+  },
+  "success": true
+}
+"""
