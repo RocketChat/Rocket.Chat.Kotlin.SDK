@@ -1,26 +1,10 @@
 package chat.rocket.core.internal.realtime
 
-private fun newMessage(method: String, id: String, params: String): String {
-    return "{\n" +
-            "    \"msg\": \"method\",\n" +
-            "    \"method\": \"$method\",\n" +
-            "    \"id\":\"$id\",\n" +
-            "    \"params\":[\n" +
-            "          $params" +
-            "    ]\n" +
-            "}"
-}
+private fun newMessage(method: String, id: String, params: String): String =
+    "{\"msg\":\"method\",\"id\":\"$id\",\"method\":\"$method\",\"params\":[$params]}"
 
-private fun newSubscriptionMessage(name: String, id: String, params: String): String {
-    return "{\n" +
-            "    \"msg\": \"sub\",\n" +
-            "    \"id\": \"$id\",\n" +
-            "    \"name\": \"$name\",\n" +
-            "    \"params\":[\n" +
-            "        $params" +
-            "    ]\n" +
-            "}"
-}
+private fun newSubscriptionMessage(name: String, id: String, params: String): String =
+    "{\"msg\":\"sub\",\"id\":\"$id\",\"name\":\"$name\",\"params\":[$params]}"
 
 internal fun loginMethod(id: String, token: String): String =
     newMessage("login", id, "{\"resume\":\"$token\"}")
