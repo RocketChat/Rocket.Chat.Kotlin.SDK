@@ -1,18 +1,19 @@
 package rocket.chat.kotlin.sample
 
 import chat.rocket.common.RocketChatException
-import chat.rocket.common.model.BaseRoom
 import chat.rocket.common.model.RoomType
 import chat.rocket.common.model.ServerInfo
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
-import chat.rocket.common.util.ifNull
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
 import chat.rocket.core.compat.Callback
 import chat.rocket.core.compat.serverInfo
 import chat.rocket.core.internal.realtime.*
-import chat.rocket.core.internal.rest.*
+import chat.rocket.core.internal.rest.chatRooms
+import chat.rocket.core.internal.rest.getRoomFavoriteMessages
+import chat.rocket.core.internal.rest.login
+import chat.rocket.core.internal.rest.settingsOauth
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.history
 import chat.rocket.core.model.messages
@@ -24,12 +25,9 @@ import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
-import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
-import kotlin.math.log
-import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     val logger = object : PlatformLogger {
