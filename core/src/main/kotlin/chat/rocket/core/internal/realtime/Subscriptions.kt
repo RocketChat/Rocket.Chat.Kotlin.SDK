@@ -5,6 +5,7 @@ import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.model.SocketMessage
 import chat.rocket.core.internal.model.Subscription
 import chat.rocket.core.model.Message
+import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room
 import kotlinx.coroutines.experimental.launch
 import org.json.JSONObject
@@ -20,6 +21,15 @@ fun RocketChatClient.subscribeRooms(callback: (Boolean, String) -> Unit): String
 
 fun RocketChatClient.subscribeRoomMessages(roomId: String, callback: (Boolean, String) -> Unit): String {
     return socket.subscribeRoomMessages(roomId, callback)
+}
+
+fun RocketChatClient.subscribeUserDataChanges(callback: (Boolean, String) -> Unit): String {
+    with(socket) {
+        val id = generateId()
+        getUserDataChanges(id)
+        subscriptionsMap[id] = callback
+        return id
+    }
 }
 
 fun RocketChatClient.unsubscribe(subId: String) {
@@ -102,6 +112,7 @@ private fun Socket.processUserStream(text: String) {
         when (stream) {
             "rooms-changed" -> {
                 processRoomStream(state, data)
+                processMyselfStream(state, data)
             }
             "subscriptions-changed" -> {
                 processSubscriptionStream(state, data)
@@ -149,6 +160,17 @@ private fun Socket.processSubscriptionStream(state: String, data: JSONObject) {
     subscription?.apply {
         launch(parent = parentJob) {
             subscriptionsChannel.send(StreamMessage(getMessageType(state), subscription))
+        }
+    }
+}
+
+private fun Socket.processMyselfStream(state: String, data: JSONObject) {
+    val adapter = moshi.adapter<Myself>(Myself::class.java)
+    val myself = adapter.fromJson(data.toString())
+
+    myself?.apply {
+        launch(parent = parentJob) {
+            userDataChannel.send(StreamMessage(getMessageType(state), myself))
         }
     }
 }

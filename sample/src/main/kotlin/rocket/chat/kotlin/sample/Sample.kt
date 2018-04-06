@@ -13,7 +13,6 @@ import chat.rocket.core.internal.realtime.*
 import chat.rocket.core.internal.rest.chatRooms
 import chat.rocket.core.internal.rest.getRoomFavoriteMessages
 import chat.rocket.core.internal.rest.login
-import chat.rocket.core.internal.rest.settingsOauth
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.history
 import chat.rocket.core.model.messages
@@ -22,7 +21,6 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.channels.Channel
-import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.OkHttpClient
@@ -47,10 +45,10 @@ fun main(args: Array<String>) {
     val interceptor = HttpLoggingInterceptor()
     interceptor.level = HttpLoggingInterceptor.Level.BODY
     val okHttpClient = OkHttpClient.Builder()
-            .addInterceptor(interceptor)
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(15, TimeUnit.SECONDS)
-            .build()
+        .addInterceptor(interceptor)
+        .connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(15, TimeUnit.SECONDS)
+        .build()
 
     val client = RocketChatClient.create {
         httpClient = okHttpClient
@@ -62,11 +60,8 @@ fun main(args: Array<String>) {
     // using coroutines
     val job = launch(CommonPool) {
 
-        val services = client.settingsOauth().services
-        logger.debug("Services: $services")
-
         val token = client.login("luciofm-testing", "vpnfe5lnv!")
-        logger.debug("Login: ${token.userId} - ${token.authToken}")
+        logger.debug("Token: userId = ${token.userId} - authToken = ${token.authToken}")
 
         launch {
             val statusChannel = Channel<State>()
@@ -74,11 +69,14 @@ fun main(args: Array<String>) {
             for (status in statusChannel) {
                 logger.debug("Changing status to: $status")
                 when (status) {
-                    is State.Authenticating -> logger.debug("Authenticating")
+                    is State.Authenticating -> {
+                        logger.debug("Authenticating")
+                    }
                     is State.Connected -> {
                         logger.debug("Connected")
                         client.subscribeSubscriptions { _, _ -> }
                         client.subscribeRooms { _, _ -> }
+                        client.subscribeUserDataChanges { _, _ -> }
                     }
                 }
             }
@@ -98,10 +96,9 @@ fun main(args: Array<String>) {
         }
 
         launch {
-            delay(10000)
-            client.setTemporaryStatus(UserStatus.Online)
-            delay(2000)
-            client.setDefaultStatus(UserStatus.Away)
+            for (userData in client.userDataChannel) {
+                logger.debug("User Data: $userData")
+            }
         }
 
         client.connect()

@@ -20,9 +20,8 @@ suspend fun RocketChatClient.setTemporaryStatus(status: UserStatus) = withContex
     }
 }
 
-suspend fun RocketChatClient.getUserDataChanges() = withContext(CommonPool) {
-    socket.send(userDataChangesMessage(socket.generateId()))
-}
+fun Socket.getUserDataChanges(id: String) =
+    send(userDataChangesMessage(id))
 
 sealed class UserStatus {
     @Json(name = "online") object Online : UserStatus()
