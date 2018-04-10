@@ -77,6 +77,9 @@ fun Socket.processSubscriptionsChanged(message: SocketMessage, text: String) {
         "stream-room-messages" -> {
             processRoomMessage(text)
         }
+        "users" -> {
+            processUsersStream(text)
+        }
         else -> {
             // IGNORE for now
         }
@@ -112,7 +115,6 @@ private fun Socket.processUserStream(text: String) {
         when (stream) {
             "rooms-changed" -> {
                 processRoomStream(state, data)
-                processMyselfStream(state, data)
             }
             "subscriptions-changed" -> {
                 processSubscriptionStream(state, data)
@@ -142,6 +144,23 @@ private fun Socket.processRoomMessage(text: String) {
     }
 }
 
+private fun Socket.processUsersStream(text: String) {
+    try {
+        val json = JSONObject(text)
+        val fields = json.getJSONObject("fields")
+        val adapter = moshi.adapter<Myself>(Myself::class.java)
+        val myself = adapter.fromJson(fields.toString())
+
+        myself?.let {
+            launch(parent = parentJob) {
+                userDataChannel.send(myself)
+            }
+        }
+    } catch (ex: Exception) {
+        ex.printStackTrace()
+    }
+}
+
 private fun Socket.processRoomStream(state: String, data: JSONObject) {
     val adapter = moshi.adapter<Room>(Room::class.java)
     val room = adapter.fromJson(data.toString())
@@ -160,17 +179,6 @@ private fun Socket.processSubscriptionStream(state: String, data: JSONObject) {
     subscription?.apply {
         launch(parent = parentJob) {
             subscriptionsChannel.send(StreamMessage(getMessageType(state), subscription))
-        }
-    }
-}
-
-private fun Socket.processMyselfStream(state: String, data: JSONObject) {
-    val adapter = moshi.adapter<Myself>(Myself::class.java)
-    val myself = adapter.fromJson(data.toString())
-
-    myself?.apply {
-        launch(parent = parentJob) {
-            userDataChannel.send(StreamMessage(getMessageType(state), myself))
         }
     }
 }

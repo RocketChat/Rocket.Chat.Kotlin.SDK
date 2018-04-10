@@ -30,7 +30,7 @@ class Socket(
     internal val roomsChannel: SendChannel<StreamMessage<Room>>,
     internal val subscriptionsChannel: SendChannel<StreamMessage<Subscription>>,
     internal val messagesChannel: SendChannel<Message>,
-    internal val userDataChannel: SendChannel<StreamMessage<Myself>>
+    internal val userDataChannel: SendChannel<Myself>
 ) : WebSocketListener() {
 
     private val request: Request = Request.Builder()

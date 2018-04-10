@@ -57,7 +57,7 @@ class RocketChatClient private constructor(
     val roomsChannel = Channel<StreamMessage<Room>>()
     val subscriptionsChannel = Channel<StreamMessage<Subscription>>()
     val messagesChannel = Channel<Message>()
-    val userDataChannel = Channel<StreamMessage<Myself>>()
+    val userDataChannel = Channel<Myself>()
     internal val socket: Socket
 
     init {
