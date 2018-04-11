@@ -2,19 +2,8 @@ package chat.rocket.core.internal
 
 import chat.rocket.common.internal.ISO8601Date
 import chat.rocket.common.util.Logger
-import chat.rocket.core.model.attachment.Attachment
-import chat.rocket.core.model.attachment.AudioAttachment
-import chat.rocket.core.model.attachment.AuthorAttachment
-import chat.rocket.core.model.attachment.Field
-import chat.rocket.core.model.attachment.ImageAttachment
-import chat.rocket.core.model.attachment.MessageAttachment
-import chat.rocket.core.model.attachment.VideoAttachment
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonDataException
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
+import chat.rocket.core.model.attachment.*
+import com.squareup.moshi.*
 import java.lang.reflect.Type
 
 class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<Attachment>() {
@@ -160,7 +149,69 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
     }
 
     override fun toJson(writer: JsonWriter, value: Attachment?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        if (value == null) {
+            writer.nullValue()
+        } else {
+            when (value) {
+                is MessageAttachment -> writeMessageAttachment(writer, value)
+                is AudioAttachment -> writeAudioAttachment(writer, value)
+                is AuthorAttachment -> writeAuthorAttachment(writer, value)
+            }
+        }
+    }
+
+    private fun writeMessageAttachment(writer: JsonWriter, attachment: MessageAttachment) {
+        writer.beginObject()
+        with(writer) {
+            name("author_name").value(attachment.author)
+            name("author_icon").value(attachment.icon)
+            name("text").value(attachment.text)
+            name("thumbUrl").value(attachment.thumbUrl)
+            name("color").value(attachment.color)
+            name("message_link").value(attachment.url)
+            name("ts").value(attachment.timestamp)
+        }
+        writer.endObject()
+    }
+
+    private fun writeAudioAttachment(writer: JsonWriter, attachment: AudioAttachment) {
+        writer.beginObject()
+        with(writer) {
+            name("title").value(attachment.title)
+            name("description").value(attachment.description)
+            name("title_link").value(attachment.titleLink)
+            name("title_link_download").value(attachment.titleLinkDownload)
+            name("audio_url").value(attachment.url)
+            name("audio_type").value(attachment.size)
+            name("audio_url").value(attachment.type)
+        }
+        writer.endObject()
+    }
+
+    private fun writeAuthorAttachment(writer: JsonWriter, attachment: AuthorAttachment) {
+        writer.beginObject()
+        with(writer) {
+            name("author_link").value(attachment.url)
+            name("author_icon").value(attachment.authorIcon)
+            name("author_name").value(attachment.authorName)
+            attachment.fields?.let { writeAuthorFields(writer, it) }
+        }
+        writer.endObject()
+    }
+
+    private fun writeAuthorFields(writer: JsonWriter, fields: List<Field>) {
+        if (fields.isNotEmpty()) {
+            writer.name("fields")
+            writer.beginArray()
+            fields.forEach {
+                writer.beginObject()
+                writer.name("title").value(it.title)
+                writer.name("value").value(it.value)
+                writer.name("short").value(it.shortField)
+                writer.endObject()
+            }
+            writer.endArray()
+        }
     }
 
     private fun checkNonNull(field: Any?, fieldName: String) {

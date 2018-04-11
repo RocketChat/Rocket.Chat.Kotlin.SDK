@@ -12,4 +12,5 @@ interface BaseMessage {
     val avatar: String?
     val mentions: List<SimpleUser>?
     val channels: List<SimpleRoom>?
+    val isTemporary: Boolean?
 }
