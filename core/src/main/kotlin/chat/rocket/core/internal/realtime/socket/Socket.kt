@@ -9,6 +9,7 @@ import chat.rocket.core.internal.realtime.message.CONNECT_MESSAGE
 import chat.rocket.core.internal.realtime.message.pingMessage
 import chat.rocket.core.internal.realtime.message.pongMessage
 import chat.rocket.core.internal.realtime.socket.model.StreamMessage
+import chat.rocket.core.internal.realtime.socket.model.State
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room
@@ -346,14 +347,4 @@ fun RocketChatClient.connect() {
 
 fun RocketChatClient.disconnect() {
     socket.disconnect()
-}
-
-sealed class State {
-    class Created : State()
-    class Waiting(val seconds: Int) : State()
-    class Connecting : State()
-    class Authenticating : State()
-    class Connected : State()
-    class Disconnecting : State()
-    class Disconnected : State()
 }

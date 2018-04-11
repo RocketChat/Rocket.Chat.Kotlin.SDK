@@ -17,7 +17,7 @@ import chat.rocket.core.internal.CoreJsonAdapterFactory
 import chat.rocket.core.internal.ReactionsAdapter
 import chat.rocket.core.internal.model.Subscription
 import chat.rocket.core.internal.realtime.socket.Socket
-import chat.rocket.core.internal.realtime.socket.State
+import chat.rocket.core.internal.realtime.socket.model.State
 import chat.rocket.core.internal.realtime.socket.model.StreamMessage
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.Myself
