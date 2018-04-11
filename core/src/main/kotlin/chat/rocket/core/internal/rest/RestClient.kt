@@ -35,7 +35,7 @@ internal fun getRestApiMethodNameByRoomType(roomType: RoomType, method: String):
         is RoomType.PrivateGroup -> "groups.$method"
         is RoomType.DirectMessage -> "dm.$method"
         // TODO - handle custom rooms
-        else -> "channels." + method
+        else -> "channels.$method"
     }
 }
 
@@ -49,7 +49,7 @@ internal fun requestUrl(baseUrl: HttpUrl, method: String): HttpUrl.Builder {
 internal fun RocketChatClient.requestBuilder(httpUrl: HttpUrl): Request.Builder {
     val builder = Request.Builder().url(httpUrl)
 
-    val token: Token? = tokenRepository.get()
+    val token: Token? = tokenRepository.get(this.url)
     token?.let {
         builder.addHeader("X-Auth-Token", token.authToken)
                 .addHeader("X-User-Id", token.userId)
@@ -64,17 +64,20 @@ internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type:
             val callback = object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
                     logger.debug {
-                        "Failed request: $request"
+                        "Failed request: ${request.method()} - ${request.url()} - ${e.message}"
                     }
                     continuation.tryResumeWithException {
-                        RocketChatNetworkErrorException("Network Error: ${e.message}", e)
+                        RocketChatNetworkErrorException("Network Error: ${e.message}", e, request.url().toString())
                     }
                 }
 
                 override fun onResponse(call: Call, response: Response) {
+                    logger.debug {
+                        "Successful HTTP request: ${request.method()} - ${request.url()}: ${response.code()} ${response.message()}"
+                    }
                     if (!response.isSuccessful) {
                         continuation.tryResumeWithException {
-                            processCallbackError(moshi, response, logger)
+                            processCallbackError(moshi, request, response, logger)
                         }
                         return
                     }
@@ -88,7 +91,7 @@ internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type:
                                 value -> continuation.tryToResume { value }
                             }.ifNull {
                                 continuation.tryResumeWithException {
-                                    RocketChatInvalidResponseException("Error parsing JSON message")
+                                    RocketChatInvalidResponseException("Error parsing JSON message", url = request.url().toString())
                                 }
                             }
                         }
@@ -99,7 +102,7 @@ internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type:
                             is IllegalArgumentException,
                             is IOException -> {
                                 continuation.tryResumeWithException {
-                                    RocketChatInvalidResponseException(ex.message!!, ex)
+                                    RocketChatInvalidResponseException(ex.message!!, ex, request.url().toString())
                                 }
                             }
                             else -> continuation.resumeWithException(ex)
@@ -110,6 +113,9 @@ internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type:
                 }
             }
 
+            logger.debug {
+                "Enqueueing: ${request.method()} - ${request.url()}"
+            }
             if (largeFile) {
                 httpClient.newBuilder()
                     .writeTimeout(90, TimeUnit.SECONDS)
@@ -124,7 +130,7 @@ internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type:
             }
         }
 
-internal fun processCallbackError(moshi: Moshi, response: Response, logger: Logger): RocketChatException {
+internal fun processCallbackError(moshi: Moshi, request: Request, response: Response, logger: Logger): RocketChatException {
     var exception: RocketChatException
     try {
         val body = response.body()?.string() ?: "missing body"
@@ -133,18 +139,17 @@ internal fun processCallbackError(moshi: Moshi, response: Response, logger: Logg
             val adapter: JsonAdapter<AuthenticationErrorMessage>? = moshi.adapter(AuthenticationErrorMessage::class.java)
             val message: AuthenticationErrorMessage? = adapter?.fromJson(body)
             if (message?.error?.contentEquals("totp-required") == true)
-                RocketChatTwoFactorException(message.message)
+                RocketChatTwoFactorException(message.message, request.url().toString())
             else
-                RocketChatAuthException(message?.message ?: "Authentication problem")
+                RocketChatAuthException(message?.message ?: "Authentication problem", request.url().toString())
         } else {
             val adapter: JsonAdapter<ErrorMessage>? = moshi.adapter(ErrorMessage::class.java)
             val message = adapter?.fromJson(body)
-            RocketChatApiException(message?.errorType ?: response.code().toString(), message?.error ?: "unknown error")
+            RocketChatApiException(message?.errorType ?: response.code().toString(), message?.error ?: "unknown error",
+                    url = request.url().toString())
         }
-    } catch (e: IOException) {
-        exception = RocketChatApiException(response.code().toString(), e.message!!, e)
-    } catch (e: NullPointerException) {
-        exception = RocketChatApiException(response.code().toString(), e.message!!, e)
+    } catch (e: Exception) {
+        exception = RocketChatApiException(response.code().toString(), e.message!!, e, request.url().toString())
     } finally {
         response.body()?.close()
     }

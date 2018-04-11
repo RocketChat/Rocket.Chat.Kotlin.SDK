@@ -40,6 +40,10 @@ const val QUERY_USERS_SUCCESS = "{\"users\":[{\"_id\":\"2XjnFaM4unjqRh96A\",\"st
 
 const val INCORRECT_PARAM_PROVIDED = "{\"success\":false,\"error\":\"fun is not a function\"}"
 
+const val CREATE_CHANNEL_SUCCESS = "{\"channel\":{\"_id\":\"JeJcd4PE9d9fvjakf\",\"name\":\"elf\",\"fname\":\"elf\",\"t\":\"c\",\"msgs\":0,\"u\":{\"_id\":\"MaBK2dquY8TbaH6d3\",\"username\":\"aniket03\"},\"customFields\":{},\"ts\":\"2018-03-13T14:42:46.849Z\",\"ro\":false,\"sysMes\":true,\"_updatedAt\":\"2018-03-13T14:42:46.850Z\"},\"success\":true}"
+
+const val FAIL_DUPLICATE_CHANNEL = "{\"success\":false,\"error\":\"A channel with name 'elf' exists [error-duplicate-channel-name]\",\"errorType\":\"error-duplicate-channel-name\"}"
+
 const val ROLES_OK = """
 {
   "username": "rafaelks",
@@ -47,6 +51,26 @@ const val ROLES_OK = """
     "admin"
   ],
   "_id": "hvzu8z6mHFigiXy6Y",
+  "success": true
+}
+"""
+//{"message":{"_id":"1abbbf94-c839-4436-9476-6de03011c1e0","rid":"GS3Ceh7BLJGzfto78","msg":"Não"}}
+const val SEND_MESSAGE_WITH_ID_OK = """
+{
+  "message": {
+    "_id": "1abbbf94-c839-4436-9476-6de03011c1e0",
+    "rid": "GENERAL",
+    "msg": "Sending message from SDK to #general and @here",
+    "ts": "2018-04-04T22:37:59.167Z",
+    "u": {
+      "_id": "vKjyfQkgekhXykvKk",
+      "username": "bruce.lee",
+      "name": "Bruce Lee"
+    },
+    "mentions": [],
+    "channels": [],
+    "_updatedAt": "2018-04-04T22:37:59.248Z"
+  },
   "success": true
 }
 """

@@ -48,7 +48,7 @@ class MessagesTest {
             platformLogger = PlatformLogger.NoOpLogger()
         }
 
-        Mockito.`when`(tokenProvider.get()).thenReturn(authToken)
+        Mockito.`when`(tokenProvider.get(sut.url)).thenReturn(authToken)
     }
 
     @Test
@@ -60,7 +60,7 @@ class MessagesTest {
                 .once()
 
         runBlocking {
-            val msg = sut.sendMessage(roomId = "GENERAL",
+            val msg = sut.postMessage(roomId = "GENERAL",
                     text = "Sending message from SDK to #general and @here",
                     alias = "TestingAlias",
                     emoji = ":smirk:",
@@ -105,6 +105,30 @@ class MessagesTest {
     }
 
     @Test
+    fun `sendMessage() with id should return a Message object with given id`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/chat.sendMessage")
+                .andReturn(200, SEND_MESSAGE_WITH_ID_OK)
+                .once()
+
+        runBlocking {
+            val msg = sut.sendMessage(
+                    messageId = "1abbbf94-c839-4436-9476-6de03011c1e0",
+                    roomId = "GENERAL",
+                    message = "Sending message from SDK to #general and @here",
+                    alias = "TestingAlias",
+                    emoji = ":smirk:",
+                    avatar = "https://avatars2.githubusercontent.com/u/224255?s=88&v=4")
+
+            with(msg) {
+                assertThat(message, isEqualTo("Sending message from SDK to #general and @here"))
+                assertThat(id, isEqualTo("1abbbf94-c839-4436-9476-6de03011c1e0"))
+            }
+        }
+    }
+
+    @Test
     fun `uploadFile() should succeed without throwing`() {
         mockServer.expect()
                 .post()
@@ -114,7 +138,7 @@ class MessagesTest {
 
         runBlocking {
             val file = temporaryFolder.newFile("file.png")
-            sut.uploadFile(roomId="GENERAL",
+            sut.uploadFile(roomId = "GENERAL",
                     file = file,
                     mimeType = "image/png",
                     msg = "Random Message",
@@ -132,7 +156,7 @@ class MessagesTest {
 
         runBlocking {
             val file = temporaryFolder.newFile("file.png")
-            sut.uploadFile(roomId="GENERAL",
+            sut.uploadFile(roomId = "GENERAL",
                     file = file,
                     mimeType = "image/png",
                     msg = "Random Message",

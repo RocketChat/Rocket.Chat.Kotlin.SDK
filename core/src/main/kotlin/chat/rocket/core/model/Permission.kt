@@ -5,6 +5,6 @@ import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
 data class Permission(
-        @Json(name = "_id") val id: String,
-        val roles: List<String>
+    @Json(name = "_id") val id: String,
+    val roles: List<String>
 )

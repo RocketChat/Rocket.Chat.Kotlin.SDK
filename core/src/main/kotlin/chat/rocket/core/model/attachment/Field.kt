@@ -1,13 +1,14 @@
-package chat.rocket.core.model
+package chat.rocket.core.model.attachment
 
 import com.squareup.moshi.Json
 import se.ansman.kotshi.JsonDefaultValueBoolean
 import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
-data class DeleteResult(
-    @Json(name = "_id") val id: String,
-    @Json(name = "ts") val timestamp: Long?,
+data class Field(
+    val title: String,
+    val value: String,
     @JsonDefaultValueBoolean(false)
-    val success: Boolean
+    @Json(name = "short")
+    val shortField: Boolean
 )

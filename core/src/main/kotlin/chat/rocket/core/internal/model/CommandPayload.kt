@@ -4,7 +4,7 @@ import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
 data class CommandPayload(
-        val command: String,
-        val roomId: String,
-        val params: String?
+    val command: String,
+    val roomId: String,
+    val params: String?
 )

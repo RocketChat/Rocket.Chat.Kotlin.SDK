@@ -1,24 +1,18 @@
 package rocket.chat.kotlin.sample
 
 import chat.rocket.common.RocketChatException
-import chat.rocket.common.model.BaseRoom
 import chat.rocket.common.model.RoomType
 import chat.rocket.common.model.ServerInfo
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
-import chat.rocket.common.util.ifNull
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
 import chat.rocket.core.compat.Callback
 import chat.rocket.core.compat.serverInfo
 import chat.rocket.core.internal.realtime.*
 import chat.rocket.core.internal.rest.chatRooms
-import chat.rocket.core.internal.rest.configurations
 import chat.rocket.core.internal.rest.getRoomFavoriteMessages
 import chat.rocket.core.internal.rest.login
-import chat.rocket.core.internal.rest.sendMessage
-import chat.rocket.core.internal.rest.settings
-import chat.rocket.core.internal.rest.signup
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.history
 import chat.rocket.core.model.messages
@@ -27,15 +21,11 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.channels.Channel
-import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
-import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
-import kotlin.math.log
-import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     val logger = object : PlatformLogger {
@@ -55,10 +45,10 @@ fun main(args: Array<String>) {
     val interceptor = HttpLoggingInterceptor()
     interceptor.level = HttpLoggingInterceptor.Level.BODY
     val okHttpClient = OkHttpClient.Builder()
-            .addInterceptor(interceptor)
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(15, TimeUnit.SECONDS)
-            .build()
+        .addInterceptor(interceptor)
+        .connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(15, TimeUnit.SECONDS)
+        .build()
 
     val client = RocketChatClient.create {
         httpClient = okHttpClient
@@ -71,7 +61,7 @@ fun main(args: Array<String>) {
     val job = launch(CommonPool) {
 
         val token = client.login("luciofm-testing", "vpnfe5lnv!")
-        logger.debug("Login: ${token.userId} - ${token.authToken}")
+        logger.debug("Token: userId = ${token.userId} - authToken = ${token.authToken}")
 
         launch {
             val statusChannel = Channel<State>()
@@ -79,11 +69,14 @@ fun main(args: Array<String>) {
             for (status in statusChannel) {
                 logger.debug("Changing status to: $status")
                 when (status) {
-                    is State.Authenticating -> logger.debug("Authenticating")
+                    is State.Authenticating -> {
+                        logger.debug("Authenticating")
+                    }
                     is State.Connected -> {
                         logger.debug("Connected")
                         client.subscribeSubscriptions { _, _ -> }
                         client.subscribeRooms { _, _ -> }
+                        client.subscribeUserDataChanges { _, _ -> }
                     }
                 }
             }
@@ -103,10 +96,9 @@ fun main(args: Array<String>) {
         }
 
         launch {
-            delay(10000)
-            client.setConnectionStatus(UserStatus.Online)
-            delay(2000)
-            client.setDefaultStatus(UserStatus.Away)
+            for (userData in client.userDataChannel) {
+                logger.debug("User Data: $userData")
+            }
         }
 
         client.connect()
@@ -174,11 +166,11 @@ suspend fun pinMessage(client: RocketChatClient) {
 
 class SimpleTokenRepository : TokenRepository {
     private var savedToken: Token? = null
-    override fun save(token: Token) {
+    override fun save(url: String, token: Token) {
         savedToken = token
     }
 
-    override fun get(): Token? {
+    override fun get(url: String): Token? {
         return savedToken
     }
 }

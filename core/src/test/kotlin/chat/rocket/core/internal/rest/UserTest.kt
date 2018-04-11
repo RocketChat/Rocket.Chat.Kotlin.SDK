@@ -52,7 +52,7 @@ class UserTest {
             platformLogger = PlatformLogger.NoOpLogger()
         }
 
-        Mockito.`when`(tokenProvider.get()).thenReturn(authToken)
+        Mockito.`when`(tokenProvider.get(sut.url)).thenReturn(authToken)
     }
 
     @Test
@@ -91,18 +91,18 @@ class UserTest {
         }
     }
 
-    @Test
-    fun `chatRooms() should return users chatrooms`() {
-        mockServer.expect()
-                .get().withPath("/api/v1/rooms.get?updatedAt=1970-01-01T00:00:00.000Z").andReturn(200, ROOMS_OK).once()
-        mockServer.expect()
-                .get().withPath("/api/v1/subscriptions.get?updatedAt=1970-01-01T00:00:00.000Z").andReturn(200, SUBSCRIPTIONS_OK).once()
-
-        runBlocking {
-            val rooms = sut.chatRooms()
-            System.out.println("Rooms: $rooms")
-        }
-    }
+//    @Test
+//    fun `chatRooms() should return users chatrooms`() {
+//        mockServer.expect()
+//                .get().withPath("/api/v1/rooms.get?updatedAt=1970-01-01T00:00:00.000Z").andReturn(200, ROOMS_OK).once()
+//        mockServer.expect()
+//                .get().withPath("/api/v1/subscriptions.get?updatedAt=1970-01-01T00:00:00.000Z").andReturn(200, SUBSCRIPTIONS_OK).once()
+//
+//        runBlocking {
+//            val rooms = sut.chatRooms()
+//            System.out.println("Rooms: $rooms")
+//        }
+//    }
 
     @Test
     fun `updateProfile() should succeed with valid parameters` () {
@@ -150,6 +150,62 @@ class UserTest {
         runBlocking {
             try {
                 sut.updateProfile("userId", "test@email.com", null, null, "testuser" )
+                throw RuntimeException("unreachable code")
+            } catch (ex: Exception) {
+                assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
+                val apiException = ex as RocketChatApiException
+                assertThat(apiException.errorType, isEqualTo("403"))
+                assertThat(apiException.message, isEqualTo("Email already exists. [403]"))
+            }
+        }
+    }
+
+    @Test
+    fun `updateOwnBasicInformation() should succeed with valid parameters` () {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.updateOwnBasicInfo")
+                .andReturn(200, USER_UPDATE_SUCCESS)
+                .once()
+
+        runBlocking {
+            val user = sut.updateOwnBasicInformation("userId", "test@email.com")
+            assertThat(user.id, isEqualTo("userId"))
+        }
+    }
+
+    @Test
+    fun `updateOwnBasicInformation() should fail with RocketChatApiException if email is already in use`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.updateOwnBasicInfo")
+                .andReturn(403, FAIL_EMAIL_IN_USE)
+                .once()
+
+        runBlocking {
+            try {
+                sut.updateOwnBasicInformation("userId", "test@email.com")
+                throw RuntimeException("unreachable code")
+            } catch (ex: Exception) {
+                assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
+                assertThat(ex.message, isEqualTo("Email already exists. [403]"))
+                val apiException = ex as RocketChatApiException
+                assertThat(apiException.errorType, isEqualTo("403"))
+            }
+        }
+    }
+
+    @Test
+    fun `updateOwnBasicInformation() should fail with RocketChatApiException if username is already in use`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.updateOwnBasicInfo")
+                .andReturn(403, FAIL_EMAIL_IN_USE)
+                .once()
+
+        runBlocking {
+            try {
+                sut.updateOwnBasicInformation("userId", "test@email.com", null, null, "testuser" )
                 throw RuntimeException("unreachable code")
             } catch (ex: Exception) {
                 assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))

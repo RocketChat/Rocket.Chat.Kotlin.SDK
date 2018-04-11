@@ -7,9 +7,9 @@ import okhttp3.MediaType
 import okhttp3.RequestBody
 import java.io.InputStream
 
-
-class InputStreamRequestBody(private val contentType: MediaType?,
-                             private val inputStreamProvider: () -> InputStream?
+class InputStreamRequestBody(
+    private val contentType: MediaType?,
+    private val inputStreamProvider: () -> InputStream?
 ) : RequestBody() {
 
     override fun contentType(): MediaType? {

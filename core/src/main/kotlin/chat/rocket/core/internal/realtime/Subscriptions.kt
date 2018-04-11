@@ -5,6 +5,7 @@ import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.model.SocketMessage
 import chat.rocket.core.internal.model.Subscription
 import chat.rocket.core.model.Message
+import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room
 import kotlinx.coroutines.experimental.launch
 import org.json.JSONObject
@@ -22,12 +23,21 @@ fun RocketChatClient.subscribeRoomMessages(roomId: String, callback: (Boolean, S
     return socket.subscribeRoomMessages(roomId, callback)
 }
 
+fun RocketChatClient.subscribeUserDataChanges(callback: (Boolean, String) -> Unit): String {
+    with(socket) {
+        val id = generateId()
+        getUserDataChanges(id)
+        subscriptionsMap[id] = callback
+        return id
+    }
+}
+
 fun RocketChatClient.unsubscribe(subId: String) {
     socket.unsubscribe(subId)
 }
 
 internal fun Socket.subscribeSubscriptions(callback: (Boolean, String) -> Unit): String {
-    client.tokenRepository.get()?.let { (userId) ->
+    client.tokenRepository.get(client.url)?.let { (userId) ->
         val id = generateId()
         send(subscriptionsStreamMessage(id, userId))
         subscriptionsMap[id] = callback
@@ -38,7 +48,7 @@ internal fun Socket.subscribeSubscriptions(callback: (Boolean, String) -> Unit):
 }
 
 internal fun Socket.subscribeRooms(callback: (Boolean, String) -> Unit): String {
-    client.tokenRepository.get()?.let { (userId) ->
+    client.tokenRepository.get(client.url)?.let { (userId) ->
         val id = generateId()
         send(roomsStreamMessage(id, userId))
         subscriptionsMap[id] = callback
@@ -66,6 +76,9 @@ fun Socket.processSubscriptionsChanged(message: SocketMessage, text: String) {
         }
         "stream-room-messages" -> {
             processRoomMessage(text)
+        }
+        "users" -> {
+            processUsersStream(text)
         }
         else -> {
             // IGNORE for now
@@ -124,6 +137,23 @@ private fun Socket.processRoomMessage(text: String) {
         message?.let {
             launch(parent = parentJob) {
                 messagesChannel.send(message)
+            }
+        }
+    } catch (ex: Exception) {
+        ex.printStackTrace()
+    }
+}
+
+private fun Socket.processUsersStream(text: String) {
+    try {
+        val json = JSONObject(text)
+        val fields = json.getJSONObject("fields")
+        val adapter = moshi.adapter<Myself>(Myself::class.java)
+        val myself = adapter.fromJson(fields.toString())
+
+        myself?.let {
+            launch(parent = parentJob) {
+                userDataChannel.send(myself)
             }
         }
     } catch (ex: Exception) {

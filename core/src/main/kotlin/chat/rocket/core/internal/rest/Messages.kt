@@ -4,9 +4,7 @@ import chat.rocket.common.model.BaseResult
 import chat.rocket.common.model.RoomType
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
-import chat.rocket.core.internal.model.DeletePayload
-import chat.rocket.core.internal.model.MessagePayload
-import chat.rocket.core.internal.model.ReactionPayload
+import chat.rocket.core.internal.model.*
 import chat.rocket.core.model.DeleteResult
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.PagedResult
@@ -30,8 +28,8 @@ import java.io.InputStream
  * @return The updated Message object.
  */
 suspend fun RocketChatClient.updateMessage(roomId: String, messageId: String, text: String): Message = withContext(CommonPool) {
-    val payload = MessagePayload(roomId, text, null, null, null, null, messageId)
-    val adapter = moshi.adapter(MessagePayload::class.java)
+    val payload = PostMessagePayload(roomId, text, null, null, null, null, messageId)
+    val adapter = moshi.adapter(PostMessagePayload::class.java)
     val payloadBody = adapter.toJson(payload)
 
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
@@ -68,10 +66,12 @@ suspend fun RocketChatClient.unpinMessage(messageId: String) {
     }
 }
 
-suspend fun RocketChatClient.getRoomFavoriteMessages(roomId: String,
-                                                     roomType: RoomType,
-                                                     offset: Int): PagedResult<List<Message>> = withContext(CommonPool) {
-    val userId = tokenRepository.get()?.userId
+suspend fun RocketChatClient.getRoomFavoriteMessages(
+    roomId: String,
+    roomType: RoomType,
+    offset: Int
+): PagedResult<List<Message>> = withContext(CommonPool) {
+    val userId = tokenRepository.get(this.url)?.userId
 
     val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "messages"))
             .addQueryParameter("roomId", roomId)
@@ -88,9 +88,11 @@ suspend fun RocketChatClient.getRoomFavoriteMessages(roomId: String,
     return@withContext PagedResult<List<Message>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
 }
 
-suspend fun RocketChatClient.getRoomPinnedMessages(roomId: String,
-                                                   roomType: RoomType,
-                                                   offset: Int? = 0): PagedResult<List<Message>> = withContext(CommonPool) {
+suspend fun RocketChatClient.getRoomPinnedMessages(
+    roomId: String,
+    roomType: RoomType,
+    offset: Int? = 0
+): PagedResult<List<Message>> = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl,
             getRestApiMethodNameByRoomType(roomType, "messages"))
             .addQueryParameter("roomId", roomId)
@@ -108,29 +110,67 @@ suspend fun RocketChatClient.getRoomPinnedMessages(roomId: String,
 }
 
 /**
- * Sends a new message
+ * Posts a new message.
  *
- * @param roomId the room where to send the message (works with all types)
+ * @param roomId The room where to send the message (works with all types)
  * @param text Optional text message to send
- * @param alias Optianal alias to be used as the sender of the message
+ * @param alias Optional alias to be used as the sender of the message
  * @param emoji Optional emoji to be used as the sender's avatar
  * @param avatar Optional avatar url to be used as the sender's avatar
  * @param attachments Optional List of [Attachment]
  * @return
  */
-suspend fun RocketChatClient.sendMessage(roomId: String,
-                                         text: String? = null,
-                                         alias: String? = null,
-                                         emoji: String? = null,
-                                         avatar: String? = null,
-                                         attachments: List<Attachment>? = null): Message = withContext(CommonPool) {
-    val payload = MessagePayload(roomId, text, alias, emoji, avatar, attachments)
-    val adapter = moshi.adapter(MessagePayload::class.java)
+suspend fun RocketChatClient.postMessage(
+    roomId: String,
+    text: String? = null,
+    alias: String? = null,
+    emoji: String? = null,
+    avatar: String? = null,
+    attachments: List<Attachment>? = null
+): Message = withContext(CommonPool) {
+    val payload = PostMessagePayload(roomId, text, alias, emoji, avatar, attachments)
+    val adapter = moshi.adapter(PostMessagePayload::class.java)
     val payloadBody = adapter.toJson(payload)
 
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, "chat.postMessage").build()
+    val request = requestBuilder(url).post(body).build()
+
+    val type = Types.newParameterizedType(RestResult::class.java, Message::class.java)
+    return@withContext handleRestCall<RestResult<Message>>(request, type).result()
+}
+
+/**
+ * Sends a new message with the given message id.
+ *
+ * @param messageId The id of message.
+ * @param roomId The room where to send the message (works with all types)
+ * @param text Optional text message to send
+ * @param alias Optional alias to be used as the sender of the message
+ * @param emoji Optional emoji to be used as the sender's avatar
+ * @param avatar Optional avatar url to be used as the sender's avatar
+ * @param attachments Optional List of [Attachment]
+ * @return
+ */
+suspend fun RocketChatClient.sendMessage(
+        messageId: String,
+        roomId: String,
+        message: String? = null,
+        alias: String? = null,
+        emoji: String? = null,
+        avatar: String? = null,
+        attachments: List<Attachment>? = null
+): Message = withContext(CommonPool) {
+    val payload = SendMessagePayload(
+            SendMessageBody(messageId, roomId, message, alias, emoji, avatar, attachments)
+    )
+    val adapter = moshi.adapter(SendMessagePayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val url = requestUrl(restUrl, "chat.sendMessage").build()
     val request = requestBuilder(url).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, Message::class.java)
@@ -146,11 +186,13 @@ suspend fun RocketChatClient.sendMessage(roomId: String,
  * @param msg The message to send with the file.
  * @param description The file description.
  */
-suspend fun RocketChatClient.uploadFile(roomId: String,
-                                        file: File,
-                                        mimeType: String,
-                                        msg: String = "",
-                                        description: String = "") {
+suspend fun RocketChatClient.uploadFile(
+    roomId: String,
+    file: File,
+    mimeType: String,
+    msg: String = "",
+    description: String = ""
+) {
     withContext(CommonPool) {
         val body = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
@@ -164,12 +206,14 @@ suspend fun RocketChatClient.uploadFile(roomId: String,
     }
 }
 
-suspend fun RocketChatClient.uploadFile(roomId: String,
-                                        fileName: String,
-                                        mimeType: String,
-                                        msg: String = "",
-                                        description: String = "",
-                                        inputStreamProvider: () -> InputStream?) {
+suspend fun RocketChatClient.uploadFile(
+    roomId: String,
+    fileName: String,
+    mimeType: String,
+    msg: String = "",
+    description: String = "",
+    inputStreamProvider: () -> InputStream?
+) {
     withContext(CommonPool) {
         val body = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
@@ -192,10 +236,12 @@ private suspend fun RocketChatClient.uploadFile(roomId: String, body: RequestBod
     handleRestCall<Any>(request, Any::class.java, largeFile = true)
 }
 
-suspend fun RocketChatClient.messages(roomId: String,
-                                      roomType: RoomType,
-                                      offset: Long,
-                                      count: Long): PagedResult<List<Message>> = withContext(CommonPool) {
+suspend fun RocketChatClient.messages(
+    roomId: String,
+    roomType: RoomType,
+    offset: Long,
+    count: Long
+): PagedResult<List<Message>> = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl,
             getRestApiMethodNameByRoomType(roomType, "messages"))
             .addQueryParameter("roomId", roomId)
@@ -219,9 +265,11 @@ suspend fun RocketChatClient.messages(roomId: String,
  * @param msgId The message id to delete.
  * @param asUser Whether the message should be deleted as the user who sent it. Defaults to false.
  */
-suspend fun RocketChatClient.deleteMessage(roomId: String,
-                                           msgId: String,
-                                           asUser: Boolean = false): DeleteResult = withContext(CommonPool) {
+suspend fun RocketChatClient.deleteMessage(
+    roomId: String,
+    msgId: String,
+    asUser: Boolean = false
+): DeleteResult = withContext(CommonPool) {
     val payload = DeletePayload(roomId, msgId, asUser)
     val adapter = moshi.adapter(DeletePayload::class.java)
     val payloadBody = adapter.toJson(payload)
@@ -234,12 +282,13 @@ suspend fun RocketChatClient.deleteMessage(roomId: String,
     return@withContext handleRestCall<DeleteResult>(request, DeleteResult::class.java)
 }
 
-
-suspend fun RocketChatClient.history(roomId: String,
-                                     roomType: RoomType,
-                                     count: Long = 50,
-                                     oldest: String? = null,
-                                     latest: String? = null): PagedResult<List<Message>> = withContext(CommonPool) {
+suspend fun RocketChatClient.history(
+    roomId: String,
+    roomType: RoomType,
+    count: Long = 50,
+    oldest: String? = null,
+    latest: String? = null
+): PagedResult<List<Message>> = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "history")).apply {
         addQueryParameter("roomId", roomId)
         addQueryParameter("count", count.toString())
