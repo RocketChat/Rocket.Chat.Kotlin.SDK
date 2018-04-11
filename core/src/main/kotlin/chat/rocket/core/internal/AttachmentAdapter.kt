@@ -154,7 +154,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
         } else {
             when (value) {
                 is MessageAttachment -> writeMessageAttachment(writer, value)
-                is AudioAttachment -> writeAudioAttachment(writer, value)
+                is FileAttachment -> writeFileAttachment(writer, value)
                 is AuthorAttachment -> writeAuthorAttachment(writer, value)
             }
         }
@@ -174,18 +174,43 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
         writer.endObject()
     }
 
-    private fun writeAudioAttachment(writer: JsonWriter, attachment: AudioAttachment) {
+    private fun writeFileAttachment(writer: JsonWriter, attachment: FileAttachment) {
         writer.beginObject()
-        with(writer) {
-            name("title").value(attachment.title)
-            name("description").value(attachment.description)
-            name("title_link").value(attachment.titleLink)
-            name("title_link_download").value(attachment.titleLinkDownload)
-            name("audio_url").value(attachment.url)
-            name("audio_type").value(attachment.size)
-            name("audio_url").value(attachment.type)
+        writer.name("title").value(attachment.title)
+        writer.name("description").value(attachment.description)
+        writer.name("title_link").value(attachment.titleLink)
+        writer.name("title_link_download").value(attachment.titleLinkDownload)
+        when (attachment) {
+            is AudioAttachment -> writeAudioAttachment(writer, attachment)
+            is VideoAttachment -> writeVideoAttachment(writer, attachment)
+            is ImageAttachment -> writeImageAttachment(writer, attachment)
         }
         writer.endObject()
+    }
+
+    private fun writeAudioAttachment(writer: JsonWriter, attachment: AudioAttachment) {
+        with(writer) {
+            name("audio_url").value(attachment.url)
+            name("audio_size").value(attachment.size)
+            name("audio_type").value(attachment.type)
+        }
+    }
+
+    private fun writeVideoAttachment(writer: JsonWriter, attachment: VideoAttachment) {
+        with(writer) {
+            name("video_url").value(attachment.url)
+            name("video_size").value(attachment.size)
+            name("video_type").value(attachment.type)
+        }
+    }
+
+    private fun writeImageAttachment(writer: JsonWriter, attachment: ImageAttachment) {
+        with(writer) {
+            name("image_url").value(attachment.url)
+            name("image_size").value(attachment.size)
+            name("image_type").value(attachment.type)
+            name("image_preview").value(attachment.imagePreview)
+        }
     }
 
     private fun writeAuthorAttachment(writer: JsonWriter, attachment: AuthorAttachment) {
