@@ -1,10 +1,14 @@
-package chat.rocket.core.internal.realtime
+package chat.rocket.core.internal.realtime.socket
 
-import chat.rocket.common.model.Token
 import chat.rocket.core.RocketChatClient
-import chat.rocket.core.internal.model.MessageType
-import chat.rocket.core.internal.model.SocketMessage
+import chat.rocket.core.internal.realtime.socket.message.model.MessageType
+import chat.rocket.core.internal.realtime.socket.message.model.SocketMessage
 import chat.rocket.core.internal.model.Subscription
+import chat.rocket.core.internal.realtime.socket.model.ReconnectionStrategy
+import chat.rocket.core.internal.realtime.message.CONNECT_MESSAGE
+import chat.rocket.core.internal.realtime.message.pingMessage
+import chat.rocket.core.internal.realtime.message.pongMessage
+import chat.rocket.core.internal.realtime.socket.model.StreamMessage
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room
@@ -61,7 +65,8 @@ class Socket(
 
     internal val subscriptionsMap = HashMap<String, (Boolean, String) -> Unit>()
 
-    private val reconnectionStrategy = ReconnectionStrategy(Int.MAX_VALUE, 3000)
+    private val reconnectionStrategy =
+        ReconnectionStrategy(Int.MAX_VALUE, 3000)
 
     private var selfDisconnect = false
 
@@ -177,9 +182,7 @@ class Socket(
                 login(client.tokenRepository.get(client.url))
             }
             else -> {
-                logger.warn {
-                    "Invalid message type on state Connecting: ${message.type}"
-                }
+                logger.warn { "Invalid message type on state Connecting: ${message.type}" }
             }
         }
     }
@@ -197,6 +200,7 @@ class Socket(
                 send(pongMessage())
             }
             else -> {
+                // IGNORING FOR NOW.
             }
         }
     }
@@ -216,9 +220,7 @@ class Socket(
                 logger.info { "Error: ${message.errorReason}" }
             }
             else -> {
-                logger.debug {
-                    "Ignoring message type: ${message.type}"
-                }
+                logger.debug { "Ignoring message type: ${message.type}" }
             }
         }
     }
@@ -307,9 +309,7 @@ class Socket(
     }
 
     override fun onFailure(webSocket: WebSocket, throwable: Throwable?, response: Response?) {
-        logger.warn {
-            throwable?.message
-        }
+        logger.warn { throwable?.message }
         throwable?.printStackTrace()
         setState(State.Disconnected())
         close()
@@ -337,15 +337,6 @@ class Socket(
         setState(State.Disconnected())
         close()
         startReconnection()
-    }
-}
-
-fun Socket.login(token: Token?) {
-    token?.let { authToken ->
-        socket?.let {
-            setState(State.Authenticating())
-            send(loginMethod(generateId(), authToken.authToken))
-        }
     }
 }
 

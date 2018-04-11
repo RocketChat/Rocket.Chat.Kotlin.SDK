@@ -4,7 +4,11 @@ import chat.rocket.common.model.BaseResult
 import chat.rocket.common.model.RoomType
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
-import chat.rocket.core.internal.model.*
+import chat.rocket.core.internal.model.PostMessagePayload
+import chat.rocket.core.internal.model.SendMessagePayload
+import chat.rocket.core.internal.model.SendMessageBody
+import chat.rocket.core.internal.model.DeletePayload
+import chat.rocket.core.internal.model.ReactionPayload
 import chat.rocket.core.model.DeleteResult
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.PagedResult
@@ -154,13 +158,13 @@ suspend fun RocketChatClient.postMessage(
  * @return
  */
 suspend fun RocketChatClient.sendMessage(
-        messageId: String,
-        roomId: String,
-        message: String? = null,
-        alias: String? = null,
-        emoji: String? = null,
-        avatar: String? = null,
-        attachments: List<Attachment>? = null
+    messageId: String,
+    roomId: String,
+    message: String? = null,
+    alias: String? = null,
+    emoji: String? = null,
+    avatar: String? = null,
+    attachments: List<Attachment>? = null
 ): Message = withContext(CommonPool) {
     val payload = SendMessagePayload(
             SendMessageBody(messageId, roomId, message, alias, emoji, avatar, attachments)
