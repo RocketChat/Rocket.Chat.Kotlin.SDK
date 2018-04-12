@@ -2,8 +2,20 @@ package chat.rocket.core.internal
 
 import chat.rocket.common.internal.ISO8601Date
 import chat.rocket.common.util.Logger
-import chat.rocket.core.model.attachment.*
-import com.squareup.moshi.*
+import chat.rocket.core.model.attachment.Attachment
+import chat.rocket.core.model.attachment.AudioAttachment
+import chat.rocket.core.model.attachment.AuthorAttachment
+import chat.rocket.core.model.attachment.Field
+import chat.rocket.core.model.attachment.FileAttachment
+import chat.rocket.core.model.attachment.ImageAttachment
+import chat.rocket.core.model.attachment.MessageAttachment
+import chat.rocket.core.model.attachment.VideoAttachment
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonDataException
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import java.lang.reflect.Type
 
 class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<Attachment>() {
