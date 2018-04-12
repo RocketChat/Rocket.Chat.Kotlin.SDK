@@ -60,7 +60,7 @@ class MessagesTest {
                 .once()
 
         runBlocking {
-            val msg = sut.sendMessage(roomId = "GENERAL",
+            val msg = sut.postMessage(roomId = "GENERAL",
                     text = "Sending message from SDK to #general and @here",
                     alias = "TestingAlias",
                     emoji = ":smirk:",
@@ -100,6 +100,30 @@ class MessagesTest {
 
                 assertThat(updatedAt, isEqualTo(1511443964808))
                 assertThat(id, isEqualTo("messageId"))
+            }
+        }
+    }
+
+    @Test
+    fun `sendMessage() with id should return a Message object with given id`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/chat.sendMessage")
+                .andReturn(200, SEND_MESSAGE_WITH_ID_OK)
+                .once()
+
+        runBlocking {
+            val msg = sut.sendMessage(
+                    messageId = "1abbbf94-c839-4436-9476-6de03011c1e0",
+                    roomId = "GENERAL",
+                    message = "Sending message from SDK to #general and @here",
+                    alias = "TestingAlias",
+                    emoji = ":smirk:",
+                    avatar = "https://avatars2.githubusercontent.com/u/224255?s=88&v=4")
+
+            with(msg) {
+                assertThat(message, isEqualTo("Sending message from SDK to #general and @here"))
+                assertThat(id, isEqualTo("1abbbf94-c839-4436-9476-6de03011c1e0"))
             }
         }
     }

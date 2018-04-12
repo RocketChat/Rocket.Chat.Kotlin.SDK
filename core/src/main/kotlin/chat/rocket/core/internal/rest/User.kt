@@ -11,6 +11,8 @@ import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.model.Subscription
 import chat.rocket.core.internal.model.UserPayload
 import chat.rocket.core.internal.model.UserPayloadData
+import chat.rocket.core.internal.model.OwnBasicInformationPayload
+import chat.rocket.core.internal.model.OwnBasicInformationPayloadData
 import chat.rocket.core.model.ChatRoom
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.UserRole
@@ -69,6 +71,37 @@ suspend fun RocketChatClient.updateProfile(
 }
 
 /**
+ * Updates own basic information for the user.
+ *
+ * @param email The email address for the user.
+ * @param currentPassword The password for the user encrypted in SHA256.
+ * @param newPassword The new password for the user.
+ * @param username The username for the user.
+ * @param name The display name of the user.
+ * @return An [User] with an updated profile.
+ */
+suspend fun RocketChatClient.updateOwnBasicInformation(
+    email: String? = null,
+    currentPassword: String? = null,
+    newPassword: String? = null,
+    username: String? = null,
+    name: String? = null
+): User {
+    val payload =
+        OwnBasicInformationPayload(OwnBasicInformationPayloadData(email, currentPassword, newPassword, username, name))
+    val adapter = moshi.adapter(OwnBasicInformationPayload::class.java)
+
+    val payloadBody = adapter.toJson(payload)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val httpUrl = requestUrl(restUrl, "users.updateOwnBasicInfo").build()
+    val request = requestBuilder(httpUrl).post(body).build()
+
+    val type = Types.newParameterizedType(RestResult::class.java, User::class.java)
+    return handleRestCall<RestResult<User>>(request, type).result()
+}
+
+/**
  * Resets the user's avatar.
  *
  * @param userId The ID of the user to reset the avatar.
@@ -98,7 +131,7 @@ suspend fun RocketChatClient.resetAvatar(userId: String): Boolean {
  */
 suspend fun RocketChatClient.setAvatar(file: File, mimeType: String): Boolean {
     if (mimeType != "image/gif" && mimeType != "image/png" && mimeType != "image/jpeg" && mimeType != "image/bmp" && mimeType != "image/webp") {
-        throw RocketChatException("Invalid image type")
+        throw RocketChatException("Invalid image type $mimeType")
     }
 
     val body = MultipartBody.Builder()

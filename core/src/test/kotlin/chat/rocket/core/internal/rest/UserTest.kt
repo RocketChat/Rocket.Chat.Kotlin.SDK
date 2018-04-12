@@ -161,6 +161,62 @@ class UserTest {
     }
 
     @Test
+    fun `updateOwnBasicInformation() should succeed with valid parameters` () {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.updateOwnBasicInfo")
+                .andReturn(200, USER_UPDATE_SUCCESS)
+                .once()
+
+        runBlocking {
+            val user = sut.updateOwnBasicInformation("userId", "test@email.com")
+            assertThat(user.id, isEqualTo("userId"))
+        }
+    }
+
+    @Test
+    fun `updateOwnBasicInformation() should fail with RocketChatApiException if email is already in use`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.updateOwnBasicInfo")
+                .andReturn(403, FAIL_EMAIL_IN_USE)
+                .once()
+
+        runBlocking {
+            try {
+                sut.updateOwnBasicInformation("userId", "test@email.com")
+                throw RuntimeException("unreachable code")
+            } catch (ex: Exception) {
+                assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
+                assertThat(ex.message, isEqualTo("Email already exists. [403]"))
+                val apiException = ex as RocketChatApiException
+                assertThat(apiException.errorType, isEqualTo("403"))
+            }
+        }
+    }
+
+    @Test
+    fun `updateOwnBasicInformation() should fail with RocketChatApiException if username is already in use`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/users.updateOwnBasicInfo")
+                .andReturn(403, FAIL_EMAIL_IN_USE)
+                .once()
+
+        runBlocking {
+            try {
+                sut.updateOwnBasicInformation("userId", "test@email.com", null, null, "testuser" )
+                throw RuntimeException("unreachable code")
+            } catch (ex: Exception) {
+                assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
+                val apiException = ex as RocketChatApiException
+                assertThat(apiException.errorType, isEqualTo("403"))
+                assertThat(apiException.message, isEqualTo("Email already exists. [403]"))
+            }
+        }
+    }
+
+    @Test
     fun `resetAvatar() should succeed with valid parameters`() {
         mockServer.expect()
                 .post()

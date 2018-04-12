@@ -4,6 +4,8 @@ import chat.rocket.common.internal.ISO8601Date
 import chat.rocket.common.util.Logger
 import chat.rocket.core.model.attachment.Attachment
 import chat.rocket.core.model.attachment.AudioAttachment
+import chat.rocket.core.model.attachment.AuthorAttachment
+import chat.rocket.core.model.attachment.Field
 import chat.rocket.core.model.attachment.ImageAttachment
 import chat.rocket.core.model.attachment.MessageAttachment
 import chat.rocket.core.model.attachment.VideoAttachment
@@ -20,6 +22,8 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
     private val type = Types.newParameterizedType(List::class.java, Attachment::class.java)
     private val attachmentsAdapter = moshi.adapter<List<Attachment>>(type)
     private val tsAdapter = moshi.adapter<Long>(Long::class.java, ISO8601Date::class.java)
+    private val fieldsType = Types.newParameterizedType(List::class.java, Field::class.java)
+    private val fieldsAdapter = moshi.adapter<List<Field>>(fieldsType)
 
     private val NAMES = arrayOf(
             "title",                // 0
@@ -45,7 +49,8 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
             "ts",                   // 20
             "author_icon",          // 21
             "author_link",          // 22
-            "image_preview"         // 23
+            "image_preview",        // 23
+            "fields"                // 24
     )
 
     private val OPTIONS = JsonReader.Options.of(*NAMES)
@@ -58,12 +63,12 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
         var title: String? = null                 // 0
         var type: String? = null                  // 1
         var description: String? = null           // 2
-        var author: String? = null                // 3
+        var authorName: String? = null            // 3
         var text: String? = null                  // 4
         var thumbUrl: String? = null              // 5
         var color: String? = null                 // 6
         var titleLink: String? = null             // 7
-        var titleLinkDownload: Boolean = false    // 8
+        var titleLinkDownload = false             // 8
         var imageUrl: String? = null              // 9
         var imageType: String? = null             // 10
         var imageSize: Long? = null               // 11
@@ -79,6 +84,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
         var authorIcon: String? = null            // 21
         var authorLink: String? = null            // 22
         var imagePreview: String? = null          // 23
+        var fields: List<Field>? = null           // 24
 
         reader.beginObject()
         while (reader.hasNext()) {
@@ -86,7 +92,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 0 -> title = reader.nextStringOrNull()
                 1 -> type = reader.nextStringOrNull()
                 2 -> description = reader.nextStringOrNull()
-                3 -> author = reader.nextStringOrNull()
+                3 -> authorName = reader.nextStringOrNull()
                 4 -> text = reader.nextStringOrNull()
                 5 -> thumbUrl = reader.nextStringOrNull()
                 6 -> color = reader.nextStringOrNull()
@@ -107,6 +113,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 21 -> authorIcon = reader.nextStringOrNull()
                 22 -> authorLink = reader.nextStringOrNull()
                 23 -> imagePreview = reader.nextStringOrNull()
+                24 -> fields = fieldsAdapter.fromJson(reader)
                 else -> {
                     val name = reader.nextName()
                     logger.debug {
@@ -137,11 +144,11 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 return AudioAttachment(title, description, titleLink, titleLinkDownload, audioUrl, audioType!!, audioSize!!)
             }
             text != null -> {
-                return MessageAttachment(author, authorIcon, text, thumbUrl, color, messageLink, attachments, timestamp)
-            } /*
+                return MessageAttachment(authorName, authorIcon, text, thumbUrl, color, messageLink, attachments, timestamp)
+            }
             authorLink != null -> {
-                return MessageAttachment(title, author, authorIcon, text, thumbUrl, color, authorLink, attachments, timestamp)
-            }*/
+                return AuthorAttachment(authorLink, authorIcon, authorName, fields)
+            }
             else -> {
                 logger.debug {
                     "Invalid Attachment type: supported are file and message at ${reader.path} - type: $type"

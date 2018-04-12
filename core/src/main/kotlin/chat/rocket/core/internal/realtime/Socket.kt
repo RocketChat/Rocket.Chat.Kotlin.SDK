@@ -6,6 +6,7 @@ import chat.rocket.core.internal.model.MessageType
 import chat.rocket.core.internal.model.SocketMessage
 import chat.rocket.core.internal.model.Subscription
 import chat.rocket.core.model.Message
+import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room
 import com.squareup.moshi.JsonAdapter
 import kotlinx.coroutines.experimental.Job
@@ -28,17 +29,20 @@ class Socket(
     internal val client: RocketChatClient,
     internal val roomsChannel: SendChannel<StreamMessage<Room>>,
     internal val subscriptionsChannel: SendChannel<StreamMessage<Subscription>>,
-    internal val messagesChannel: SendChannel<Message>
+    internal val messagesChannel: SendChannel<Message>,
+    internal val userDataChannel: SendChannel<Myself>
 ) : WebSocketListener() {
 
     private val request: Request = Request.Builder()
-                .url("${client.url}/websocket")
-                .addHeader("Accept-Encoding", "gzip, deflate, sdch")
-                .addHeader("Accept-Language", "en-US,en;q=0.8")
-                .addHeader("Pragma", "no-cache")
-                .addHeader("User-Agent",
-                        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36")
-                .build()
+        .url("${client.url}/websocket")
+        .addHeader("Accept-Encoding", "gzip, deflate, sdch")
+        .addHeader("Accept-Language", "en-US,en;q=0.8")
+        .addHeader("Pragma", "no-cache")
+        .addHeader(
+            "User-Agent",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36"
+        )
+        .build()
 
     private val httpClient = client.httpClient
     internal val logger = client.logger
@@ -209,7 +213,7 @@ class Socket(
                 processSubscriptionResult(text)
             }
             MessageType.ERROR -> {
-                logger.info { "Error : ${message.errorReason}" }
+                logger.info { "Error: ${message.errorReason}" }
             }
             else -> {
                 logger.debug {
