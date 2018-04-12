@@ -25,9 +25,9 @@ internal fun Socket.processUserStream(text: String) {
     }
 }
 
-private fun Socket.processUserDataStream(json: JSONObject, userId: String) {
+private fun Socket.processUserDataStream(json: JSONObject, id: String) {
     val fields = json.optJSONObject("fields")
-    fields.put("_id", userId)
+    fields.put("_id", id)
 
     val adapter = moshi.adapter<Myself>(Myself::class.java)
     val myself = adapter.fromJson(fields.toString())

@@ -9,8 +9,6 @@ import chat.rocket.core.internal.realtime.socket.message.collection.processUserS
 import chat.rocket.core.internal.realtime.socket.message.model.SocketMessage
 import org.json.JSONObject
 
-
-
 internal fun Socket.processSubscriptionsAdded(message: SocketMessage, text: String) {
     when (message.collection) {
         USERS -> {
