@@ -10,6 +10,12 @@ data class ChatRoomPayload(@Json(name = "rid") val roomId: String)
 data class ChatRoomJoinLeavePayload(val roomId: String)
 
 @JsonSerializable
+data class ChatRoomNamePayload(
+    val roomId: String,
+    val name: String
+)
+
+@JsonSerializable
 data class ChatRoomTopicPayload(
     val roomId: String,
     val topic: String

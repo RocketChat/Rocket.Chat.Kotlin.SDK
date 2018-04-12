@@ -32,6 +32,8 @@ data class Subscription(
     val open: Boolean,
     @JsonDefaultValueBoolean(false)
     val alert: Boolean,
+    @JsonDefaultValueBoolean(false)
+    val archived: Boolean,
     @JsonDefaultValueLong(0)
     val unread: Long,
     @JsonDefaultValueLong(0)

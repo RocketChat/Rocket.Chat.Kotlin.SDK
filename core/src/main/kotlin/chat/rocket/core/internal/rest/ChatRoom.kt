@@ -4,12 +4,16 @@ import chat.rocket.common.model.BaseResult
 import chat.rocket.common.model.RoomType
 import chat.rocket.common.model.User
 import chat.rocket.core.RocketChatClient
+import chat.rocket.core.internal.RestMultiResult
 import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.model.*
+import chat.rocket.core.model.ChatRoom
 import chat.rocket.core.model.PagedResult
+import chat.rocket.core.model.Room
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
+import okhttp3.Request
 import okhttp3.RequestBody
 
 /**
@@ -56,6 +60,18 @@ suspend fun RocketChatClient.getMembers(roomId: String, roomType: RoomType, offs
     return@withContext PagedResult<List<User>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
 }
 
+suspend fun RocketChatClient.getInfo(roomId: String, roomName: String, roomType: RoomType): ChatRoom = withContext(CommonPool) {
+    val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "info"))
+            .addQueryParameter("roomId", roomId)
+            .addQueryParameter("roomName", roomName)
+            .build()
+
+    val request = requestBuilder(url).get().build()
+
+    val type = Types.newParameterizedType(RestResult::class.java, ChatRoom::class.java)
+    return@withContext handleRestCall<RestResult<ChatRoom>>(request, type).result()
+}
+
 suspend fun RocketChatClient.joinChat(roomId: String): Boolean = withContext(CommonPool) {
     val payload = ChatRoomJoinLeavePayload(roomId)
     val adapter = moshi.adapter(ChatRoomJoinLeavePayload::class.java)
@@ -77,6 +93,19 @@ suspend fun RocketChatClient.leaveChat(roomId: String, roomType: RoomType): Bool
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "leave")).build()
+    val request = requestBuilder(url).post(body).build()
+
+    return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
+}
+
+suspend fun RocketChatClient.rename(roomId: String, roomType: RoomType, newName: String): Boolean = withContext(CommonPool) {
+    val payload = ChatRoomNamePayload(roomId, newName)
+    val adapter = moshi.adapter(ChatRoomNamePayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "rename")).build()
     val request = requestBuilder(url).post(body).build()
 
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success

@@ -215,6 +215,20 @@ class ChatRoomTest {
     }
 
     @Test
+    fun `rename() should succeed without throwing`() {
+        mockServer.expect()
+                .post()
+                .withPath("/api/v1/channels.info")
+                .andReturn(200, SUCCESS)
+                .once()
+
+        runBlocking {
+            val result = sut.rename(roomId = "GENERAL", roomType = RoomType.CHANNEL, newName = "name")
+            assertTrue(result)
+        }
+    }
+
+    @Test
     fun `setJoinCode() should succeed without throwing`() {
         mockServer.expect()
                 .post()
