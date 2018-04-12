@@ -1,5 +1,6 @@
 package chat.rocket.core.internal.realtime.socket
 
+import chat.rocket.common.model.User
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.realtime.socket.message.model.MessageType
 import chat.rocket.core.internal.realtime.socket.message.model.SocketMessage
@@ -35,7 +36,8 @@ class Socket(
     internal val roomsChannel: SendChannel<StreamMessage<Room>>,
     internal val subscriptionsChannel: SendChannel<StreamMessage<Subscription>>,
     internal val messagesChannel: SendChannel<Message>,
-    internal val userDataChannel: SendChannel<Myself>
+    internal val userDataChannel: SendChannel<Myself>,
+    internal val activeUsersChannel: SendChannel<User>
 ) : WebSocketListener() {
 
     private val request: Request = Request.Builder()
@@ -210,6 +212,12 @@ class Socket(
         when (message.type) {
             MessageType.PING -> {
                 send(pongMessage())
+            }
+            MessageType.ADDED -> {
+                processSubscriptionsAdded(message, text)
+            }
+            MessageType.REMOVED -> {
+                processSubscriptionsRemoved(message, text)
             }
             MessageType.CHANGED -> {
                 processSubscriptionsChanged(message, text)
