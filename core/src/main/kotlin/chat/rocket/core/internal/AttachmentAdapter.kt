@@ -6,6 +6,7 @@ import chat.rocket.core.model.attachment.Attachment
 import chat.rocket.core.model.attachment.AudioAttachment
 import chat.rocket.core.model.attachment.AuthorAttachment
 import chat.rocket.core.model.attachment.Field
+import chat.rocket.core.model.attachment.FileAttachment
 import chat.rocket.core.model.attachment.ImageAttachment
 import chat.rocket.core.model.attachment.MessageAttachment
 import chat.rocket.core.model.attachment.VideoAttachment
@@ -160,7 +161,94 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
     }
 
     override fun toJson(writer: JsonWriter, value: Attachment?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        if (value == null) {
+            writer.nullValue()
+        } else {
+            when (value) {
+                is MessageAttachment -> writeMessageAttachment(writer, value)
+                is FileAttachment -> writeFileAttachment(writer, value)
+                is AuthorAttachment -> writeAuthorAttachment(writer, value)
+            }
+        }
+    }
+
+    private fun writeMessageAttachment(writer: JsonWriter, attachment: MessageAttachment) {
+        writer.beginObject()
+        with(writer) {
+            name("author_name").value(attachment.author)
+            name("author_icon").value(attachment.icon)
+            name("text").value(attachment.text)
+            name("thumbUrl").value(attachment.thumbUrl)
+            name("color").value(attachment.color)
+            name("message_link").value(attachment.url)
+            name("ts").value(attachment.timestamp)
+        }
+        writer.endObject()
+    }
+
+    private fun writeFileAttachment(writer: JsonWriter, attachment: FileAttachment) {
+        writer.beginObject()
+        writer.name("title").value(attachment.title)
+        writer.name("description").value(attachment.description)
+        writer.name("title_link").value(attachment.titleLink)
+        writer.name("title_link_download").value(attachment.titleLinkDownload)
+        when (attachment) {
+            is AudioAttachment -> writeAudioAttachment(writer, attachment)
+            is VideoAttachment -> writeVideoAttachment(writer, attachment)
+            is ImageAttachment -> writeImageAttachment(writer, attachment)
+        }
+        writer.endObject()
+    }
+
+    private fun writeAudioAttachment(writer: JsonWriter, attachment: AudioAttachment) {
+        with(writer) {
+            name("audio_url").value(attachment.url)
+            name("audio_size").value(attachment.size)
+            name("audio_type").value(attachment.type)
+        }
+    }
+
+    private fun writeVideoAttachment(writer: JsonWriter, attachment: VideoAttachment) {
+        with(writer) {
+            name("video_url").value(attachment.url)
+            name("video_size").value(attachment.size)
+            name("video_type").value(attachment.type)
+        }
+    }
+
+    private fun writeImageAttachment(writer: JsonWriter, attachment: ImageAttachment) {
+        with(writer) {
+            name("image_url").value(attachment.url)
+            name("image_size").value(attachment.size)
+            name("image_type").value(attachment.type)
+            name("image_preview").value(attachment.imagePreview)
+        }
+    }
+
+    private fun writeAuthorAttachment(writer: JsonWriter, attachment: AuthorAttachment) {
+        writer.beginObject()
+        with(writer) {
+            name("author_link").value(attachment.url)
+            name("author_icon").value(attachment.authorIcon)
+            name("author_name").value(attachment.authorName)
+            attachment.fields?.let { writeAuthorFields(writer, it) }
+        }
+        writer.endObject()
+    }
+
+    private fun writeAuthorFields(writer: JsonWriter, fields: List<Field>) {
+        if (fields.isNotEmpty()) {
+            writer.name("fields")
+            writer.beginArray()
+            fields.forEach {
+                writer.beginObject()
+                writer.name("title").value(it.title)
+                writer.name("value").value(it.value)
+                writer.name("short").value(it.shortField)
+                writer.endObject()
+            }
+            writer.endArray()
+        }
     }
 
     private fun checkNonNull(field: Any?, fieldName: String) {

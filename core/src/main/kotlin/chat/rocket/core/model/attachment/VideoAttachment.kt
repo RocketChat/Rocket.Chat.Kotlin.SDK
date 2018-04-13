@@ -9,7 +9,7 @@ data class VideoAttachment(
     @Json(name = "title_link_download") override val titleLinkDownload: Boolean?,
     @Json(name = "video_url") private val videoUrl: String,
     @Json(name = "video_type") private val videoType: String?,
-    @Json(name = "video_url") private val videoSize: Long?
+    @Json(name = "video_size") private val videoSize: Long?
 ) : FileAttachment {
     override val url: String
         get() = videoUrl
