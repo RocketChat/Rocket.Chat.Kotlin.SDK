@@ -1,7 +1,10 @@
 package chat.rocket.core.internal.realtime
 
+import chat.rocket.common.model.UserStatus
 import chat.rocket.core.RocketChatClient
-import com.squareup.moshi.Json
+import chat.rocket.core.internal.realtime.message.defaultStatusMessage
+import chat.rocket.core.internal.realtime.message.temporaryStatusMessage
+import chat.rocket.core.internal.realtime.message.userDataChangesMessage
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
 
@@ -11,7 +14,7 @@ suspend fun RocketChatClient.setDefaultStatus(status: UserStatus) = withContext(
 
 suspend fun RocketChatClient.setTemporaryStatus(status: UserStatus) = withContext(CommonPool) {
     when {
-        (status == UserStatus.Online || status == UserStatus.Away) -> {
+        (status is UserStatus.Online || status is UserStatus.Away) -> {
             socket.send(temporaryStatusMessage(socket.generateId(), status))
         }
         else -> {
@@ -20,21 +23,11 @@ suspend fun RocketChatClient.setTemporaryStatus(status: UserStatus) = withContex
     }
 }
 
-fun Socket.getUserDataChanges(id: String) =
-    send(userDataChangesMessage(id))
-
-sealed class UserStatus {
-    @Json(name = "online") object Online : UserStatus()
-    @Json(name = "busy") object Busy : UserStatus()
-    @Json(name = "away") object Away : UserStatus()
-    @Json(name = "offline") object Offline : UserStatus()
-
-    override fun toString(): String {
-        return when (this) {
-            is Online -> "online"
-            is Busy -> "busy"
-            is Away -> "away"
-            is Offline -> "offline"
-        }
+fun RocketChatClient.subscribeUserDataChanges(callback: (Boolean, String) -> Unit): String {
+    with(socket) {
+        val id = generateId()
+        send(userDataChangesMessage(id))
+        subscriptionsMap[id] = callback
+        return id
     }
 }

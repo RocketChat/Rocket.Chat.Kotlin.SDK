@@ -4,12 +4,15 @@ import chat.rocket.common.RocketChatException
 import chat.rocket.common.model.RoomType
 import chat.rocket.common.model.ServerInfo
 import chat.rocket.common.model.Token
+import chat.rocket.common.model.UserStatus
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
 import chat.rocket.core.compat.Callback
 import chat.rocket.core.compat.serverInfo
 import chat.rocket.core.internal.realtime.*
+import chat.rocket.core.internal.realtime.socket.model.State
+import chat.rocket.core.internal.realtime.socket.connect
 import chat.rocket.core.internal.rest.chatRooms
 import chat.rocket.core.internal.rest.getRoomFavoriteMessages
 import chat.rocket.core.internal.rest.login
@@ -21,6 +24,7 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.channels.Channel
+import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.OkHttpClient
@@ -100,6 +104,14 @@ fun main(args: Array<String>) {
                 logger.debug("User Data: $userData")
             }
         }
+
+        launch {
+            delay(10000)
+            client.setTemporaryStatus(UserStatus.Online())
+            delay(2000)
+            client.setDefaultStatus(UserStatus.Away())
+        }
+
 
         client.connect()
 
