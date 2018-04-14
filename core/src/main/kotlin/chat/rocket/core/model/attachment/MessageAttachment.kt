@@ -8,7 +8,7 @@ data class MessageAttachment(
     @Json(name = "author_icon") val icon: String?,
     val text: String?,
     val thumbUrl: String?,
-    val color: Color?,
+    val color: String?,
     @Json(name = "message_link") private val messageLink: String?,
     val attachments: List<Attachment>?,
     @Json(name = "ts") @ISO8601Date val timestamp: Long?

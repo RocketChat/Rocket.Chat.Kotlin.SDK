@@ -5,8 +5,6 @@ import chat.rocket.common.util.Logger
 import chat.rocket.core.model.attachment.Attachment
 import chat.rocket.core.model.attachment.AudioAttachment
 import chat.rocket.core.model.attachment.AuthorAttachment
-import chat.rocket.core.model.attachment.Color
-import chat.rocket.core.model.attachment.ColorAttachment
 import chat.rocket.core.model.attachment.Field
 import chat.rocket.core.model.attachment.FileAttachment
 import chat.rocket.core.model.attachment.ImageAttachment
@@ -27,7 +25,6 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
     private val tsAdapter = moshi.adapter<Long>(Long::class.java, ISO8601Date::class.java)
     private val fieldsType = Types.newParameterizedType(List::class.java, Field::class.java)
     private val fieldsAdapter = moshi.adapter<List<Field>>(fieldsType)
-    private val colorAdapter = moshi.adapter<Color>(Color::class.java)
 
     private val NAMES = arrayOf(
             "title",                // 0
@@ -54,8 +51,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
             "author_icon",          // 21
             "author_link",          // 22
             "image_preview",        // 23
-            "fields",               // 24
-            "fallback"              // 25
+            "fields"                // 24
     )
 
     private val OPTIONS = JsonReader.Options.of(*NAMES)
@@ -71,7 +67,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
         var authorName: String? = null            // 3
         var text: String? = null                  // 4
         var thumbUrl: String? = null              // 5
-        var color: Color? = null                  // 6
+        var color: String? = null                 // 6
         var titleLink: String? = null             // 7
         var titleLinkDownload = false             // 8
         var imageUrl: String? = null              // 9
@@ -90,7 +86,6 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
         var authorLink: String? = null            // 22
         var imagePreview: String? = null          // 23
         var fields: List<Field>? = null           // 24
-        var fallback: String? = null              // 25
 
         reader.beginObject()
         while (reader.hasNext()) {
@@ -101,7 +96,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 3 -> authorName = reader.nextStringOrNull()
                 4 -> text = reader.nextStringOrNull()
                 5 -> thumbUrl = reader.nextStringOrNull()
-                6 -> color = colorAdapter.fromJson(reader)
+                6 -> color = reader.nextStringOrNull()
                 7 -> titleLink = reader.nextStringOrNull()
                 8 -> titleLinkDownload = reader.nextBooleanOrFalse()
                 9 -> imageUrl = reader.nextStringOrNull()
@@ -120,7 +115,6 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 22 -> authorLink = reader.nextStringOrNull()
                 23 -> imagePreview = reader.nextStringOrNull()
                 24 -> fields = fieldsAdapter.fromJson(reader)
-                25 -> fallback = reader.nextStringOrNull()
                 else -> {
                     val name = reader.nextName()
                     logger.debug {
@@ -132,38 +126,36 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
         }
         reader.endObject()
 
-        return when {
+        when {
             imageUrl != null -> {
                 var preview: String? = null
                 imagePreview?.let {
                     preview = "data:${imageType!!};base64,$it"
                 }
-                ImageAttachment(title, description, titleLink, titleLinkDownload, imageUrl, imageType, imageSize, preview)
+                return ImageAttachment(title, description, titleLink, titleLinkDownload, imageUrl, imageType, imageSize, preview)
             }
             videoUrl != null -> {
                 checkNonNull(videoType, "videoType")
                 checkNonNull(videoSize, "videoSize")
-                VideoAttachment(title, description, titleLink, titleLinkDownload, videoUrl, videoType!!, videoSize!!)
+                return VideoAttachment(title, description, titleLink, titleLinkDownload, videoUrl, videoType!!, videoSize!!)
             }
             audioUrl != null -> {
                 checkNonNull(audioType, "audioType")
                 checkNonNull(audioSize, "audioSize")
-                AudioAttachment(title, description, titleLink, titleLinkDownload, audioUrl, audioType!!, audioSize!!)
-            }
-            text != null && color != null && fallback != null -> {
-                ColorAttachment(color, text, fallback)
+                return AudioAttachment(title, description, titleLink, titleLinkDownload, audioUrl, audioType!!, audioSize!!)
             }
             text != null -> {
-                MessageAttachment(authorName, authorIcon, text, thumbUrl, color, messageLink, attachments, timestamp)
+                return MessageAttachment(authorName, authorIcon, text, thumbUrl, color, messageLink, attachments, timestamp)
             }
             authorLink != null -> {
-                AuthorAttachment(authorLink, authorIcon, authorName, fields)
+                return AuthorAttachment(authorLink, authorIcon, authorName, fields)
             }
             else -> {
                 logger.debug {
                     "Invalid Attachment type: supported are file and message at ${reader.path} - type: $type"
                 }
-                null
+                return null
+                //throw JsonDataException("Invalid Attachment type: supported are image, video and audio")
             }
         }
     }
@@ -173,22 +165,11 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
             writer.nullValue()
         } else {
             when (value) {
-                is ColorAttachment -> writeColorAttachment(writer, value)
                 is MessageAttachment -> writeMessageAttachment(writer, value)
                 is FileAttachment -> writeFileAttachment(writer, value)
                 is AuthorAttachment -> writeAuthorAttachment(writer, value)
             }
         }
-    }
-
-    private fun writeColorAttachment(writer: JsonWriter, attachment: ColorAttachment) {
-        writer.beginObject()
-        with(writer) {
-            name("color").value(attachment.color.toString())
-            name("text").value(attachment.text)
-            name("fallback").value(attachment.fallback)
-        }
-        writer.endObject()
     }
 
     private fun writeMessageAttachment(writer: JsonWriter, attachment: MessageAttachment) {
@@ -198,7 +179,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
             name("author_icon").value(attachment.icon)
             name("text").value(attachment.text)
             name("thumbUrl").value(attachment.thumbUrl)
-            name("color").value(attachment.color?.toString())
+            name("color").value(attachment.color)
             name("message_link").value(attachment.url)
             name("ts").value(attachment.timestamp)
         }
