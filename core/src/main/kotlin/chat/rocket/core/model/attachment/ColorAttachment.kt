@@ -14,12 +14,12 @@ data class ColorAttachment(
         get() = "#$color"
 }
 
-@FallbackSealedClass(name = "Custom", fieldName = "rawColor")
-sealed class Color(val color: Int) {
-    @Json(name = "good") class Good : Color(0x35AC19)
-    @Json(name = "warning") class Warning : Color(0xFCB316)
-    @Json(name = "danger") class Danger : Color(0xD30230)
-    class Custom(private val rawColor: String) : Color(parseColor(rawColor))
+@FallbackSealedClass(name = "Custom", fieldName = "colorValue")
+sealed class Color(val color: Int, val rawColor: String) {
+    @Json(name = "good") class Good : Color(0x35AC19, "good")
+    @Json(name = "warning") class Warning : Color(0xFCB316, "warning")
+    @Json(name = "danger") class Danger : Color(0xD30230, "danger")
+    class Custom(private val colorValue: String) : Color(parseColor(colorValue), colorValue)
 
     override fun toString(): String {
         return color.toString(16)
