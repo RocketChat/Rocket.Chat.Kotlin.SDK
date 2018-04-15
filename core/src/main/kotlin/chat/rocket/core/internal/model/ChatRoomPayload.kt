@@ -7,30 +7,27 @@ import se.ansman.kotshi.JsonSerializable
 data class ChatRoomPayload(@Json(name = "rid") val roomId: String)
 
 @JsonSerializable
-data class ChatRoomJoinLeavePayload(val roomId: String)
-
-@JsonSerializable
 data class ChatRoomNamePayload(
     val roomId: String,
-    val name: String
+    val name: String?
 )
 
 @JsonSerializable
 data class ChatRoomTopicPayload(
     val roomId: String,
-    val topic: String
+    val topic: String?
 )
 
 @JsonSerializable
 data class ChatRoomDescriptionPayload(
     val roomId: String,
-    val description: String
+    val description: String?
 )
 
 @JsonSerializable
 data class ChatRoomAnnouncementPayload(
     val roomId: String,
-    val announcement: String
+    val announcement: String?
 )
 
 @JsonSerializable

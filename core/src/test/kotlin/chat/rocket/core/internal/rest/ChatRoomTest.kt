@@ -218,7 +218,7 @@ class ChatRoomTest {
     fun `rename() should succeed without throwing`() {
         mockServer.expect()
                 .post()
-                .withPath("/api/v1/channels.info")
+                .withPath("/api/v1/channels.rename")
                 .andReturn(200, SUCCESS)
                 .once()
 
