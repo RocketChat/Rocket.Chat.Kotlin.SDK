@@ -16,9 +16,9 @@ import chat.rocket.core.internal.RoomListAdapterFactory
 import chat.rocket.core.internal.CoreJsonAdapterFactory
 import chat.rocket.core.internal.ReactionsAdapter
 import chat.rocket.core.internal.model.Subscription
-import chat.rocket.core.internal.realtime.Socket
-import chat.rocket.core.internal.realtime.State
-import chat.rocket.core.internal.realtime.StreamMessage
+import chat.rocket.core.internal.realtime.socket.Socket
+import chat.rocket.core.internal.realtime.socket.model.State
+import chat.rocket.core.internal.realtime.socket.model.StreamMessage
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room

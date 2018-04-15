@@ -1,11 +1,12 @@
-package chat.rocket.core.internal.model
+package chat.rocket.core.internal.realtime.socket.message.model
 
 import com.squareup.moshi.Json
 import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
 data class SocketMessage(
-    @Json(name = "msg") val type: MessageType,
+    @Json(name = "msg")
+    val type: MessageType,
     val id: String?,
     val collection: String?,
     @Json(name = "reason")

@@ -15,9 +15,18 @@ sealed class UserStatus {
     @Json(name = "busy")
     class Busy : UserStatus()
     @Json(name = "away")
-    class Away() : UserStatus()
+    class Away : UserStatus()
     @Json(name = "offline")
     class Offline : UserStatus()
 
     class Unknown(val rawStatus: String) : UserStatus()
+
+    override fun toString(): String {
+        return when (this) {
+            is Online -> "online"
+            is Busy -> "busy"
+            is Away -> "away"
+            else -> "offline"
+        }
+    }
 }
