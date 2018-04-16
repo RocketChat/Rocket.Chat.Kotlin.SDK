@@ -184,7 +184,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
     private fun writeColorAttachment(writer: JsonWriter, attachment: ColorAttachment) {
         writer.beginObject()
         with(writer) {
-            name("color").value(attachment.color.toString())
+            name("color").value(attachment.color.rawColor)
             name("text").value(attachment.text)
             name("fallback").value(attachment.fallback)
         }
