@@ -9,7 +9,7 @@ data class ImageAttachment(
     @Json(name = "title_link_download") override val titleLinkDownload: Boolean?,
     @Json(name = "image_url") private val imageUrl: String,
     @Json(name = "image_type") private val imageType: String?,
-    @Json(name = "image_url") private val imageSize: Long?,
+    @Json(name = "image_size") private val imageSize: Long?,
     @Json(name = "image_preview") val imagePreview: String?
 ) : FileAttachment {
     override val url: String

@@ -37,7 +37,8 @@ data class Message(
     val attachments: List<Attachment>?,
     @JsonDefaultValueBoolean(false)
     val pinned: Boolean,
-    val reactions: Reactions?
+    val reactions: Reactions?,
+    override val isTemporary: Boolean? = false //TODO: Remove after we have a db
 ) : BaseMessage
 
 @FallbackSealedClass(name = "Unspecified", fieldName = "rawType")
