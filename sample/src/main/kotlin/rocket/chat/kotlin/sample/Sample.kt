@@ -80,7 +80,8 @@ fun main(args: Array<String>) {
                         logger.debug("Connected")
                         client.subscribeSubscriptions { _, _ -> }
                         client.subscribeRooms { _, _ -> }
-                        client.subscribeUserDataChanges { _, _ -> }
+                        client.subscribeUserData { _, _ -> }
+                        client.subscribeActiveUsers { _, _ ->  }
                     }
                 }
             }
@@ -102,6 +103,12 @@ fun main(args: Array<String>) {
         launch {
             for (userData in client.userDataChannel) {
                 logger.debug("User Data: $userData")
+            }
+        }
+
+        launch {
+            for (activeUsers in client.activeUsersChannel) {
+                logger.debug("Active users: $activeUsers")
             }
         }
 

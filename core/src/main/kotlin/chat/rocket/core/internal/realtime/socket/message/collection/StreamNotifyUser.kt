@@ -13,7 +13,7 @@ internal const val STREAM_NOTIFY_USER = "stream-notify-user"
 private const val STREAM_ROOMS_CHANGED = "rooms-changed"
 private const val STREAM_SUBSCRIPTION_CHANGED = "subscriptions-changed"
 
-internal fun Socket.processUserStream(text: String) {
+internal fun Socket.processNotifyUserStream(text: String) {
     try {
         val json = JSONObject(text)
         val fields = json.getJSONObject("fields")
