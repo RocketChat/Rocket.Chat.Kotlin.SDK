@@ -263,7 +263,6 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 writer.beginObject()
                 writer.name("title").value(it.title)
                 writer.name("value").value(it.value)
-                writer.name("short").value(it.shortField)
                 writer.endObject()
             }
             writer.endArray()

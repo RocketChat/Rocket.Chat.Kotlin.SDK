@@ -73,7 +73,7 @@ class SettingsAdapter : JsonAdapter<Map<String, Value<Any>>>() {
 
     private fun readSetting(reader: JsonReader): Pair<String, Value<Any>> {
         var id: String? = null
-        var type: String
+        var type: String = ""
         var tmp: Any? = null
         var token: JsonReader.Token
         while (reader.hasNext()) {
@@ -87,27 +87,41 @@ class SettingsAdapter : JsonAdapter<Map<String, Value<Any>>>() {
                 2 -> {
                     token = reader.peek()
                     when (token) {
-                        JsonReader.Token.NUMBER -> tmp = reader.nextInt()
-                        JsonReader.Token.BOOLEAN -> tmp = reader.nextBoolean()
-                        JsonReader.Token.STRING -> tmp = reader.nextString()
+                        JsonReader.Token.NUMBER -> {
+                            val number = reader.nextLongOrNull()
+                            tmp = when {
+                                number == null -> 0
+                                number > Int.MAX_VALUE -> Int.MAX_VALUE
+                                else -> number.toInt()
+                            }
+                        }
+                        JsonReader.Token.BOOLEAN -> tmp = reader.nextBooleanOrFalse()
+                        JsonReader.Token.STRING -> tmp = reader.nextStringOrNull() ?: ""
                         JsonReader.Token.BEGIN_OBJECT -> {
                             reader.beginObject()
                             tmp = readAsset(reader)
                             reader.endObject()
+                        }
+                        JsonReader.Token.NULL -> {
+                            when(type) {
+                                "string" -> tmp = ""
+                                "boolean" -> tmp = false
+                                "int" -> tmp = 0
+                            }
                         }
                     }
                 }
             }
         }
 
-        id.ifNull {
+        if (id == null) {
             throw JsonEncodingException("Missing \"id\" field")
         }
 
         return when (tmp) {
-            is String -> Pair(id!!, Value(tmp))
-            is Int -> Pair(id!!, Value(tmp))
-            is Boolean -> Pair(id!!, Value(tmp))
+            is String -> Pair(id, Value(tmp))
+            is Int -> Pair(id, Value(tmp))
+            is Boolean -> Pair(id, Value(tmp))
             else -> throw JsonEncodingException("Unknown value type for $tmp")
         }
     }
@@ -129,7 +143,7 @@ class SettingsAdapter : JsonAdapter<Map<String, Value<Any>>>() {
     }
 
     private fun assertNextName(reader: JsonReader, expected: String) {
-        var name = reader.nextName()
+        val name = reader.nextName()
         if (name != expected) {
             throw JsonEncodingException("expected a \"$expected\" value, got \"$name\"")
         }

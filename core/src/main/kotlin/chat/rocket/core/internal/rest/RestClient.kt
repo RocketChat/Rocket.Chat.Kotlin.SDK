@@ -94,6 +94,10 @@ internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type:
                                     RocketChatInvalidResponseException("Error parsing JSON message", url = request.url().toString())
                                 }
                             }
+                        }.ifNull {
+                            continuation.tryResumeWithException {
+                                RocketChatInvalidResponseException("Error parsing JSON message", url = request.url().toString())
+                            }
                         }
                     } catch (ex: Exception) {
                         // kinda of multi catch exception...
