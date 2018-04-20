@@ -18,7 +18,7 @@ suspend fun RocketChatClient.serverInfo(): ServerInfo = withContext(CommonPool) 
 
     val request = Request.Builder().url(url).get().build()
 
-    handleRestCall<ServerInfo>(request, ServerInfo::class.java)
+    handleRestCall<ServerInfo>(request, ServerInfo::class.java, allowRedirects = false)
 }
 
 suspend fun RocketChatClient.configurations(): Map<String, Map<String, String>> = withContext(CommonPool) {

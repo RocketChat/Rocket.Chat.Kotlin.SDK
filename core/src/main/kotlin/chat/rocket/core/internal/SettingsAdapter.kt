@@ -1,6 +1,5 @@
 package chat.rocket.core.internal
 
-import chat.rocket.common.util.ifNull
 import chat.rocket.core.model.Value
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonAdapter
@@ -103,7 +102,7 @@ class SettingsAdapter : JsonAdapter<Map<String, Value<Any>>>() {
                             reader.endObject()
                         }
                         JsonReader.Token.NULL -> {
-                            when(type) {
+                            when (type) {
                                 "string" -> tmp = ""
                                 "boolean" -> tmp = false
                                 "int" -> tmp = 0
