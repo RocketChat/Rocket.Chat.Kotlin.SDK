@@ -25,8 +25,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
     private val type = Types.newParameterizedType(List::class.java, Attachment::class.java)
     private val attachmentsAdapter = moshi.adapter<List<Attachment>>(type)
     private val tsAdapter = moshi.adapter<Long>(Long::class.java, ISO8601Date::class.java)
-    private val fieldsType = Types.newParameterizedType(List::class.java, Field::class.java)
-    private val fieldsAdapter = moshi.adapter<List<Field>>(fieldsType)
+    private val fieldAdapter = moshi.adapter<Field>(Field::class.java)
     private val colorAdapter = moshi.adapter<Color>(Color::class.java)
 
     private val NAMES = arrayOf(
@@ -119,7 +118,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 21 -> authorIcon = reader.nextStringOrNull()
                 22 -> authorLink = reader.nextStringOrNull()
                 23 -> imagePreview = reader.nextStringOrNull()
-                24 -> fields = fieldsAdapter.fromJson(reader)
+                24 -> fields = parseFields(reader)
                 25 -> fallback = reader.nextStringOrNull()
                 else -> {
                     val name = reader.nextName()
@@ -163,6 +162,43 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 logger.debug {
                     "Invalid Attachment type: supported are file and message at ${reader.path} - type: $type"
                 }
+                null
+            }
+        }
+    }
+
+    private fun parseFields(reader: JsonReader): List<Field>? {
+        return when {
+            reader.peek() == JsonReader.Token.NULL -> return reader.nextNull<List<Field>>()
+            reader.peek() == JsonReader.Token.BEGIN_ARRAY -> {
+                reader.beginArray()
+                if (reader.peek() == JsonReader.Token.NULL) {
+                    reader.skipValue()
+                    reader.endArray()
+                    return null
+                }
+                val list = ArrayList<Field>()
+                while (reader.hasNext()) {
+                    val field = fieldAdapter.fromJson(reader)
+                    field?.let {
+                        list.add(it)
+                    }
+                }
+                reader.endArray()
+                list
+            }
+            reader.peek() == JsonReader.Token.BEGIN_OBJECT -> {
+                val list = ArrayList<Field>()
+                reader.beginObject()
+                val field = fieldAdapter.fromJson(reader)
+                field?.let {
+                    list.add(it)
+                }
+                reader.endObject()
+                list
+            }
+            else -> {
+                reader.skipValue()
                 null
             }
         }
