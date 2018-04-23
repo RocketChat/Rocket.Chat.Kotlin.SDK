@@ -8,6 +8,8 @@ const val LOGIN_ERROR = "{\"status\": \"error\",\"message\": \"Unauthorized\"}"
 
 const val LOGOUT_SUCCESS = "{ \"status\": \"success\", \"data\": { \"message\": \"You've been logged out!\" } }"
 
+const val USER_NOT_FOUND_ERROR = "{\"status\": \"false\",\"message\": \"User not found\"}"
+
 const val USER_REGISTER_SUCCESS = "{\"user\":{\"_id\":\"userId\",\"createdAt\":\"2017-11-07T15:59:50.432Z\",\"services\":{\"password\":{\"bcrypt\":\"bcrypt-password\"},\"email\":{\"verificationTokens\":[{\"token\":\"verificationToken\",\"address\":\"test@email.com\",\"when\":\"2017-11-07T15:59:50.457Z\"}]}},\"emails\":[{\"address\":\"test@email.com\",\"verified\":false}],\"type\":\"user\",\"status\":\"offline\",\"active\":true,\"name\":\"Test User\",\"_updatedAt\":\"2017-11-07T15:59:51.144Z\",\"roles\":[\"user\"],\"username\":\"testuser\"},\"success\":true}"
 const val USER_UPDATE_SUCCESS = "{\"user\":{\"_id\":\"userId\",\"createdAt\":\"2017-11-07T15:59:50.432Z\",\"services\":{\"password\":{\"bcrypt\":\"new-bcrypt-password\"},\"email\":{\"verificationTokens\":[{\"token\":\"verificationToken\",\"address\":\"test@email.com\",\"when\":\"2017-11-07T15:59:50.457Z\"}]}},\"emails\":[{\"address\":\"test@email.com\",\"verified\":false}],\"type\":\"user\",\"status\":\"offline\",\"active\":true,\"name\":\"New name\",\"_updatedAt\":\"2017-11-07T15:59:51.144Z\",\"roles\":[\"user\"],\"username\":\"new-username\"},\"success\":true}"
 
