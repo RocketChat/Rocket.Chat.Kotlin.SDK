@@ -2,6 +2,7 @@ package chat.rocket.core.internal.rest
 
 import chat.rocket.common.RocketChatApiException
 import chat.rocket.common.RocketChatAuthException
+import chat.rocket.common.RocketChatException
 import chat.rocket.common.RocketChatInvalidResponseException
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
@@ -583,6 +584,32 @@ class LoginTest {
                 assertThat(ex.errorType, isEqualTo("error-field-unavailable"))
                 assertThat(ex.message, isEqualTo("<strong>testuser</strong> is already in use :( [error-field-unavailable]"))
             }
+        }
+    }
+
+    @Test
+    fun `forgotPassword() should succeed with valid parameters`() {
+        mockServer.expect()
+            .post()
+            .withPath("/api/v1/users.forgotPassword")
+            .andReturn(200, SUCCESS)
+            .once()
+
+        runBlocking {
+            sut.forgotPassword("test@email.com")
+        }
+    }
+
+    @Test(expected = RocketChatException::class)
+    fun `forgotPassword() should fail with RocketChatApiException if the user was not found`() {
+        mockServer.expect()
+            .post()
+            .withPath("/api/v1/users.forgotPassword")
+            .andReturn(403, USER_NOT_FOUND_ERROR)
+            .once()
+
+        runBlocking {
+            sut.forgotPassword("test@email.com")
         }
     }
 
