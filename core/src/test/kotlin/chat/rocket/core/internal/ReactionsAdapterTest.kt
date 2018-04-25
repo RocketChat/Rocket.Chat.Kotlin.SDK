@@ -4,6 +4,8 @@ import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
 import chat.rocket.core.model.Reactions
+import com.fasterxml.jackson.databind.util.JSONPObject
+import com.squareup.moshi.Json
 import com.squareup.moshi.Moshi
 import okhttp3.OkHttpClient
 import org.hamcrest.MatcherAssert.assertThat
@@ -79,5 +81,13 @@ class ReactionsAdapterTest {
         val adapter = moshi.adapter<Reactions>(Reactions::class.java)
         val reactions = adapter.fromJson(REACTIONS_EMPTY)
         assertThat(reactions!!.size, isEqualTo(0))
+    }
+
+    @Test
+    fun `should serialize back to JSON string`() {
+        val adapter = moshi.adapter<Reactions>(Reactions::class.java)
+        val reactions = adapter.fromJson(REACTIONS)
+        val reactionsJson = adapter.toJson(reactions)
+        assertThat(adapter.fromJson(reactionsJson), isEqualTo(reactions))
     }
 }

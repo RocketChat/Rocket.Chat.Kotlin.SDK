@@ -1,13 +1,9 @@
 package chat.rocket.core.internal
 
 import chat.rocket.core.model.Reactions
-import com.squareup.moshi.FromJson
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.ToJson
-import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.*
 
-internal class ReactionsAdapter : JsonAdapter<Reactions>() {
+class ReactionsAdapter : JsonAdapter<Reactions>() {
 
     @FromJson
     override fun fromJson(reader: JsonReader): Reactions {
@@ -37,8 +33,33 @@ internal class ReactionsAdapter : JsonAdapter<Reactions>() {
         return reactions
     }
 
+    // {":joy:":{"usernames":["leonardo.aramaki"]},":thinking:":{"usernames":["leonardo.aramaki"]}}}]}}
     @ToJson
     override fun toJson(writer: JsonWriter, value: Reactions?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        if (value == null) {
+            writer.nullValue()
+        } else {
+            with(writer) {
+                beginObject()
+                value.getShortNames().forEach {
+                    writeReaction(writer, it, value.getUsernames(it))
+                }
+                endObject()
+            }
+        }
+    }
+
+    private fun writeReaction(writer: JsonWriter, shortname: String, usernames: List<String>?) {
+        with(writer) {
+            name(shortname)
+            beginObject()
+            name("usernames")
+            beginArray()
+            usernames?.forEach {
+                writer.value(it)
+            }
+            endArray()
+            endObject()
+        }
     }
 }
