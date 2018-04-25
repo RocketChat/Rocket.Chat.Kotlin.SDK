@@ -33,7 +33,6 @@ class ReactionsAdapter : JsonAdapter<Reactions>() {
         return reactions
     }
 
-    // {":joy:":{"usernames":["leonardo.aramaki"]},":thinking:":{"usernames":["leonardo.aramaki"]}}}]}}
     @ToJson
     override fun toJson(writer: JsonWriter, value: Reactions?) {
         if (value == null) {
