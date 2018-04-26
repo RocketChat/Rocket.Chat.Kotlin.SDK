@@ -9,6 +9,7 @@ import chat.rocket.core.model.attachment.Color
 import chat.rocket.core.model.attachment.ColorAttachment
 import chat.rocket.core.model.attachment.Field
 import chat.rocket.core.model.attachment.FileAttachment
+import chat.rocket.core.model.attachment.GenericFileAttachment
 import chat.rocket.core.model.attachment.ImageAttachment
 import chat.rocket.core.model.attachment.MessageAttachment
 import chat.rocket.core.model.attachment.VideoAttachment
@@ -149,6 +150,9 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 checkNonNull(audioSize, "audioSize")
                 AudioAttachment(title, description, titleLink, titleLinkDownload, audioUrl, audioType!!, audioSize!!)
             }
+            titleLink != null -> {
+                GenericFileAttachment(title, description, titleLink, titleLink, titleLinkDownload)
+            }
             text != null && color != null && fallback != null -> {
                 ColorAttachment(color, text, fallback)
             }
@@ -251,8 +255,17 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
             is AudioAttachment -> writeAudioAttachment(writer, attachment)
             is VideoAttachment -> writeVideoAttachment(writer, attachment)
             is ImageAttachment -> writeImageAttachment(writer, attachment)
+            is GenericFileAttachment -> writeGenericFileAttachment(writer, attachment)
         }
         writer.endObject()
+    }
+
+    private fun writeGenericFileAttachment(writer: JsonWriter, attachment: GenericFileAttachment) {
+        with(writer) {
+            name("title").value(attachment.title)
+            name("titleLink").value(attachment.url)
+            name("titleLinkDownload").value(attachment.titleLinkDownload)
+        }
     }
 
     private fun writeAudioAttachment(writer: JsonWriter, attachment: AudioAttachment) {
