@@ -4,8 +4,6 @@ import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
 import chat.rocket.core.model.Reactions
-import com.fasterxml.jackson.databind.util.JSONPObject
-import com.squareup.moshi.Json
 import com.squareup.moshi.Moshi
 import okhttp3.OkHttpClient
 import org.hamcrest.MatcherAssert.assertThat

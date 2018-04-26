@@ -1,7 +1,11 @@
 package chat.rocket.core.internal
 
 import chat.rocket.core.model.Reactions
-import com.squareup.moshi.*
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.ToJson
+import com.squareup.moshi.JsonWriter
 
 class ReactionsAdapter : JsonAdapter<Reactions>() {
 

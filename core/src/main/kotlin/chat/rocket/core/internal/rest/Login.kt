@@ -239,7 +239,6 @@ suspend fun RocketChatClient.signup(
     handleRestCall<RestResult<User>>(request, type).result()
 }
 
-
 /**
  * Dispatches an email with a link to the user be able to reset its password.
  *

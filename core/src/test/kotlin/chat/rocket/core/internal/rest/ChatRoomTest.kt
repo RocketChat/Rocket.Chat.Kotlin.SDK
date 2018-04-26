@@ -151,5 +151,4 @@ class ChatRoomTest {
             val result = sut.queryUsers("g")
         }
     }
-
 }
