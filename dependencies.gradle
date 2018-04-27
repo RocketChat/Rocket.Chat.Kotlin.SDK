@@ -1,6 +1,6 @@
 ext {
     versions = [
-            kotlin       : '1.2.31',
+            kotlin       : '1.2.40',
             kotlinter    : '1.10.0',
             coroutine    : '0.22.5',
             dokka        : '0.9.16',
