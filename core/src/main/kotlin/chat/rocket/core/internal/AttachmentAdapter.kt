@@ -141,14 +141,10 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 ImageAttachment(title, description, titleLink, titleLinkDownload, imageUrl, imageType, imageSize, preview)
             }
             videoUrl != null -> {
-                checkNonNull(videoType, "videoType")
-                checkNonNull(videoSize, "videoSize")
-                VideoAttachment(title, description, titleLink, titleLinkDownload, videoUrl, videoType!!, videoSize!!)
+                VideoAttachment(title, description, titleLink, titleLinkDownload, videoUrl, videoType, videoSize)
             }
             audioUrl != null -> {
-                checkNonNull(audioType, "audioType")
-                checkNonNull(audioSize, "audioSize")
-                AudioAttachment(title, description, titleLink, titleLinkDownload, audioUrl, audioType!!, audioSize!!)
+                AudioAttachment(title, description, titleLink, titleLinkDownload, audioUrl, audioType, audioSize)
             }
             titleLink != null -> {
                 GenericFileAttachment(title, description, titleLink, titleLink, titleLinkDownload)
