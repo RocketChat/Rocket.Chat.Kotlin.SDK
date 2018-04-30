@@ -117,7 +117,6 @@ fun main(args: Array<String>) {
             client.setTemporaryStatus(UserStatus.Online())
             delay(2000)
             client.setDefaultStatus(UserStatus.Away())
-
             client.setTypingStatus("GENERAL", "luciofm-testing", true)
         }
 
