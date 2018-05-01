@@ -60,6 +60,7 @@ class RocketChatClient private constructor(
     val messagesChannel = Channel<Message>()
     val userDataChannel = Channel<Myself>()
     val activeUsersChannel = Channel<User>()
+    val typingStatusChannel = Channel<Pair<String, Boolean>>()
     internal val socket: Socket
 
     init {
@@ -77,7 +78,8 @@ class RocketChatClient private constructor(
             subscriptionsChannel = subscriptionsChannel,
             messagesChannel = messagesChannel,
             userDataChannel = userDataChannel,
-            activeUsersChannel = activeUsersChannel
+            activeUsersChannel = activeUsersChannel,
+            typingStatusChannel = typingStatusChannel
         )
     }
 

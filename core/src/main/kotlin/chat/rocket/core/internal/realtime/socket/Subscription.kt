@@ -1,8 +1,10 @@
 package chat.rocket.core.internal.realtime.socket
 
+import chat.rocket.core.internal.realtime.socket.message.collection.STREAM_NOTIFY_ROOM
 import chat.rocket.core.internal.realtime.socket.message.collection.STREAM_NOTIFY_USER
 import chat.rocket.core.internal.realtime.socket.message.collection.STREAM_ROOM_MESSAGES
 import chat.rocket.core.internal.realtime.socket.message.collection.USERS
+import chat.rocket.core.internal.realtime.socket.message.collection.processNotifyRoomStream
 import chat.rocket.core.internal.realtime.socket.message.collection.processNotifyUserStream
 import chat.rocket.core.internal.realtime.socket.message.collection.processRoomMessage
 import chat.rocket.core.internal.realtime.socket.message.collection.processUserStream
@@ -38,6 +40,9 @@ internal fun Socket.processSubscriptionsChanged(message: SocketMessage, text: St
         }
         STREAM_ROOM_MESSAGES -> {
             processRoomMessage(text)
+        }
+        STREAM_NOTIFY_ROOM -> {
+            processNotifyRoomStream(text)
         }
         USERS -> {
             processUserStream(text)

@@ -82,6 +82,7 @@ fun main(args: Array<String>) {
                         client.subscribeRooms { _, _ -> }
                         client.subscribeUserData { _, _ -> }
                         client.subscribeActiveUsers { _, _ ->  }
+                        client.subscribeTypingStatus("GENERAL") {_, _ ->  }
                     }
                 }
             }
@@ -109,6 +110,12 @@ fun main(args: Array<String>) {
         launch {
             for (activeUsers in client.activeUsersChannel) {
                 logger.debug("Active users: $activeUsers")
+            }
+        }
+
+        launch {
+            for (typingStatus in client.typingStatusChannel) {
+                logger.debug("Typing status: $typingStatus")
             }
         }
 

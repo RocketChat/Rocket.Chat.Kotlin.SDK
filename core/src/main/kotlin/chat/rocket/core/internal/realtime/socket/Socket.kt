@@ -37,7 +37,8 @@ class Socket(
     internal val subscriptionsChannel: SendChannel<StreamMessage<Subscription>>,
     internal val messagesChannel: SendChannel<Message>,
     internal val userDataChannel: SendChannel<Myself>,
-    internal val activeUsersChannel: SendChannel<User>
+    internal val activeUsersChannel: SendChannel<User>,
+    internal val typingStatusChannel: SendChannel<Pair<String, Boolean>>
 ) : WebSocketListener() {
 
     private val request: Request = Request.Builder()
