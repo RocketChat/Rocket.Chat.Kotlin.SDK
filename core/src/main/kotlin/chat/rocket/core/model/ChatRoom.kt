@@ -13,54 +13,54 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
 
 data class ChatRoom(
-    override val id: String,
-    override val type: RoomType,
-    override val user: SimpleUser?,
-    val status: UserStatus?,
-    val name: String,
-    override val fullName: String?,
-    override val readonly: Boolean? = false,
-    override val updatedAt: Long?,
-    val timestamp: Long?,
-    val lastSeen: Long?,
-    val topic: String?,
-    val description: String?,
-    val announcement: String?,
-    @get:JvmName("isDefault")
-    val default: Boolean = false,
-    val favorite: Boolean = false,
-    val open: Boolean,
-    val alert: Boolean,
-    val unread: Long,
-    val userMentions: Long?,
-    val groupMentions: Long?,
-    val lastMessage: Message?,
-    val client: RocketChatClient
+        override val id: String,
+        override val type: RoomType,
+        override val user: SimpleUser?,
+        val status: UserStatus?,
+        val name: String,
+        override val fullName: String?,
+        override val readonly: Boolean? = false,
+        override val updatedAt: Long?,
+        val timestamp: Long?,
+        val lastSeen: Long?,
+        val topic: String?,
+        val description: String?,
+        val announcement: String?,
+        @get:JvmName("isDefault")
+        val default: Boolean = false,
+        val favorite: Boolean = false,
+        val open: Boolean,
+        val alert: Boolean,
+        val unread: Long,
+        val userMentions: Long?,
+        val groupMentions: Long?,
+        val lastMessage: Message?,
+        val client: RocketChatClient
 ) : BaseRoom {
     companion object {
         fun create(room: Room, subscription: Subscription, client: RocketChatClient): ChatRoom {
             return ChatRoom(id = room.id,
-                            type = room.type,
-                            user = room.user ?: subscription.user,
-                            status = null,
-                            name = room.name ?: subscription.name,
-                            fullName = room.fullName ?: subscription.fullName,
-                            readonly = room.readonly,
-                            updatedAt = room.updatedAt ?: subscription.updatedAt,
-                            timestamp = subscription.timestamp,
-                            lastSeen = subscription.lastSeen,
-                            topic = room.topic,
-                            description = room.description,
-                            announcement = room.announcement,
-                            default = subscription.isDefault,
-                            favorite = subscription.isFavorite,
-                            open = subscription.open,
-                            alert = subscription.alert,
-                            unread = subscription.unread,
-                            userMentions = subscription.userMentions,
-                            groupMentions = subscription.groupMentions,
-                            lastMessage = room.lastMessage,
-                            client = client)
+                    type = room.type,
+                    user = room.user,
+                    status = null,
+                    name = room.name ?: subscription.name,
+                    fullName = room.fullName ?: subscription.fullName,
+                    readonly = room.readonly,
+                    updatedAt = room.updatedAt ?: subscription.updatedAt,
+                    timestamp = subscription.timestamp,
+                    lastSeen = subscription.lastSeen,
+                    topic = room.topic,
+                    description = room.description,
+                    announcement = room.announcement,
+                    default = subscription.isDefault,
+                    favorite = subscription.isFavorite,
+                    open = subscription.open,
+                    alert = subscription.alert,
+                    unread = subscription.unread,
+                    userMentions = subscription.userMentions,
+                    groupMentions = subscription.groupMentions,
+                    lastMessage = room.lastMessage,
+                    client = client)
         }
     }
 
@@ -69,16 +69,16 @@ data class ChatRoom(
 }
 
 suspend fun ChatRoom.messages(
-    offset: Long = 0,
-    count: Long = 50
+        offset: Long = 0,
+        count: Long = 50
 ): PagedResult<List<Message>> = withContext(CommonPool) {
     return@withContext client.messages(id, type, offset, count)
 }
 
 suspend fun ChatRoom.history(
-    count: Long = 50,
-    oldest: String? = null,
-    latest: String? = null
+        count: Long = 50,
+        oldest: String? = null,
+        latest: String? = null
 ): PagedResult<List<Message>> = withContext(CommonPool) {
     return@withContext client.history(id, type, count, oldest, latest)
 }
