@@ -26,3 +26,9 @@ internal fun streamRoomMessages(id: String, roomId: String): String =
 
 internal fun userDataChangesMessage(id: String): String =
     newSubscriptionMessage("userData", id, "")
+
+internal fun activeUsersMessage(id: String): String =
+    newSubscriptionMessage("activeUsers", id, "")
+
+internal fun streamTypingMessage(id: String, roomId: String): String =
+    newSubscriptionMessage("stream-notify-room", id, "\"$roomId/typing\", false")

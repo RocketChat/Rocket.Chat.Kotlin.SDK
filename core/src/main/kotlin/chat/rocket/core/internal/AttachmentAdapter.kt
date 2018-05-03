@@ -9,6 +9,7 @@ import chat.rocket.core.model.attachment.Color
 import chat.rocket.core.model.attachment.ColorAttachment
 import chat.rocket.core.model.attachment.Field
 import chat.rocket.core.model.attachment.FileAttachment
+import chat.rocket.core.model.attachment.GenericFileAttachment
 import chat.rocket.core.model.attachment.ImageAttachment
 import chat.rocket.core.model.attachment.MessageAttachment
 import chat.rocket.core.model.attachment.VideoAttachment
@@ -25,8 +26,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
     private val type = Types.newParameterizedType(List::class.java, Attachment::class.java)
     private val attachmentsAdapter = moshi.adapter<List<Attachment>>(type)
     private val tsAdapter = moshi.adapter<Long>(Long::class.java, ISO8601Date::class.java)
-    private val fieldsType = Types.newParameterizedType(List::class.java, Field::class.java)
-    private val fieldsAdapter = moshi.adapter<List<Field>>(fieldsType)
+    private val fieldAdapter = moshi.adapter<Field>(Field::class.java)
     private val colorAdapter = moshi.adapter<Color>(Color::class.java)
 
     private val NAMES = arrayOf(
@@ -119,7 +119,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 21 -> authorIcon = reader.nextStringOrNull()
                 22 -> authorLink = reader.nextStringOrNull()
                 23 -> imagePreview = reader.nextStringOrNull()
-                24 -> fields = fieldsAdapter.fromJson(reader)
+                24 -> fields = parseFields(reader)
                 25 -> fallback = reader.nextStringOrNull()
                 else -> {
                     val name = reader.nextName()
@@ -141,14 +141,13 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 ImageAttachment(title, description, titleLink, titleLinkDownload, imageUrl, imageType, imageSize, preview)
             }
             videoUrl != null -> {
-                checkNonNull(videoType, "videoType")
-                checkNonNull(videoSize, "videoSize")
-                VideoAttachment(title, description, titleLink, titleLinkDownload, videoUrl, videoType!!, videoSize!!)
+                VideoAttachment(title, description, titleLink, titleLinkDownload, videoUrl, videoType, videoSize)
             }
             audioUrl != null -> {
-                checkNonNull(audioType, "audioType")
-                checkNonNull(audioSize, "audioSize")
-                AudioAttachment(title, description, titleLink, titleLinkDownload, audioUrl, audioType!!, audioSize!!)
+                AudioAttachment(title, description, titleLink, titleLinkDownload, audioUrl, audioType, audioSize)
+            }
+            titleLink != null -> {
+                GenericFileAttachment(title, description, titleLink, titleLink, titleLinkDownload)
             }
             text != null && color != null && fallback != null -> {
                 ColorAttachment(color, text, fallback)
@@ -163,6 +162,43 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 logger.debug {
                     "Invalid Attachment type: supported are file and message at ${reader.path} - type: $type"
                 }
+                null
+            }
+        }
+    }
+
+    private fun parseFields(reader: JsonReader): List<Field>? {
+        return when {
+            reader.peek() == JsonReader.Token.NULL -> return reader.nextNull<List<Field>>()
+            reader.peek() == JsonReader.Token.BEGIN_ARRAY -> {
+                reader.beginArray()
+                if (reader.peek() == JsonReader.Token.NULL) {
+                    reader.skipValue()
+                    reader.endArray()
+                    return null
+                }
+                val list = ArrayList<Field>()
+                while (reader.hasNext()) {
+                    val field = fieldAdapter.fromJson(reader)
+                    field?.let {
+                        list.add(it)
+                    }
+                }
+                reader.endArray()
+                list
+            }
+            reader.peek() == JsonReader.Token.BEGIN_OBJECT -> {
+                val list = ArrayList<Field>()
+                reader.beginObject()
+                val field = fieldAdapter.fromJson(reader)
+                field?.let {
+                    list.add(it)
+                }
+                reader.endObject()
+                list
+            }
+            else -> {
+                reader.skipValue()
                 null
             }
         }
@@ -215,8 +251,17 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
             is AudioAttachment -> writeAudioAttachment(writer, attachment)
             is VideoAttachment -> writeVideoAttachment(writer, attachment)
             is ImageAttachment -> writeImageAttachment(writer, attachment)
+            is GenericFileAttachment -> writeGenericFileAttachment(writer, attachment)
         }
         writer.endObject()
+    }
+
+    private fun writeGenericFileAttachment(writer: JsonWriter, attachment: GenericFileAttachment) {
+        with(writer) {
+            name("title").value(attachment.title)
+            name("titleLink").value(attachment.url)
+            name("titleLinkDownload").value(attachment.titleLinkDownload)
+        }
     }
 
     private fun writeAudioAttachment(writer: JsonWriter, attachment: AudioAttachment) {
@@ -263,7 +308,6 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 writer.beginObject()
                 writer.name("title").value(it.title)
                 writer.name("value").value(it.value)
-                writer.name("short").value(it.shortField)
                 writer.endObject()
             }
             writer.endArray()

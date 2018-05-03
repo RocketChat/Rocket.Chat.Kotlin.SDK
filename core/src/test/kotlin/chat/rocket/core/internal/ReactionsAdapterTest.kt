@@ -80,4 +80,12 @@ class ReactionsAdapterTest {
         val reactions = adapter.fromJson(REACTIONS_EMPTY)
         assertThat(reactions!!.size, isEqualTo(0))
     }
+
+    @Test
+    fun `should serialize back to JSON string`() {
+        val adapter = moshi.adapter<Reactions>(Reactions::class.java)
+        val reactions = adapter.fromJson(REACTIONS)
+        val reactionsJson = adapter.toJson(reactions)
+        assertThat(adapter.fromJson(reactionsJson), isEqualTo(reactions))
+    }
 }

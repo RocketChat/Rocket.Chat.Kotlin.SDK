@@ -80,7 +80,9 @@ fun main(args: Array<String>) {
                         logger.debug("Connected")
                         client.subscribeSubscriptions { _, _ -> }
                         client.subscribeRooms { _, _ -> }
-                        client.subscribeUserDataChanges { _, _ -> }
+                        client.subscribeUserData { _, _ -> }
+                        client.subscribeActiveUsers { _, _ ->  }
+                        client.subscribeTypingStatus("GENERAL") {_, _ ->  }
                     }
                 }
             }
@@ -106,12 +108,24 @@ fun main(args: Array<String>) {
         }
 
         launch {
+            for (activeUsers in client.activeUsersChannel) {
+                logger.debug("Active users: $activeUsers")
+            }
+        }
+
+        launch {
+            for (typingStatus in client.typingStatusChannel) {
+                logger.debug("Typing status: $typingStatus")
+            }
+        }
+
+        launch {
             delay(10000)
             client.setTemporaryStatus(UserStatus.Online())
             delay(2000)
             client.setDefaultStatus(UserStatus.Away())
+            client.setTypingStatus("GENERAL", "luciofm-testing", true)
         }
-
 
         client.connect()
 

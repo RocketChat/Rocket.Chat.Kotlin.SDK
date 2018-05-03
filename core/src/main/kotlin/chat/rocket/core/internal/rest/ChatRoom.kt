@@ -215,3 +215,18 @@ suspend fun RocketChatClient.hide(roomId: String, roomType: RoomType, hideRoom: 
 
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
+
+/**
+ * @param queryParam Parameter which is used to query users on the basis of regex
+ */
+suspend fun RocketChatClient.queryUsers(queryParam: String): PagedResult<List<User>> = withContext(CommonPool) {
+    val httpUrl = requestUrl(restUrl, "users.list")
+            .addQueryParameter("query", "{ \"name\": { \"\\u0024regex\": \"$queryParam\" } }")
+            .build()
+    val request = requestBuilder(httpUrl).get().build()
+    val type = Types.newParameterizedType(RestResult::class.java,
+            Types.newParameterizedType(List::class.java, User::class.java))
+
+    val result = handleRestCall<RestResult<List<User>>>(request, type)
+    return@withContext PagedResult<List<User>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
+}

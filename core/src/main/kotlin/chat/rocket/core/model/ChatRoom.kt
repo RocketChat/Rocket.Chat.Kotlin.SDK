@@ -3,6 +3,7 @@ package chat.rocket.core.model
 import chat.rocket.common.model.BaseRoom
 import chat.rocket.common.model.RoomType
 import chat.rocket.common.model.SimpleUser
+import chat.rocket.common.model.UserStatus
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.model.Subscription
 import chat.rocket.core.internal.realtime.subscribeRoomMessages
@@ -15,6 +16,7 @@ data class ChatRoom(
     override val id: String,
     override val type: RoomType,
     override val user: SimpleUser?,
+    val status: UserStatus?,
     val name: String,
     override val fullName: String?,
     override val readonly: Boolean? = false,
@@ -42,6 +44,7 @@ data class ChatRoom(
             return ChatRoom(id = room.id,
                             type = room.type,
                             user = room.user ?: subscription.user,
+                            status = null,
                             name = room.name ?: subscription.name,
                             fullName = room.fullName ?: subscription.fullName,
                             readonly = room.readonly,

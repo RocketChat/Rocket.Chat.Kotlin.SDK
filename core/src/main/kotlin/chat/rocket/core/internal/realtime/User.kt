@@ -2,6 +2,7 @@ package chat.rocket.core.internal.realtime
 
 import chat.rocket.common.model.UserStatus
 import chat.rocket.core.RocketChatClient
+import chat.rocket.core.internal.realtime.message.activeUsersMessage
 import chat.rocket.core.internal.realtime.message.defaultStatusMessage
 import chat.rocket.core.internal.realtime.message.temporaryStatusMessage
 import chat.rocket.core.internal.realtime.message.userDataChangesMessage
@@ -23,10 +24,19 @@ suspend fun RocketChatClient.setTemporaryStatus(status: UserStatus) = withContex
     }
 }
 
-fun RocketChatClient.subscribeUserDataChanges(callback: (Boolean, String) -> Unit): String {
+fun RocketChatClient.subscribeUserData(callback: (Boolean, String) -> Unit): String {
     with(socket) {
         val id = generateId()
         send(userDataChangesMessage(id))
+        subscriptionsMap[id] = callback
+        return id
+    }
+}
+
+fun RocketChatClient.subscribeActiveUsers(callback: (Boolean, String) -> Unit): String {
+    with(socket) {
+        val id = generateId()
+        send(activeUsersMessage(id))
         subscriptionsMap[id] = callback
         return id
     }
