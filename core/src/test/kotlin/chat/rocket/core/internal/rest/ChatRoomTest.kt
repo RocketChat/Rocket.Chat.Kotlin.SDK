@@ -113,7 +113,6 @@ class ChatRoomTest {
         }
     }
 
-<<<<<<< HEAD
     @Test
     fun `leaveChat() should succeed without throwing`() {
         mockServer.expect()
@@ -303,9 +302,11 @@ class ChatRoomTest {
             val result = sut.hide(roomId = "GENERAL", roomType = RoomType.CHANNEL,
                     hideRoom = true)
             assertTrue(result)
-=======
-    // TODO Fix tests!
+        }
+    }
 
+
+    // TODO Fix tests!
     @Test
     fun `queryUsers() should succeed without throwing`() {
         mockServer.expect()
@@ -344,7 +345,6 @@ class ChatRoomTest {
 
         runBlocking {
             val result = sut.queryUsers("g")
->>>>>>> 9f7cd2d628bcaf69ed4f26038ef6eb3fe02f4890
         }
     }
 }
