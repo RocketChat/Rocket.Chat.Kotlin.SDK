@@ -13,12 +13,10 @@ jobs:
           keys:
           - v1-dependencies-{{ checksum "build.gradle" }}
           - v1-dependencies-
-      - run: ./gradlew build
+      - run:
+        name: Build SDK
+        command: ./gradlew build
       - save_cache:
           paths:
             - ~/.m2
           key: v1-dependencies-{{ checksum "build.gradle" }}
-test:
-  post:
-    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
-    - find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
