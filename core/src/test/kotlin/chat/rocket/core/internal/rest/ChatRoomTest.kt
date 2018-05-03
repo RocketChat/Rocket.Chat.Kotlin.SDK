@@ -305,7 +305,6 @@ class ChatRoomTest {
         }
     }
 
-
     // TODO Fix tests!
     @Test
     fun `queryUsers() should succeed without throwing`() {
