@@ -14,7 +14,7 @@ suspend fun RocketChatClient.setTypingStatus(roomId: String, username: String, i
         socket.send(typingMessage(socket.generateId(), roomId, username, isTyping))
     }
 
-fun RocketChatClient.subscribeTypingStatus(roomId: String, callback: (Boolean, String) -> Unit) : String {
+fun RocketChatClient.subscribeTypingStatus(roomId: String, callback: (Boolean, String) -> Unit): String {
     with(socket) {
         val id = generateId()
         send(streamTypingMessage(id, roomId))
