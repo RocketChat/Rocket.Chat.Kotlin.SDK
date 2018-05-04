@@ -1,6 +1,7 @@
 package chat.rocket.core.internal.rest
 
 import chat.rocket.common.RocketChatException
+import chat.rocket.common.model.BaseResult
 import chat.rocket.common.model.Token
 import chat.rocket.common.model.User
 import chat.rocket.core.RocketChatClient
@@ -12,6 +13,7 @@ import chat.rocket.core.internal.model.EmailLoginPayload
 import chat.rocket.core.internal.model.LdapLoginPayload
 import chat.rocket.core.internal.model.SamlLoginPayload
 import chat.rocket.core.internal.model.SignUpPayload
+import chat.rocket.core.internal.model.ForgotPasswordPayload
 import chat.rocket.core.internal.model.CasData
 import chat.rocket.core.internal.model.OauthData
 import com.squareup.moshi.Types
@@ -235,4 +237,23 @@ suspend fun RocketChatClient.signup(
 
     val type = Types.newParameterizedType(RestResult::class.java, User::class.java)
     handleRestCall<RestResult<User>>(request, type).result()
+}
+
+/**
+ * Dispatches an email with a link to the user be able to reset its password.
+ *
+ * @param email Email of the user.
+ * @throws [RocketChatException] if the user was not found.
+ */
+suspend fun RocketChatClient.forgotPassword(email: String): Boolean {
+    val payload = ForgotPasswordPayload(email)
+    val adapter = moshi.adapter(ForgotPasswordPayload::class.java)
+
+    val payloadBody = adapter.toJson(payload)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val url = requestUrl(restUrl, "users.forgotPassword").build()
+    val request = Request.Builder().url(url).post(body).build()
+
+    return handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }

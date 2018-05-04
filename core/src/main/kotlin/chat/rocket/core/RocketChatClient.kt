@@ -4,6 +4,7 @@ import chat.rocket.common.CommonJsonAdapterFactory
 import chat.rocket.common.internal.FallbackSealedClassJsonAdapter
 import chat.rocket.common.internal.ISO8601Date
 import chat.rocket.common.model.TimestampAdapter
+import chat.rocket.common.model.User
 import chat.rocket.common.util.CalendarISO8601Converter
 import chat.rocket.common.util.Logger
 import chat.rocket.common.util.PlatformLogger
@@ -16,9 +17,9 @@ import chat.rocket.core.internal.RoomListAdapterFactory
 import chat.rocket.core.internal.CoreJsonAdapterFactory
 import chat.rocket.core.internal.ReactionsAdapter
 import chat.rocket.core.internal.model.Subscription
-import chat.rocket.core.internal.realtime.Socket
-import chat.rocket.core.internal.realtime.State
-import chat.rocket.core.internal.realtime.StreamMessage
+import chat.rocket.core.internal.realtime.socket.Socket
+import chat.rocket.core.internal.realtime.socket.model.State
+import chat.rocket.core.internal.realtime.socket.model.StreamMessage
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room
@@ -58,6 +59,8 @@ class RocketChatClient private constructor(
     val subscriptionsChannel = Channel<StreamMessage<Subscription>>()
     val messagesChannel = Channel<Message>()
     val userDataChannel = Channel<Myself>()
+    val activeUsersChannel = Channel<User>()
+    val typingStatusChannel = Channel<Pair<String, Boolean>>()
     internal val socket: Socket
 
     init {
@@ -74,7 +77,9 @@ class RocketChatClient private constructor(
             roomsChannel = roomsChannel,
             subscriptionsChannel = subscriptionsChannel,
             messagesChannel = messagesChannel,
-            userDataChannel = userDataChannel
+            userDataChannel = userDataChannel,
+            activeUsersChannel = activeUsersChannel,
+            typingStatusChannel = typingStatusChannel
         )
     }
 

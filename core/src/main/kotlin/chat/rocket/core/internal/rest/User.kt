@@ -205,15 +205,15 @@ internal fun RocketChatClient.combine(
     return RestMultiResult.create(update, remove)
 }
 
-internal fun RocketChatClient.combine(rooms: List<Room>, subscriptions: List<Subscription>, filterCustom: Boolean): List<ChatRoom> {
+internal fun RocketChatClient.combine(rooms: List<Room>?, subscriptions: List<Subscription>?, filterCustom: Boolean): List<ChatRoom> {
     val map = HashMap<String, Room>()
-    rooms.forEach {
+    rooms?.forEach {
         map[it.id] = it
     }
 
-    val chatRooms = ArrayList<ChatRoom>(subscriptions.size)
+    val chatRooms = ArrayList<ChatRoom>(subscriptions?.size ?: 0)
 
-    subscriptions.forEach {
+    subscriptions?.forEach {
         val room = map[it.roomId]
         val subscription = it
         // In case of any inconsistency we just ignore the room/subscription...

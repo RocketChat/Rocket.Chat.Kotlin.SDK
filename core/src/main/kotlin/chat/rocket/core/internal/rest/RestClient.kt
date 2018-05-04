@@ -3,6 +3,7 @@ package chat.rocket.core.internal.rest
 import chat.rocket.common.RocketChatApiException
 import chat.rocket.common.RocketChatAuthException
 import chat.rocket.common.RocketChatException
+import chat.rocket.common.RocketChatInvalidProtocolException
 import chat.rocket.common.RocketChatInvalidResponseException
 import chat.rocket.common.RocketChatNetworkErrorException
 import chat.rocket.common.RocketChatTwoFactorException
@@ -58,7 +59,12 @@ internal fun RocketChatClient.requestBuilder(httpUrl: HttpUrl): Request.Builder 
     return builder
 }
 
-internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type: Type, largeFile: Boolean = false): T =
+internal suspend fun <T> RocketChatClient.handleRestCall(
+    request: Request,
+    type: Type,
+    largeFile: Boolean = false,
+    allowRedirects: Boolean = true
+): T =
         suspendCancellableCoroutine { continuation ->
 
             val callback = object : Callback {
@@ -94,6 +100,10 @@ internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type:
                                     RocketChatInvalidResponseException("Error parsing JSON message", url = request.url().toString())
                                 }
                             }
+                        }.ifNull {
+                            continuation.tryResumeWithException {
+                                RocketChatInvalidResponseException("Error parsing JSON message", url = request.url().toString())
+                            }
                         }
                     } catch (ex: Exception) {
                         // kinda of multi catch exception...
@@ -116,37 +126,51 @@ internal suspend fun <T> RocketChatClient.handleRestCall(request: Request, type:
             logger.debug {
                 "Enqueueing: ${request.method()} - ${request.url()}"
             }
-            if (largeFile) {
-                httpClient.newBuilder()
-                    .writeTimeout(90, TimeUnit.SECONDS)
-                    .readTimeout(90, TimeUnit.SECONDS)
-                    .build().newCall(request).enqueue(callback)
-            } else {
-                httpClient.newCall(request).enqueue(callback)
-            }
+
+            val client = ensureClient(largeFile, allowRedirects)
+            client.newCall(request).enqueue(callback)
 
             continuation.invokeOnCompletion {
-                if (continuation.isCancelled) httpClient.cancel(request.tag())
+                if (continuation.isCancelled) client.cancel(request.tag())
             }
         }
+
+internal fun RocketChatClient.ensureClient(largeFile: Boolean, allowRedirects: Boolean): OkHttpClient {
+    return if (largeFile || !allowRedirects) {
+        httpClient.newBuilder().apply {
+            if (largeFile) {
+                writeTimeout(90, TimeUnit.SECONDS)
+                readTimeout(90, TimeUnit.SECONDS)
+            }
+            followRedirects(allowRedirects)
+        }.build()
+    } else {
+        httpClient
+    }
+}
 
 internal fun processCallbackError(moshi: Moshi, request: Request, response: Response, logger: Logger): RocketChatException {
     var exception: RocketChatException
     try {
-        val body = response.body()?.string() ?: "missing body"
-        logger.debug { "Error body: $body" }
-        exception = if (response.code() == 401) {
-            val adapter: JsonAdapter<AuthenticationErrorMessage>? = moshi.adapter(AuthenticationErrorMessage::class.java)
-            val message: AuthenticationErrorMessage? = adapter?.fromJson(body)
-            if (message?.error?.contentEquals("totp-required") == true)
-                RocketChatTwoFactorException(message.message, request.url().toString())
-            else
-                RocketChatAuthException(message?.message ?: "Authentication problem", request.url().toString())
+        if (response.isRedirect) {
+            exception = RocketChatInvalidProtocolException("Invalid Protocol", url = request.url().toString())
         } else {
-            val adapter: JsonAdapter<ErrorMessage>? = moshi.adapter(ErrorMessage::class.java)
-            val message = adapter?.fromJson(body)
-            RocketChatApiException(message?.errorType ?: response.code().toString(), message?.error ?: "unknown error",
-                    url = request.url().toString())
+            val body = response.body()?.string() ?: "missing body"
+            logger.debug { "Error body: $body" }
+            exception = if (response.code() == 401) {
+                val adapter: JsonAdapter<AuthenticationErrorMessage>? = moshi.adapter(AuthenticationErrorMessage::class.java)
+                val message: AuthenticationErrorMessage? = adapter?.fromJson(body)
+                if (message?.error?.contentEquals("totp-required") == true)
+                    RocketChatTwoFactorException(message.message, request.url().toString())
+                else
+                    RocketChatAuthException(message?.message ?: "Authentication problem", request.url().toString())
+            } else {
+                val adapter: JsonAdapter<ErrorMessage>? = moshi.adapter(ErrorMessage::class.java)
+                val message = adapter?.fromJson(body)
+                RocketChatApiException(message?.errorType ?: response.code().toString(), message?.error
+                        ?: "unknown error",
+                        url = request.url().toString())
+            }
         }
     } catch (e: Exception) {
         exception = RocketChatApiException(response.code().toString(), e.message!!, e, request.url().toString())

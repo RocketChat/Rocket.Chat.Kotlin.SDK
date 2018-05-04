@@ -7,7 +7,7 @@ import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
 data class Myself(
-    @Json(name = "_id") val id: String?,
+    @Json(name = "_id") val id: String,
     val active: Boolean?,
     override val username: String?,
     override val name: String?,
@@ -15,5 +15,6 @@ data class Myself(
     val statusConnection: UserStatus?,
     val statusDefault: UserStatus?,
     val utcOffset: Float?,
-    val emails: List<Email>?
+    val emails: List<Email>?,
+    val roles: List<String>?
 ) : BaseUser

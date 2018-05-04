@@ -3,8 +3,8 @@ package chat.rocket.core.internal.rest
 import chat.rocket.common.model.ServerInfo
 import chat.rocket.common.model.SettingsOauth
 import chat.rocket.core.RocketChatClient
-import chat.rocket.core.model.Value
 import chat.rocket.core.internal.model.ConfigurationsPayload
+import chat.rocket.core.model.Value
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
@@ -18,7 +18,7 @@ suspend fun RocketChatClient.serverInfo(): ServerInfo = withContext(CommonPool) 
 
     val request = Request.Builder().url(url).get().build()
 
-    handleRestCall<ServerInfo>(request, ServerInfo::class.java)
+    handleRestCall<ServerInfo>(request, ServerInfo::class.java, allowRedirects = false)
 }
 
 suspend fun RocketChatClient.configurations(): Map<String, Map<String, String>> = withContext(CommonPool) {
