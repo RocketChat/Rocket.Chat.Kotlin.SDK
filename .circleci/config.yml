@@ -6,24 +6,24 @@ jobs:
       steps:
         - checkout
         - run:
-          name: Run lint on the Kotlin source files.
-          command: ./gradlew lintKotlin
+            name: Run lint on the Kotlin source files.
+            command: ./gradlew lintKotlin
     test:
       docker:
         - image: circleci/openjdk:8-jdk
       steps:
         - checkout
         - run:
-          name: Run the unit tests.
-          command: ./gradlew test
+            name: Run the unit tests.
+            command: ./gradlew test
     build:
       docker:
         - image: circleci/openjdk:8-jdk
       steps:
         - checkout
         - run:
-          name: Assemble the outputs.
-          command: ./gradlew assemble
+            name: Assemble the outputs.
+            command: ./gradlew assemble
 
 workflows:
     version: 2
