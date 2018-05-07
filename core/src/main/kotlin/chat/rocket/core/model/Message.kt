@@ -14,31 +14,31 @@ import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
 data class Message(
-    @Json(name = "_id") val id: String,
-    @Json(name = "rid") override val roomId: String,
-    @JsonDefaultValueString("")
-    @Json(name = "msg")
-    override val message: String,
-    @Json(name = "ts") @ISO8601Date override val timestamp: Long,
-    @Json(name = "u") override val sender: SimpleUser?,
-    @Json(name = "_updatedAt") @ISO8601Date override val updatedAt: Long?,
-    @ISO8601Date override val editedAt: Long?,
-    override val editedBy: SimpleUser?,
-    @Json(name = "alias") override val senderAlias: String?,
-    override val avatar: String?,
-    @Json(name = "t") val type: MessageType?,
-    @JsonDefaultValueBoolean(false)
-    val groupable: Boolean,
-    @JsonDefaultValueBoolean(false)
-    val parseUrls: Boolean,
-    val urls: List<Url>?,
-    override val mentions: List<SimpleUser>?,
-    override val channels: List<SimpleRoom>?,
-    val attachments: List<Attachment>?,
-    @JsonDefaultValueBoolean(false)
-    val pinned: Boolean,
-    val reactions: Reactions?,
-    override val isTemporary: Boolean? = false //TODO: Remove after we have a db
+        @Json(name = "_id") val id: String,
+        @Json(name = "rid") override val roomId: String,
+        @JsonDefaultValueString("")
+        @Json(name = "msg")
+        override val message: String,
+        @Json(name = "ts") @ISO8601Date override val timestamp: Long,
+        @Json(name = "u") override val sender: SimpleUser?,
+        @Json(name = "_updatedAt") @ISO8601Date override val updatedAt: Long?,
+        @ISO8601Date override val editedAt: Long?,
+        override val editedBy: SimpleUser?,
+        @Json(name = "alias") override val senderAlias: String?,
+        override val avatar: String?,
+        @Json(name = "t") val type: MessageType?,
+        @JsonDefaultValueBoolean(false)
+        val groupable: Boolean,
+        @JsonDefaultValueBoolean(false)
+        val parseUrls: Boolean,
+        val urls: List<Url>?,
+        override val mentions: List<SimpleUser>?,
+        override val channels: List<SimpleRoom>?,
+        val attachments: List<Attachment>?,
+        @JsonDefaultValueBoolean(false)
+        val pinned: Boolean,
+        val reactions: Reactions?,
+        override val isTemporary: Boolean? = false //TODO: Remove after we have a db
 ) : BaseMessage
 
 @FallbackSealedClass(name = "Unspecified", fieldName = "rawType")
@@ -67,6 +67,12 @@ sealed class MessageType {
     @Json(name = "message_pinned")
     class MessagePinned : MessageType()
 
+    @Json(name = "user-muted")
+    class UserMuted : MessageType()
+
+    @Json(name = "user-unmuted")
+    class UserUnMuted : MessageType()
+
     class Unspecified(val rawType: String) : MessageType()
 }
 
@@ -77,6 +83,8 @@ fun Message.isSystemMessage() = when (type) {
     is MessageType.UserAdded,
     is MessageType.RoomNameChanged,
     is MessageType.UserRemoved,
+    is MessageType.UserMuted,
+    is MessageType.UserUnMuted,
     is MessageType.MessagePinned -> true
     else -> false
 }
