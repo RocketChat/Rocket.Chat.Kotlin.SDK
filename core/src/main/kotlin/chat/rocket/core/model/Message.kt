@@ -67,6 +67,12 @@ sealed class MessageType {
     @Json(name = "message_pinned")
     class MessagePinned : MessageType()
 
+    @Json(name = "user-muted")
+    class UserMuted : MessageType()
+
+    @Json(name = "user-unmuted")
+    class UserUnMuted : MessageType()
+
     class Unspecified(val rawType: String) : MessageType()
 }
 
@@ -77,6 +83,8 @@ fun Message.isSystemMessage() = when (type) {
     is MessageType.UserAdded,
     is MessageType.RoomNameChanged,
     is MessageType.UserRemoved,
+    is MessageType.UserMuted,
+    is MessageType.UserUnMuted,
     is MessageType.MessagePinned -> true
     else -> false
 }
