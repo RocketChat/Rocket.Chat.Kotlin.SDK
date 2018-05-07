@@ -38,7 +38,7 @@ data class Message(
     @JsonDefaultValueBoolean(false)
     val pinned: Boolean,
     val reactions: Reactions?,
-    val role: String?,
+    val role: String? = null,
     override val isTemporary: Boolean? = false //TODO: Remove after we have a db
 ) : BaseMessage
 
