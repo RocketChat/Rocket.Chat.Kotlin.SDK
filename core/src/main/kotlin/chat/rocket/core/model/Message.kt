@@ -38,6 +38,7 @@ data class Message(
     @JsonDefaultValueBoolean(false)
     val pinned: Boolean,
     val reactions: Reactions?,
+    val role: String?,
     override val isTemporary: Boolean? = false //TODO: Remove after we have a db
 ) : BaseMessage
 
@@ -73,6 +74,12 @@ sealed class MessageType {
     @Json(name = "user-unmuted")
     class UserUnMuted : MessageType()
 
+    @Json(name = "subscription-role-added")
+    class SubscriptionRoleAdded : MessageType()
+
+    @Json(name = "subscription-role-removed")
+    class SubscriptionRoleRemoved : MessageType()
+
     class Unspecified(val rawType: String) : MessageType()
 }
 
@@ -85,6 +92,8 @@ fun Message.isSystemMessage() = when (type) {
     is MessageType.UserRemoved,
     is MessageType.UserMuted,
     is MessageType.UserUnMuted,
+    is MessageType.SubscriptionRoleAdded,
+    is MessageType.SubscriptionRoleRemoved,
     is MessageType.MessagePinned -> true
     else -> false
 }
