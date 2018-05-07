@@ -28,11 +28,14 @@ suspend fun RocketChatClient.serverInfo(): ServerInfo = withContext(CommonPool) 
     return@withContext ServerInfo(info.version, responseUrl.baseUrl(), redirected)
 }
 
-private fun HttpUrl.baseUrl(): String {
+private fun HttpUrl.baseUrl(): HttpUrl {
     val segments = pathSegments()
     val info = segments.indexOf("info")
     val api = segments.indexOf("api")
-    return newBuilder().removePathSegment(info).removePathSegment(api).build().toString()
+    return newBuilder()
+            .removePathSegment(info)
+            .removePathSegment(api)
+            .build()
 }
 
 suspend fun RocketChatClient.configurations(): Map<String, Map<String, String>> = withContext(CommonPool) {
