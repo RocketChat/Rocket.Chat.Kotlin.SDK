@@ -8,7 +8,6 @@ import chat.rocket.core.model.Room
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
-import okhttp3.Request
 import okhttp3.RequestBody
 
 /**
