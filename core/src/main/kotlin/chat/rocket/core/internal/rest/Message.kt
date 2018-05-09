@@ -161,7 +161,7 @@ suspend fun RocketChatClient.starMessage(messageId: String): Message = withConte
  *
  * @param messageId The message id to unstar.
  */
-suspend fun RocketChatClient.unStarMessage(messageId: String) {
+suspend fun RocketChatClient.unstarMessage(messageId: String) {
     withContext(CommonPool) {
         val body = FormBody.Builder().add("messageId", messageId).build()
 
