@@ -52,9 +52,7 @@ suspend fun RocketChatClient.pinMessage(messageId: String): Message = withContex
 
     val request = requestBuilder(httpUrl).post(body).build()
 
-    val type = Types.newParameterizedType(RestResult::class.java,
-            Message::class.java)
-
+    val type = Types.newParameterizedType(RestResult::class.java, Message::class.java)
     return@withContext handleRestCall<RestResult<Message>>(request, type).result()
 }
 
@@ -66,6 +64,28 @@ suspend fun RocketChatClient.unpinMessage(messageId: String) {
 
         val request = requestBuilder(httpUrl).post(body).build()
 
+        handleRestCall<Any>(request, Any::class.java)
+    }
+}
+
+suspend fun RocketChatClient.starMessage(messageId: String): Message = withContext(CommonPool) {
+    val body = FormBody.Builder().add("messageId", messageId).build()
+
+    val httpUrl = requestUrl(restUrl, "chat.starMessage").build()
+
+    val request = requestBuilder(httpUrl).post(body).build()
+
+    val type = Types.newParameterizedType(RestResult::class.java, Message::class.java)
+    return@withContext handleRestCall<RestResult<Message>>(request, type).result()
+}
+
+suspend fun RocketChatClient.unStarMessage(messageId: String) {
+    withContext(CommonPool) {
+        val body = FormBody.Builder().add("messageId", messageId).build()
+
+        val httpUrl = requestUrl(restUrl, "chat.unStarMessage").build()
+
+        val request = requestBuilder(httpUrl).post(body).build()
         handleRestCall<Any>(request, Any::class.java)
     }
 }
