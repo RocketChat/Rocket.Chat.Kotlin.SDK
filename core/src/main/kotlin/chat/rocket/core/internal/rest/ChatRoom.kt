@@ -170,8 +170,6 @@ suspend fun RocketChatClient.setDescription(roomId: String, roomType: RoomType, 
     val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "setDescription")).build()
     val request = requestBuilder(url).post(body).build()
 
-    System.out.println(request.body().toString())
-
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
 
