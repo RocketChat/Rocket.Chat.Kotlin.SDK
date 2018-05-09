@@ -144,16 +144,16 @@ suspend fun RocketChatClient.deleteMessage(
  *
  * @param messageId The message id to star.
  */
-suspend fun RocketChatClient.starMessage(messageId: String): Message = withContext(CommonPool) {
-    val body = FormBody.Builder().add("messageId", messageId).build()
+suspend fun RocketChatClient.starMessage(messageId: String) {
+    withContext(CommonPool) {
+        val body = FormBody.Builder().add("messageId", messageId).build()
 
-    val httpUrl = requestUrl(restUrl, "chat.starMessage").build()
+        val httpUrl = requestUrl(restUrl, "chat.starMessage").build()
 
-    val request = requestBuilder(httpUrl).post(body).build()
+        val request = requestBuilder(httpUrl).post(body).build()
 
-    val type = Types.newParameterizedType(RestResult::class.java, Message::class.java)
-
-    return@withContext handleRestCall<RestResult<Message>>(request, type).result()
+        handleRestCall<Any>(request, Any::class.java)
+    }
 }
 
 /**
