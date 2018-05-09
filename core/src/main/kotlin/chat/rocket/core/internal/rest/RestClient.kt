@@ -59,81 +59,76 @@ internal fun RocketChatClient.requestBuilder(httpUrl: HttpUrl): Request.Builder 
     return builder
 }
 
+internal fun <T> RocketChatClient.handleResponse(response: Response, type: Type): T {
+    val url = response.priorResponse()?.request()?.url() ?: response.request().url()
+    try {
+        // Override nullability, if there is no adapter, moshi will throw...
+        val adapter: JsonAdapter<T> = moshi.adapter(type)!!
+
+        val source = response.body()?.source()
+        checkNotNull(source) { "Missing body" }
+
+        return adapter.fromJson(source) ?: throw RocketChatInvalidResponseException("Error parsing JSON message", url = url.toString())
+    } catch (ex: Exception) {
+        when (ex) {
+            is RocketChatException -> throw ex // already a RocketChatException, just rethrow it.
+            else -> throw RocketChatInvalidResponseException(ex.message!!, ex, url.toString())
+        }
+    } finally {
+        response.body()?.close()
+    }
+}
+
+internal suspend fun RocketChatClient.handleRequest(
+    request: Request,
+    largeFile: Boolean = false,
+    allowRedirects: Boolean = true
+): Response = suspendCancellableCoroutine { continuation ->
+    val callback = object : Callback {
+        override fun onFailure(call: Call, e: IOException) {
+            logger.debug {
+                "Failed request: ${request.method()} - ${request.url()} - ${e.message}"
+            }
+            continuation.tryResumeWithException {
+                RocketChatNetworkErrorException("Network Error: ${e.message}", e, request.url().toString())
+            }
+        }
+
+        override fun onResponse(call: Call, response: Response) {
+            logger.debug {
+                "Successful HTTP request: ${request.method()} - ${request.url()}: ${response.code()} ${response.message()}"
+            }
+            if (!response.isSuccessful) {
+                continuation.tryResumeWithException {
+                    processCallbackError(moshi, request, response, logger, allowRedirects)
+                }
+            } else {
+                continuation.tryToResume { response }
+            }
+        }
+    }
+
+    logger.debug {
+        "Enqueueing: ${request.method()} - ${request.url()}"
+    }
+
+    val client = ensureClient(largeFile, allowRedirects)
+    client.newCall(request).enqueue(callback)
+
+    continuation.invokeOnCompletion {
+        if (continuation.isCancelled) client.cancel(request.tag())
+    }
+}
+
 internal suspend fun <T> RocketChatClient.handleRestCall(
     request: Request,
     type: Type,
     largeFile: Boolean = false,
     allowRedirects: Boolean = true
-): T =
-        suspendCancellableCoroutine { continuation ->
-
-            val callback = object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    logger.debug {
-                        "Failed request: ${request.method()} - ${request.url()} - ${e.message}"
-                    }
-                    continuation.tryResumeWithException {
-                        RocketChatNetworkErrorException("Network Error: ${e.message}", e, request.url().toString())
-                    }
-                }
-
-                override fun onResponse(call: Call, response: Response) {
-                    logger.debug {
-                        "Successful HTTP request: ${request.method()} - ${request.url()}: ${response.code()} ${response.message()}"
-                    }
-                    if (!response.isSuccessful) {
-                        continuation.tryResumeWithException {
-                            processCallbackError(moshi, request, response, logger)
-                        }
-                        return
-                    }
-
-                    try {
-                        // Override nullability, if there is no adapter, moshi will throw...
-                        val adapter: JsonAdapter<T> = moshi.adapter(type)!!
-
-                        response.body()?.source()?.let { source ->
-                            adapter.fromJson(source)?.let {
-                                value -> continuation.tryToResume { value }
-                            }.ifNull {
-                                continuation.tryResumeWithException {
-                                    RocketChatInvalidResponseException("Error parsing JSON message", url = request.url().toString())
-                                }
-                            }
-                        }.ifNull {
-                            continuation.tryResumeWithException {
-                                RocketChatInvalidResponseException("Error parsing JSON message", url = request.url().toString())
-                            }
-                        }
-                    } catch (ex: Exception) {
-                        // kinda of multi catch exception...
-                        when (ex) {
-                            is JsonDataException,
-                            is IllegalArgumentException,
-                            is IOException -> {
-                                continuation.tryResumeWithException {
-                                    RocketChatInvalidResponseException(ex.message!!, ex, request.url().toString())
-                                }
-                            }
-                            else -> continuation.resumeWithException(ex)
-                        }
-                    } finally {
-                        response.body()?.close()
-                    }
-                }
-            }
-
-            logger.debug {
-                "Enqueueing: ${request.method()} - ${request.url()}"
-            }
-
-            val client = ensureClient(largeFile, allowRedirects)
-            client.newCall(request).enqueue(callback)
-
-            continuation.invokeOnCompletion {
-                if (continuation.isCancelled) client.cancel(request.tag())
-            }
-        }
+): T {
+    val response = handleRequest(request, largeFile, allowRedirects)
+    return handleResponse(response, type)
+}
 
 internal fun RocketChatClient.ensureClient(largeFile: Boolean, allowRedirects: Boolean): OkHttpClient {
     return if (largeFile || !allowRedirects) {
@@ -149,10 +144,11 @@ internal fun RocketChatClient.ensureClient(largeFile: Boolean, allowRedirects: B
     }
 }
 
-internal fun processCallbackError(moshi: Moshi, request: Request, response: Response, logger: Logger): RocketChatException {
+internal fun processCallbackError(moshi: Moshi, request: Request, response: Response,
+                                  logger: Logger, allowRedirects: Boolean = true): RocketChatException {
     var exception: RocketChatException
     try {
-        if (response.isRedirect) {
+        if (response.isRedirect && !allowRedirects) {
             exception = RocketChatInvalidProtocolException("Invalid Protocol", url = request.url().toString())
         } else {
             val body = response.body()?.string() ?: "missing body"
