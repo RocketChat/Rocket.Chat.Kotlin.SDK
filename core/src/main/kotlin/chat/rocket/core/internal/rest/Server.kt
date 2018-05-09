@@ -4,10 +4,12 @@ import chat.rocket.common.model.ServerInfo
 import chat.rocket.common.model.SettingsOauth
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.model.ConfigurationsPayload
+import chat.rocket.core.internal.model.ServerInfoResponse
 import chat.rocket.core.model.Value
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
+import okhttp3.HttpUrl
 import okhttp3.Request
 
 suspend fun RocketChatClient.serverInfo(): ServerInfo = withContext(CommonPool) {
@@ -18,7 +20,22 @@ suspend fun RocketChatClient.serverInfo(): ServerInfo = withContext(CommonPool) 
 
     val request = Request.Builder().url(url).get().build()
 
-    handleRestCall<ServerInfo>(request, ServerInfo::class.java, allowRedirects = false)
+    val response = handleRequest(request)
+    val responseUrl = response.request().url()
+    val redirected = responseUrl != request.url()
+    val info = handleResponse<ServerInfoResponse>(response, ServerInfoResponse::class.java)
+
+    return@withContext ServerInfo(info.version, responseUrl.baseUrl(), redirected)
+}
+
+private fun HttpUrl.baseUrl(): HttpUrl {
+    val segments = pathSegments()
+    val info = segments.indexOf("info")
+    val api = segments.indexOf("api")
+    return newBuilder()
+            .removePathSegment(info)
+            .removePathSegment(api)
+            .build()
 }
 
 suspend fun RocketChatClient.configurations(): Map<String, Map<String, String>> = withContext(CommonPool) {

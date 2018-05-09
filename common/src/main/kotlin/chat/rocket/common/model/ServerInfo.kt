@@ -1,6 +1,9 @@
 package chat.rocket.common.model
 
-import se.ansman.kotshi.JsonSerializable
+import okhttp3.HttpUrl
 
-@JsonSerializable
-data class ServerInfo(val version: String)
+data class ServerInfo(
+    val version: String,
+    val url: HttpUrl,
+    val redirected: Boolean = false
+)
