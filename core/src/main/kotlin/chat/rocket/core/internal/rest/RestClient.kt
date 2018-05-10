@@ -12,10 +12,8 @@ import chat.rocket.common.internal.ErrorMessage
 import chat.rocket.common.model.RoomType
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.Logger
-import chat.rocket.common.util.ifNull
 import chat.rocket.core.RocketChatClient
 import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.experimental.CancellableContinuation
 import kotlinx.coroutines.experimental.suspendCancellableCoroutine
@@ -35,16 +33,16 @@ internal fun getRestApiMethodNameByRoomType(roomType: RoomType, method: String):
         is RoomType.Channel -> "channels.$method"
         is RoomType.PrivateGroup -> "groups.$method"
         is RoomType.DirectMessage -> "dm.$method"
-        // TODO - handle custom rooms
+    // TODO - handle custom rooms
         else -> "channels.$method"
     }
 }
 
 internal fun requestUrl(baseUrl: HttpUrl, method: String): HttpUrl.Builder {
     return baseUrl.newBuilder()
-            .addPathSegment("api")
-            .addPathSegment("v1")
-            .addPathSegment(method)
+        .addPathSegment("api")
+        .addPathSegment("v1")
+        .addPathSegment(method)
 }
 
 internal fun RocketChatClient.requestBuilder(httpUrl: HttpUrl): Request.Builder {
@@ -53,7 +51,7 @@ internal fun RocketChatClient.requestBuilder(httpUrl: HttpUrl): Request.Builder 
     val token: Token? = tokenRepository.get(this.url)
     token?.let {
         builder.addHeader("X-Auth-Token", token.authToken)
-                .addHeader("X-User-Id", token.userId)
+            .addHeader("X-User-Id", token.userId)
     }
 
     return builder
@@ -144,8 +142,14 @@ internal fun RocketChatClient.ensureClient(largeFile: Boolean, allowRedirects: B
     }
 }
 
-internal fun processCallbackError(moshi: Moshi, request: Request, response: Response,
-                                  logger: Logger, allowRedirects: Boolean = true): RocketChatException {
+internal fun processCallbackError(
+    moshi: Moshi,
+    request: Request,
+    response: Response,
+    logger: Logger,
+    allowRedirects: Boolean = true
+): RocketChatException {
+
     var exception: RocketChatException
     try {
         if (response.isRedirect && !allowRedirects) {
@@ -164,8 +168,8 @@ internal fun processCallbackError(moshi: Moshi, request: Request, response: Resp
                 val adapter: JsonAdapter<ErrorMessage>? = moshi.adapter(ErrorMessage::class.java)
                 val message = adapter?.fromJson(body)
                 RocketChatApiException(message?.errorType ?: response.code().toString(), message?.error
-                        ?: "unknown error",
-                        url = request.url().toString())
+                    ?: "unknown error",
+                    url = request.url().toString())
             }
         }
     } catch (e: Exception) {
