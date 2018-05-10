@@ -113,8 +113,6 @@ class ChatRoomTest {
         }
     }
 
-    // TODO Fix tests!
-
     @Test
     fun `queryUsers() should succeed without throwing`() {
         mockServer.expect()
@@ -124,7 +122,7 @@ class ChatRoomTest {
                 .once()
 
         runBlocking {
-            val result = sut.queryUsers("g")
+            sut.queryUsers("g")
         }
     }
 
@@ -137,7 +135,7 @@ class ChatRoomTest {
                 .once()
 
         runBlocking {
-            val result = sut.queryUsers("g")
+            sut.queryUsers("g")
         }
     }
 
@@ -152,7 +150,7 @@ class ChatRoomTest {
                 .once()
 
         runBlocking {
-            val result = sut.queryUsers("g")
+            sut.queryUsers("g")
         }
     }
 }
