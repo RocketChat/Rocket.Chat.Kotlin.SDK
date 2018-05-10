@@ -7,6 +7,7 @@ import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.model.ChatRoomJoinPayload
 import chat.rocket.core.internal.model.ChatRoomPayload
+import chat.rocket.core.model.Message
 import chat.rocket.core.model.PagedResult
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
@@ -41,17 +42,24 @@ suspend fun RocketChatClient.markAsRead(roomId: String) {
  * @param offset The offset to paging which specifies the first entry to return from a collection.
  * @param count The amount of item to return from a collection.
  */
-suspend fun RocketChatClient.getMembers(roomId: String, roomType: RoomType, offset: Long, count: Long): PagedResult<List<User>> = withContext(CommonPool) {
+suspend fun RocketChatClient.getMembers(
+    roomId: String,
+    roomType: RoomType,
+    offset: Long,
+    count: Long
+): PagedResult<List<User>> = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "members"))
-            .addQueryParameter("roomId", roomId)
-            .addQueryParameter("offset", offset.toString())
-            .addQueryParameter("count", count.toString())
-            .build()
+        .addQueryParameter("roomId", roomId)
+        .addQueryParameter("offset", offset.toString())
+        .addQueryParameter("count", count.toString())
+        .build()
 
     val request = requestBuilder(httpUrl).get().build()
 
-    val type = Types.newParameterizedType(RestResult::class.java,
-            Types.newParameterizedType(List::class.java, User::class.java))
+    val type = Types.newParameterizedType(
+        RestResult::class.java,
+        Types.newParameterizedType(List::class.java, User::class.java)
+    )
     val result = handleRestCall<RestResult<List<User>>>(request, type)
 
     return@withContext PagedResult<List<User>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
@@ -70,17 +78,68 @@ suspend fun RocketChatClient.joinChat(roomId: String): Boolean = withContext(Com
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
 
+suspend fun RocketChatClient.getFavoriteMessages(
+    roomId: String,
+    roomType: RoomType,
+    offset: Int
+): PagedResult<List<Message>> = withContext(CommonPool) {
+    val userId = tokenRepository.get(this.url)?.userId
+
+    val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "messages"))
+        .addQueryParameter("roomId", roomId)
+        .addQueryParameter("offset", offset.toString())
+        .addQueryParameter("query", "{\"starred._id\":{\"\$in\":[\"$userId\"]}}")
+        .build()
+
+    val request = requestBuilder(httpUrl).get().build()
+
+    val type = Types.newParameterizedType(
+        RestResult::class.java,
+        Types.newParameterizedType(List::class.java, Message::class.java)
+    )
+    val result = handleRestCall<RestResult<List<Message>>>(request, type)
+
+    return@withContext PagedResult<List<Message>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
+}
+
+suspend fun RocketChatClient.getPinnedMessages(
+    roomId: String,
+    roomType: RoomType,
+    offset: Int? = 0
+): PagedResult<List<Message>> = withContext(CommonPool) {
+    val httpUrl = requestUrl(
+        restUrl,
+        getRestApiMethodNameByRoomType(roomType, "messages")
+    )
+        .addQueryParameter("roomId", roomId)
+        .addQueryParameter("offset", offset.toString())
+        .addQueryParameter("query", "{\"pinned\":true}")
+        .build()
+
+    val request = requestBuilder(httpUrl).get().build()
+
+    val type = Types.newParameterizedType(
+        RestResult::class.java,
+        Types.newParameterizedType(List::class.java, Message::class.java)
+    )
+    val result = handleRestCall<RestResult<List<Message>>>(request, type)
+
+    return@withContext PagedResult<List<Message>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
+}
+
 /**
  * @param queryParam Parameter which is used to query users on the basis of regex
  */
 
 suspend fun RocketChatClient.queryUsers(queryParam: String): PagedResult<List<User>> = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl, "users.list")
-            .addQueryParameter("query", "{ \"name\": { \"\\u0024regex\": \"$queryParam\" } }")
-            .build()
+        .addQueryParameter("query", "{ \"name\": { \"\\u0024regex\": \"$queryParam\" } }")
+        .build()
     val request = requestBuilder(httpUrl).get().build()
-    val type = Types.newParameterizedType(RestResult::class.java,
-            Types.newParameterizedType(List::class.java, User::class.java))
+    val type = Types.newParameterizedType(
+        RestResult::class.java,
+        Types.newParameterizedType(List::class.java, User::class.java)
+    )
 
     val result = handleRestCall<RestResult<List<User>>>(request, type)
     return@withContext PagedResult<List<User>>(result.result(), result.total() ?: 0, result.offset() ?: 0)

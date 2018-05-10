@@ -14,7 +14,7 @@ import chat.rocket.core.internal.realtime.*
 import chat.rocket.core.internal.realtime.socket.model.State
 import chat.rocket.core.internal.realtime.socket.connect
 import chat.rocket.core.internal.rest.chatRooms
-import chat.rocket.core.internal.rest.getRoomFavoriteMessages
+import chat.rocket.core.internal.rest.getFavoriteMessages
 import chat.rocket.core.internal.rest.login
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.history
@@ -186,7 +186,7 @@ fun getMeInfoByRx(client: RocketChatClient) {
 }
 
 suspend fun pinMessage(client: RocketChatClient) {
-        val result = client.getRoomFavoriteMessages("GENERAL", RoomType.CHANNEL, 0)
+        val result = client.getFavoriteMessages("GENERAL", RoomType.CHANNEL, 0)
         println("favoriteMessages: $result")
 }
 

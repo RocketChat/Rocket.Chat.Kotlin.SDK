@@ -14,19 +14,29 @@ import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
 data class Message(
-    @Json(name = "_id") val id: String,
-    @Json(name = "rid") override val roomId: String,
+    @Json(name = "_id")
+    val id: String,
+    @Json(name = "rid")
+    override val roomId: String,
     @JsonDefaultValueString("")
     @Json(name = "msg")
     override val message: String,
-    @Json(name = "ts") @ISO8601Date override val timestamp: Long,
-    @Json(name = "u") override val sender: SimpleUser?,
-    @Json(name = "_updatedAt") @ISO8601Date override val updatedAt: Long?,
-    @ISO8601Date override val editedAt: Long?,
+    @Json(name = "ts")
+    @ISO8601Date
+    override val timestamp: Long,
+    @Json(name = "u")
+    override val sender: SimpleUser?,
+    @Json(name = "_updatedAt")
+    @ISO8601Date
+    override val updatedAt: Long?,
+    @ISO8601Date
+    override val editedAt: Long?,
     override val editedBy: SimpleUser?,
-    @Json(name = "alias") override val senderAlias: String?,
+    @Json(name = "alias")
+    override val senderAlias: String?,
     override val avatar: String?,
-    @Json(name = "t") val type: MessageType?,
+    @Json(name = "t")
+    val type: MessageType?,
     @JsonDefaultValueBoolean(false)
     val groupable: Boolean,
     @JsonDefaultValueBoolean(false)
@@ -37,6 +47,7 @@ data class Message(
     val attachments: List<Attachment>?,
     @JsonDefaultValueBoolean(false)
     val pinned: Boolean,
+    val starred: List<SimpleUser>?,
     val reactions: Reactions?,
     val role: String? = null,
     override val isTemporary: Boolean? = false //TODO: Remove after we have a db
