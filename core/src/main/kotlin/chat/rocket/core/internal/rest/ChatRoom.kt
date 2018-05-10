@@ -15,32 +15,13 @@ import kotlinx.coroutines.experimental.withContext
 import okhttp3.RequestBody
 
 /**
- * Marks a room as read.
- *
- * @param roomId The ID of the room.
- */
-suspend fun RocketChatClient.markAsRead(roomId: String) {
-    withContext(CommonPool) {
-        val payload = ChatRoomPayload(roomId)
-        val adapter = moshi.adapter(ChatRoomPayload::class.java)
-        val payloadBody = adapter.toJson(payload)
-
-        val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
-
-        val url = requestUrl(restUrl, "subscriptions.read").build()
-        val request = requestBuilder(url).post(body).build()
-
-        handleRestCall<Any>(request, Any::class.java)
-    }
-}
-
-/**
- * Returns the list of members of a ChatRoom.
+ * Returns the list of members of a chat room.
  *
  * @param roomId The ID of the room.
  * @param roomType The type of the room.
  * @param offset The offset to paging which specifies the first entry to return from a collection.
  * @param count The amount of item to return from a collection.
+ * @return The list of members of a chat room.
  */
 suspend fun RocketChatClient.getMembers(
     roomId: String,
@@ -65,19 +46,14 @@ suspend fun RocketChatClient.getMembers(
     return@withContext PagedResult<List<User>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
 }
 
-suspend fun RocketChatClient.joinChat(roomId: String): Boolean = withContext(CommonPool) {
-    val payload = ChatRoomJoinPayload(roomId)
-    val adapter = moshi.adapter(ChatRoomJoinPayload::class.java)
-    val payloadBody = adapter.toJson(payload)
-
-    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
-
-    val url = requestUrl(restUrl, "channels.join").build()
-    val request = requestBuilder(url).post(body).build()
-
-    return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
-}
-
+/**
+ * Returns the list of favorites messages of a chat room.
+ *
+ * @param roomId The ID of the room.
+ * @param roomType The type of the room.
+ * @param offset The offset to paging which specifies the first entry to return from a collection.
+ * @return The list of favorites messages of a chat room.
+ */
 suspend fun RocketChatClient.getFavoriteMessages(
     roomId: String,
     roomType: RoomType,
@@ -102,6 +78,14 @@ suspend fun RocketChatClient.getFavoriteMessages(
     return@withContext PagedResult<List<Message>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
 }
 
+/**
+ * Returns the list of pinned messages of a chat room.
+ *
+ * @param roomId The ID of the room.
+ * @param roomType The type of the room.
+ * @param offset The offset to paging which specifies the first entry to return from a collection.
+ * @return The list of pinned messages of a chat room.
+ */
 suspend fun RocketChatClient.getPinnedMessages(
     roomId: String,
     roomType: RoomType,
@@ -128,9 +112,45 @@ suspend fun RocketChatClient.getPinnedMessages(
 }
 
 /**
- * @param queryParam Parameter which is used to query users on the basis of regex
+ * Marks a room as read.
+ *
+ * @param roomId The ID of the room.
  */
+suspend fun RocketChatClient.markAsRead(roomId: String) {
+    withContext(CommonPool) {
+        val payload = ChatRoomPayload(roomId)
+        val adapter = moshi.adapter(ChatRoomPayload::class.java)
+        val payloadBody = adapter.toJson(payload)
 
+        val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+        val url = requestUrl(restUrl, "subscriptions.read").build()
+        val request = requestBuilder(url).post(body).build()
+
+        handleRestCall<Any>(request, Any::class.java)
+    }
+}
+
+// TODO: Add doc.
+suspend fun RocketChatClient.joinChat(roomId: String): Boolean = withContext(CommonPool) {
+    val payload = ChatRoomJoinPayload(roomId)
+    val adapter = moshi.adapter(ChatRoomJoinPayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val url = requestUrl(restUrl, "channels.join").build()
+    val request = requestBuilder(url).post(body).build()
+
+    return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
+}
+
+/**
+ * Returns the list of user of a chat room that satisfies a query.
+ *
+ * @param queryParam Parameter which is used to query users on the basis of regex.
+ * @return The list of user of a chat room that satisfies a query.
+ */
 suspend fun RocketChatClient.queryUsers(queryParam: String): PagedResult<List<User>> = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl, "users.list")
         .addQueryParameter("query", "{ \"name\": { \"\\u0024regex\": \"$queryParam\" } }")
