@@ -4,7 +4,7 @@ ext {
             kotlinter    : '1.11.2',
             coroutine    : '0.22.5',
             dokka        : '0.9.16',
-            kotshi       : '1.0.2',
+            kotshi       : '1.0.3',
             okhttp       : '3.10.0',
             moshi        : '1.6.0-SNAPSHOT'
     ]

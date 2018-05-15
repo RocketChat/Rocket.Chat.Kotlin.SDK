@@ -7,6 +7,7 @@ import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.model.ChatRoomJoinPayload
 import chat.rocket.core.internal.model.ChatRoomPayload
+import chat.rocket.core.model.ChatRoomRole
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.PagedResult
 import com.squareup.moshi.Types
@@ -163,4 +164,30 @@ suspend fun RocketChatClient.queryUsers(queryParam: String): PagedResult<List<Us
 
     val result = handleRestCall<RestResult<List<User>>>(request, type)
     return@withContext PagedResult<List<User>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
+}
+
+/**
+ * Return a list of users in a channel [roomName] that have roles other than 'user' on it.
+ *
+ * @param roomType Type of the room (DIRECT, GROUP, CHANNEL, etc)
+ * @param roomName Name of the room to query user's roles.
+ *
+ * @return List of [ChatRoomRole] objects.
+ */
+suspend fun RocketChatClient.chatRoomRoles(
+    roomType: RoomType,
+    roomName: String
+): List<ChatRoomRole> = withContext(CommonPool) {
+
+    val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "roles"))
+        .addQueryParameter("roomName", roomName)
+        .build()
+
+    val request = requestBuilder(httpUrl).get().build()
+
+    val type = Types.newParameterizedType(
+        RestResult::class.java,
+        Types.newParameterizedType(List::class.java, ChatRoomRole::class.java)
+    )
+    return@withContext handleRestCall<RestResult<List<ChatRoomRole>>>(request, type).result()
 }
