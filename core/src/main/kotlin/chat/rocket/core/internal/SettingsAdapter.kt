@@ -75,6 +75,7 @@ class SettingsAdapter : JsonAdapter<Map<String, Value<Any>>>() {
         var type: String = ""
         var tmp: Any? = null
         var token: JsonReader.Token
+        var nullToken = false
         while (reader.hasNext()) {
             when (reader.selectName(OPTIONS)) {
                 0 -> {
@@ -102,11 +103,8 @@ class SettingsAdapter : JsonAdapter<Map<String, Value<Any>>>() {
                             reader.endObject()
                         }
                         JsonReader.Token.NULL -> {
-                            when (type) {
-                                "string" -> tmp = ""
-                                "boolean" -> tmp = false
-                                "int" -> tmp = 0
-                            }
+                            reader.skipValue()
+                            nullToken = true
                         }
                     }
                 }
@@ -115,6 +113,15 @@ class SettingsAdapter : JsonAdapter<Map<String, Value<Any>>>() {
 
         if (id == null) {
             throw JsonEncodingException("Missing \"id\" field")
+        }
+
+        // Since we can't guarantee the fields order, we need to set default values here, after parsing the whole object
+        if (nullToken) {
+            when (type) {
+                "string" -> tmp = ""
+                "boolean" -> tmp = false
+                "int" -> tmp = 0
+            }
         }
 
         return when (tmp) {
