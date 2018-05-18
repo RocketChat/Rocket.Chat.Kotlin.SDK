@@ -178,16 +178,16 @@ suspend fun RocketChatClient.unstarMessage(messageId: String) {
  *
  * @param messageId The message id to pin.
  */
-suspend fun RocketChatClient.pinMessage(messageId: String): Message = withContext(CommonPool) {
-    val body = FormBody.Builder().add("messageId", messageId).build()
+suspend fun RocketChatClient.pinMessage(messageId: String) {
+    withContext(CommonPool) {
+        val body = FormBody.Builder().add("messageId", messageId).build()
 
-    val httpUrl = requestUrl(restUrl, "chat.pinMessage").build()
+        val httpUrl = requestUrl(restUrl, "chat.pinMessage").build()
 
-    val request = requestBuilder(httpUrl).post(body).build()
+        val request = requestBuilder(httpUrl).post(body).build()
 
-    val type = Types.newParameterizedType(RestResult::class.java, Message::class.java)
-
-    return@withContext handleRestCall<RestResult<Message>>(request, type).result()
+        handleRestCall<Any>(request, Any::class.java)
+    }
 }
 
 /**
