@@ -10,6 +10,7 @@ import chat.rocket.core.internal.model.ChatRoomPayload
 import chat.rocket.core.model.ChatRoomRole
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.PagedResult
+import chat.rocket.core.model.attachment.GenericAttachment
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
@@ -110,6 +111,39 @@ suspend fun RocketChatClient.getPinnedMessages(
     val result = handleRestCall<RestResult<List<Message>>>(request, type)
 
     return@withContext PagedResult<List<Message>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
+}
+
+/**
+ * Returns the list of files of a chat room.
+ *
+ * @param roomId The ID of the room.
+ * @param roomType The type of the room.
+ * @param offset The offset to paging which specifies the first entry to return from a collection.
+ * @return The list of files of a chat room.
+ */
+suspend fun RocketChatClient.getFiles(
+    roomId: String,
+    roomType: RoomType,
+    offset: Int? = 0
+): PagedResult<List<GenericAttachment>> = withContext(CommonPool) {
+    val httpUrl = requestUrl(
+        restUrl,
+        getRestApiMethodNameByRoomType(roomType, "files")
+    )
+        .addQueryParameter("roomId", roomId)
+        .addQueryParameter("offset", offset.toString())
+        .addQueryParameter("sort", "{\"uploadedAt\":-1}")
+        .build()
+
+    val request = requestBuilder(httpUrl).get().build()
+
+    val type = Types.newParameterizedType(
+        RestResult::class.java,
+        Types.newParameterizedType(List::class.java, GenericAttachment::class.java)
+    )
+    val result = handleRestCall<RestResult<List<GenericAttachment>>>(request, type)
+
+    return@withContext PagedResult<List<GenericAttachment>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
 }
 
 /**
