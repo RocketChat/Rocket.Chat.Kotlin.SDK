@@ -162,6 +162,8 @@ suspend fun RocketChatClient.joinChat(roomId: String): Boolean = withContext(Com
  * Returns the list of user of a chat room that satisfies a query.
  *
  * @param queryParam Parameter which is used to query users on the basis of regex.
+ * @param count The number of users to be returned in the result
+ * @param offset The number of users to skip from the beginning
  * @return The list of user of a chat room that satisfies a query.
  */
 suspend fun RocketChatClient.queryUsers(
