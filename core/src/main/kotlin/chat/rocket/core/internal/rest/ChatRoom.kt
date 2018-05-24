@@ -44,7 +44,11 @@ suspend fun RocketChatClient.getMembers(
     )
     val result = handleRestCall<RestResult<List<User>>>(request, type)
 
-    return@withContext PagedResult<List<User>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
+    return@withContext PagedResult<List<User>>(
+        result.result(),
+        result.total() ?: 0,
+        result.offset() ?: 0
+    )
 }
 
 /**
@@ -76,7 +80,11 @@ suspend fun RocketChatClient.getFavoriteMessages(
     )
     val result = handleRestCall<RestResult<List<Message>>>(request, type)
 
-    return@withContext PagedResult<List<Message>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
+    return@withContext PagedResult<List<Message>>(
+        result.result(),
+        result.total() ?: 0,
+        result.offset() ?: 0
+    )
 }
 
 /**
@@ -109,7 +117,11 @@ suspend fun RocketChatClient.getPinnedMessages(
     )
     val result = handleRestCall<RestResult<List<Message>>>(request, type)
 
-    return@withContext PagedResult<List<Message>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
+    return@withContext PagedResult<List<Message>>(
+        result.result(),
+        result.total() ?: 0,
+        result.offset() ?: 0
+    )
 }
 
 /**
@@ -152,7 +164,11 @@ suspend fun RocketChatClient.joinChat(roomId: String): Boolean = withContext(Com
  * @param queryParam Parameter which is used to query users on the basis of regex.
  * @return The list of user of a chat room that satisfies a query.
  */
-suspend fun RocketChatClient.queryUsers(queryParam: String, count: Long, offset: Long): PagedResult<List<User>> = withContext(CommonPool) {
+suspend fun RocketChatClient.queryUsers(
+    queryParam: String,
+    count: Long = 30,
+    offset: Long = 0
+): PagedResult<List<User>> = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl, "users.list")
         .addQueryParameter("query", "{ \"name\": { \"\\u0024regex\": \"$queryParam\" } }")
         .addQueryParameter("offset", offset.toString())
@@ -165,7 +181,11 @@ suspend fun RocketChatClient.queryUsers(queryParam: String, count: Long, offset:
     )
 
     val result = handleRestCall<RestResult<List<User>>>(request, type)
-    return@withContext PagedResult<List<User>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
+    return@withContext PagedResult<List<User>>(
+        result.result(),
+        result.total() ?: 0,
+        result.offset() ?: 0
+    )
 }
 
 /**
