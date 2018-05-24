@@ -12,7 +12,7 @@ data class GenericAttachment(
     val type: String?,
     val size: String?,
     val user: User?,
-    val url: String?,
+    val path: String?,
     @ISO8601Date
     val uploadedAt: Long
 )
