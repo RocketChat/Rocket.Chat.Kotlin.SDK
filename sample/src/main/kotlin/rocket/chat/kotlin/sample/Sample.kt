@@ -15,6 +15,7 @@ import chat.rocket.core.internal.realtime.socket.model.State
 import chat.rocket.core.internal.realtime.socket.connect
 import chat.rocket.core.internal.rest.chatRooms
 import chat.rocket.core.internal.rest.getFavoriteMessages
+import chat.rocket.core.internal.rest.getFiles
 import chat.rocket.core.internal.rest.login
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.history
@@ -80,9 +81,9 @@ fun main(args: Array<String>) {
                         logger.debug("Connected")
                         client.subscribeSubscriptions { _, _ -> }
                         client.subscribeRooms { _, _ -> }
-                        client.subscribeUserData { _, _ -> }
-                        client.subscribeActiveUsers { _, _ ->  }
-                        client.subscribeTypingStatus("GENERAL") {_, _ ->  }
+//                        client.subscribeUserData { _, _ -> }
+//                        client.subscribeActiveUsers { _, _ ->  }
+//                        client.subscribeTypingStatus("GENERAL") {_, _ ->  }
                     }
                 }
             }
@@ -120,11 +121,12 @@ fun main(args: Array<String>) {
         }
 
         launch {
-            delay(10000)
-            client.setTemporaryStatus(UserStatus.Online())
-            delay(2000)
-            client.setDefaultStatus(UserStatus.Away())
-            client.setTypingStatus("GENERAL", "luciofm-testing", true)
+//            delay(10000)
+//            client.setTemporaryStatus(UserStatus.Online())
+//            delay(2000)
+//            client.setDefaultStatus(UserStatus.Away())
+//            client.setTypingStatus("GENERAL", "luciofm-testing", true)
+            showFileList(client)
         }
 
         client.connect()
@@ -185,9 +187,13 @@ fun getMeInfoByRx(client: RocketChatClient) {
             }
 }
 
-suspend fun pinMessage(client: RocketChatClient) {
+suspend fun showFavoriteMessage(client: RocketChatClient) {
         val result = client.getFavoriteMessages("GENERAL", RoomType.CHANNEL, 0)
         println("favoriteMessages: $result")
+}
+suspend fun showFileList(client: RocketChatClient) {
+        val result = client.getFiles("GENERAL", RoomType.CHANNEL, 0)
+        println("Attachment from the File List: $result")
 }
 
 class SimpleTokenRepository : TokenRepository {
