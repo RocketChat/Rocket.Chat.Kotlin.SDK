@@ -152,9 +152,11 @@ suspend fun RocketChatClient.joinChat(roomId: String): Boolean = withContext(Com
  * @param queryParam Parameter which is used to query users on the basis of regex.
  * @return The list of user of a chat room that satisfies a query.
  */
-suspend fun RocketChatClient.queryUsers(queryParam: String): PagedResult<List<User>> = withContext(CommonPool) {
+suspend fun RocketChatClient.queryUsers(queryParam: String, count: Long, offset: Long): PagedResult<List<User>> = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl, "users.list")
         .addQueryParameter("query", "{ \"name\": { \"\\u0024regex\": \"$queryParam\" } }")
+        .addQueryParameter("offset", offset.toString())
+        .addQueryParameter("count", count.toString())
         .build()
     val request = requestBuilder(httpUrl).get().build()
     val type = Types.newParameterizedType(
