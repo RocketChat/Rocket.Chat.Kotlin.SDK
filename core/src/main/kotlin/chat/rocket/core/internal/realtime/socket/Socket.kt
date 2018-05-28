@@ -2,15 +2,15 @@ package chat.rocket.core.internal.realtime.socket
 
 import chat.rocket.common.model.User
 import chat.rocket.core.RocketChatClient
-import chat.rocket.core.internal.realtime.socket.message.model.MessageType
-import chat.rocket.core.internal.realtime.socket.message.model.SocketMessage
 import chat.rocket.core.internal.model.Subscription
-import chat.rocket.core.internal.realtime.socket.model.ReconnectionStrategy
 import chat.rocket.core.internal.realtime.message.CONNECT_MESSAGE
 import chat.rocket.core.internal.realtime.message.pingMessage
 import chat.rocket.core.internal.realtime.message.pongMessage
-import chat.rocket.core.internal.realtime.socket.model.StreamMessage
+import chat.rocket.core.internal.realtime.socket.message.model.MessageType
+import chat.rocket.core.internal.realtime.socket.message.model.SocketMessage
+import chat.rocket.core.internal.realtime.socket.model.ReconnectionStrategy
 import chat.rocket.core.internal.realtime.socket.model.State
+import chat.rocket.core.internal.realtime.socket.model.StreamMessage
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room

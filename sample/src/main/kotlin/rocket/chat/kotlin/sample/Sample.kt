@@ -27,6 +27,7 @@ import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.experimental.suspendCancellableCoroutine
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
@@ -186,7 +187,7 @@ fun getMeInfoByRx(client: RocketChatClient) {
 }
 
 suspend fun pinMessage(client: RocketChatClient) {
-        val result = client.getFavoriteMessages("GENERAL", RoomType.CHANNEL, 0)
+        val result = client.getFavoriteMessages("GENERAL", RoomType.Channel(), 0)
         println("favoriteMessages: $result")
 }
 

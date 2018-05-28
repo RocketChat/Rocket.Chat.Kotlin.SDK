@@ -14,27 +14,27 @@ interface BaseRoom {
 
 @FallbackSealedClass(name = "Custom", fieldName = "rawType")
 sealed class RoomType {
-    @Json(name = "c") class Channel : RoomType()
-    @Json(name = "p") class PrivateGroup : RoomType()
-    @Json(name = "d") class DirectMessage : RoomType()
-    @Json(name = "l") class Livechat : RoomType()
+    @Json(name = CHANNEL) class Channel : RoomType()
+    @Json(name = PRIVATE_GROUP) class PrivateGroup : RoomType()
+    @Json(name = DIRECT_MESSAGE) class DirectMessage : RoomType()
+    @Json(name = LIVECHAT) class LiveChat : RoomType()
     class Custom(val rawType: String) : RoomType()
-
-    companion object {
-        val CHANNEL = Channel()
-        val PRIVATE_GROUP = PrivateGroup()
-        val DIRECT_MESSAGE = DirectMessage()
-        val LIVECHAT = Livechat()
-    }
 
     override fun toString(): String {
         return when (this) {
-            is Channel -> "c"
-            is PrivateGroup -> "p"
-            is DirectMessage -> "d"
-            is Livechat -> "l"
+            is Channel -> CHANNEL
+            is PrivateGroup -> PRIVATE_GROUP
+            is DirectMessage -> DIRECT_MESSAGE
+            is LiveChat -> LIVECHAT
             is Custom -> rawType
         }
+    }
+
+    companion object {
+        const val CHANNEL = "c"
+        const val PRIVATE_GROUP = "p"
+        const val DIRECT_MESSAGE = "d"
+        const val LIVECHAT = "l"
     }
 }
 
@@ -42,10 +42,10 @@ fun RoomType.of(type: String): RoomType = roomTypeOf(type)
 
 fun roomTypeOf(type: String): RoomType {
     return when (type) {
-        "c" -> RoomType.CHANNEL
-        "p" -> RoomType.PRIVATE_GROUP
-        "d" -> RoomType.DIRECT_MESSAGE
-        "l" -> RoomType.LIVECHAT
+        RoomType.CHANNEL -> RoomType.Channel()
+        RoomType.PRIVATE_GROUP -> RoomType.PrivateGroup()
+        RoomType.DIRECT_MESSAGE -> RoomType.DirectMessage()
+        RoomType.LIVECHAT -> RoomType.LiveChat()
         else -> RoomType.Custom(type)
     }
 }
