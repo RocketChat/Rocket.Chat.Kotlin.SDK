@@ -49,10 +49,10 @@ class ChatRoomTest {
     @Test
     fun `markAsRead() should succeed without throwing`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/subscriptions.read")
-                .andReturn(200, SUCCESS)
-                .once()
+            .post()
+            .withPath("/api/v1/subscriptions.read")
+            .andReturn(200, SUCCESS)
+            .once()
 
         runBlocking {
             sut.markAsRead(roomId = "GENERAL")
@@ -62,10 +62,10 @@ class ChatRoomTest {
     @Test(expected = RocketChatException::class)
     fun `markAsRead() should fail with RocketChatAuthException if not logged in`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/subscriptions.read")
-                .andReturn(401, MUST_BE_LOGGED_ERROR)
-                .once()
+            .post()
+            .withPath("/api/v1/subscriptions.read")
+            .andReturn(401, MUST_BE_LOGGED_ERROR)
+            .once()
 
         runBlocking {
             sut.markAsRead(roomId = "GENERAL")
@@ -75,13 +75,18 @@ class ChatRoomTest {
     @Test
     fun `getMembers() should succeed without throwing`() {
         mockServer.expect()
-                .get()
-                .withPath("/api/v1/channels.members?roomId=GENERAL&offset=0&count=1")
-                .andReturn(200, MEMBERS_OK)
-                .once()
+            .get()
+            .withPath("/api/v1/channels.members?roomId=GENERAL&offset=0&count=1")
+            .andReturn(200, MEMBERS_OK)
+            .once()
 
         runBlocking {
-            val members = sut.getMembers(roomId = "GENERAL", roomType = RoomType.Channel(), offset = 0, count = 1)
+            val members = sut.getMembers(
+                roomId = "GENERAL",
+                roomType = RoomType.Channel(),
+                offset = 0,
+                count = 1
+            )
             System.out.println("Members: $members")
         }
     }
@@ -89,10 +94,10 @@ class ChatRoomTest {
     @Test(expected = RocketChatException::class)
     fun `getMembers() should fail with RocketChatAuthException if not logged in`() {
         mockServer.expect()
-                .get()
-                .withPath("/api/v1/channels.members?roomId=GENERAL&offset=0")
-                .andReturn(401, MUST_BE_LOGGED_ERROR)
-                .once()
+            .get()
+            .withPath("/api/v1/channels.members?roomId=GENERAL&offset=0")
+            .andReturn(401, MUST_BE_LOGGED_ERROR)
+            .once()
 
         runBlocking {
             sut.getMembers(roomId = "GENERAL", roomType = RoomType.Channel(), offset = 0, count = 1)
@@ -102,10 +107,10 @@ class ChatRoomTest {
     @Test
     fun `joinChat() should succeed without throwing`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/channels.join")
-                .andReturn(200, SUCCESS)
-                .once()
+            .post()
+            .withPath("/api/v1/channels.join")
+            .andReturn(200, SUCCESS)
+            .once()
 
         runBlocking {
             val result = sut.joinChat(roomId = "GENERAL")
@@ -116,26 +121,26 @@ class ChatRoomTest {
     @Test
     fun `queryUsers() should succeed without throwing`() {
         mockServer.expect()
-                .get()
-                .withPath("/api/v1/users.list?query=%7B%20%22name%22%3A%20%7B%20%22%5Cu0024regex%22%3A%20%22g%22%20%7D%20%7D")
-                .andReturn(200, QUERY_USERS_SUCCESS)
-                .once()
+            .get()
+            .withPath("/api/v1/users.list?query=%7B%20%22name%22%3A%20%7B%20%22%5Cu0024regex%22%3A%20%22g%22%20%7D%20%7D&offset=0&count=1")
+            .andReturn(200, QUERY_USERS_SUCCESS)
+            .once()
 
         runBlocking {
-            sut.queryUsers("g")
+            sut.queryUsers("g", 1, 0)
         }
     }
 
     @Test(expected = RocketChatAuthException::class)
     fun `queryUsers() should fail with RocketChatAuthException if not logged in`() {
         mockServer.expect()
-                .get()
-                .withPath("/api/v1/users.list?query=%7B%20%22name%22%3A%20%7B%20%22%5Cu0024regex%22%3A%20%22g%22%20%7D%20%7D")
-                .andReturn(401, MUST_BE_LOGGED_ERROR)
-                .once()
+            .get()
+            .withPath("/api/v1/users.list?query=%7B%20%22name%22%3A%20%7B%20%22%5Cu0024regex%22%3A%20%22g%22%20%7D%20%7D&offset=0&count=1")
+            .andReturn(401, MUST_BE_LOGGED_ERROR)
+            .once()
 
         runBlocking {
-            sut.queryUsers("g")
+            sut.queryUsers("g", 1, 0)
         }
     }
 
@@ -144,13 +149,13 @@ class ChatRoomTest {
     @Test(expected = RocketChatApiException::class)
     fun `queryUsers() should fail because of incorrect param`() {
         mockServer.expect()
-                .get()
-                .withPath("/api/v1/users.list?query=%7B%20%22name%22%3A%20%7B%20%22%5Cu0024regex%22%3A%20%22g%22%20%7D%20%7D")
-                .andReturn(400, INCORRECT_PARAM_PROVIDED)
-                .once()
+            .get()
+            .withPath("/api/v1/users.list?query=%7B%20%22name%22%3A%20%7B%20%22%5Cu0024regex%22%3A%20%22g%22%20%7D%20%7D&offset=0&count=1")
+            .andReturn(400, INCORRECT_PARAM_PROVIDED)
+            .once()
 
         runBlocking {
-            sut.queryUsers("g")
+            sut.queryUsers("g", 1, 0)
         }
     }
 }
