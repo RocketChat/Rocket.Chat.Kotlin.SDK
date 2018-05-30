@@ -25,3 +25,7 @@ internal fun temporaryStatusMessage(id: String, status: UserStatus): String =
 
 internal fun typingMessage(id: String, roomId: String, username: String, isTyping: Boolean) =
     newMessage("stream-notify-room", id, "\"$roomId/typing\",\"$username\",$isTyping")
+
+internal fun createDirectMessage(id: String, username: String): String {
+    return newMessage("createDirectMessage", id, "\"$username\"")
+}
