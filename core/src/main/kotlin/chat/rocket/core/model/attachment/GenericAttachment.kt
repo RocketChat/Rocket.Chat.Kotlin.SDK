@@ -14,5 +14,5 @@ data class GenericAttachment(
     val user: User?,
     val path: String?,
     @ISO8601Date
-    val uploadedAt: Long
+    val uploadedAt: Long?
 )
