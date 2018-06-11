@@ -1,7 +1,5 @@
 package chat.rocket.core.internal.rest
 
-import chat.rocket.common.RocketChatApiException
-import chat.rocket.common.RocketChatAuthException
 import chat.rocket.common.RocketChatException
 import chat.rocket.common.model.RoomType
 import chat.rocket.common.model.Token
@@ -115,47 +113,6 @@ class ChatRoomTest {
         runBlocking {
             val result = sut.joinChat(roomId = "GENERAL")
             assertTrue(result)
-        }
-    }
-
-    @Test
-    fun `queryUsers() should succeed without throwing`() {
-        mockServer.expect()
-            .get()
-            .withPath("/api/v1/users.list?query=%7B%20%22name%22%3A%20%7B%20%22%5Cu0024regex%22%3A%20%22g%22%20%7D%20%7D&offset=0&count=1")
-            .andReturn(200, QUERY_USERS_SUCCESS)
-            .once()
-
-        runBlocking {
-            sut.queryUsers("g", 1, 0)
-        }
-    }
-
-    @Test(expected = RocketChatAuthException::class)
-    fun `queryUsers() should fail with RocketChatAuthException if not logged in`() {
-        mockServer.expect()
-            .get()
-            .withPath("/api/v1/users.list?query=%7B%20%22name%22%3A%20%7B%20%22%5Cu0024regex%22%3A%20%22g%22%20%7D%20%7D&offset=0&count=1")
-            .andReturn(401, MUST_BE_LOGGED_ERROR)
-            .once()
-
-        runBlocking {
-            sut.queryUsers("g", 1, 0)
-        }
-    }
-
-    //request fails because the query param is malformed for eg '{ "name": { "$dummy": "g" } }'
-    // instead of '{ "name": { "$regex": "g" } }'
-    @Test(expected = RocketChatApiException::class)
-    fun `queryUsers() should fail because of incorrect param`() {
-        mockServer.expect()
-            .get()
-            .withPath("/api/v1/users.list?query=%7B%20%22name%22%3A%20%7B%20%22%5Cu0024regex%22%3A%20%22g%22%20%7D%20%7D&offset=0&count=1")
-            .andReturn(400, INCORRECT_PARAM_PROVIDED)
-            .once()
-
-        runBlocking {
-            sut.queryUsers("g", 1, 0)
         }
     }
 }
