@@ -17,7 +17,6 @@ import chat.rocket.core.model.ChatRoom
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.UserRole
 import chat.rocket.core.model.Room
-import chat.rocket.core.model.PagedResult
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.async
@@ -165,34 +164,6 @@ suspend fun RocketChatClient.setAvatar(avatarUrl: String): Boolean {
     val request = requestBuilder(httpUrl).post(body).build()
 
     return handleRestCall<BaseResult>(request, BaseResult::class.java).success
-}
-
-/**
- * Returns the list of server users that satisfies a [query].
- *
- * @param query The query to search the server users for.
- * @param offset The offset to paging which specifies the first entry to return from a collection.
- * @param count The amount of item to return from a collection.
- * @return The list of user of a chat room that satisfies a query.
- */
-suspend fun RocketChatClient.searchUser(
-    query: String,
-    offset: Long = 0,
-    count: Long = 30
-): PagedResult<List<User>> = withContext(CommonPool) {
-    val httpUrl = requestUrl(restUrl, "users.list")
-        .addQueryParameter("query", "{\"name\": {\"\\u0024regex\": \"$query\"}}")
-        .addQueryParameter("offset", offset.toString())
-        .addQueryParameter("count", count.toString())
-        .build()
-    val request = requestBuilder(httpUrl).get().build()
-    val type = Types.newParameterizedType(
-        RestResult::class.java,
-        Types.newParameterizedType(List::class.java, User::class.java)
-    )
-
-    val result = handleRestCall<RestResult<List<User>>>(request, type)
-    return@withContext PagedResult<List<User>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
 }
 
 /**

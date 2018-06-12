@@ -259,49 +259,6 @@ class UserTest {
         }
     }
 
-    /* TODO FIX these tests.
-    @Test
-    fun `searchUser() should succeed without throwing`() {
-        mockServer.expect()
-            .get()
-            .withPath("/api/v1/users.list?query=%7B%20%22name%22%3A%20%7B%20%22%5Cu0024regex%22%3A%20%22g%22%20%7D%20%7D&offset=0&count=1")
-            .andReturn(200, QUERY_USERS_SUCCESS)
-            .once()
-
-        runBlocking {
-            sut.searchUser("g", 1, 0)
-        }
-    }
-
-    @Test(expected = RocketChatAuthException::class)
-    fun `searchUser() should fail with RocketChatAuthException if not logged in`() {
-        mockServer.expect()
-            .get()
-            .withPath("/api/v1/users.list?query=%7B%20%22name%22%3A%20%7B%20%22%5Cu0024regex%22%3A%20%22g%22%20%7D%20%7D&offset=0&count=1")
-            .andReturn(401, MUST_BE_LOGGED_ERROR)
-            .once()
-
-        runBlocking {
-            sut.searchUser("g", 1, 0)
-        }
-    }
-    */
-
-    // Request fails because the query param is malformed for eg '{ "name": { "$dummy": "g" } }'
-    // instead of '{ "name": { "$regex": "g" } }'
-    @Test(expected = RocketChatApiException::class)
-    fun `searchUser() should fail because of incorrect param`() {
-        mockServer.expect()
-            .get()
-            .withPath("/api/v1/users.list?query=%7B%20%22name%22%3A%20%7B%20%22%5Cu0024regex%22%3A%20%22g%22%20%7D%20%7D&offset=0&count=1")
-            .andReturn(400, INCORRECT_PARAM_PROVIDED)
-            .once()
-
-        runBlocking {
-            sut.searchUser("g", 1, 0)
-        }
-    }
-
     @Test
     fun `roles() should return current user roles in a UserRoles object`() {
         mockServer.expect()
