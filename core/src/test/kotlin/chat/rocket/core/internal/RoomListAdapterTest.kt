@@ -49,7 +49,7 @@ class RoomListAdapterTest {
         assertThat(rooms[1].id, isEqualTo("GENERAL2"))
         assert(rooms[1].type is RoomType.PrivateGroup)
         assertThat(rooms[2].id, isEqualTo("GENERAL3"))
-        assert(rooms[2].type is RoomType.Livechat)
+        assert(rooms[2].type is RoomType.LiveChat)
         assertThat(rooms[3].id, isEqualTo("GENERAL4"))
         assert(rooms[3].type is RoomType.Custom)
     }
