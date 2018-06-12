@@ -4,14 +4,15 @@ import chat.rocket.common.model.BaseResult
 import chat.rocket.common.model.RoomType
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
-import chat.rocket.core.internal.model.PostMessagePayload
-import chat.rocket.core.internal.model.SendMessagePayload
-import chat.rocket.core.internal.model.SendMessageBody
 import chat.rocket.core.internal.model.DeletePayload
+import chat.rocket.core.internal.model.PostMessagePayload
 import chat.rocket.core.internal.model.ReactionPayload
+import chat.rocket.core.internal.model.SendMessageBody
+import chat.rocket.core.internal.model.SendMessagePayload
 import chat.rocket.core.model.DeleteResult
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.PagedResult
+import chat.rocket.core.model.ReadReceipt
 import chat.rocket.core.model.attachment.Attachment
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
@@ -343,4 +344,32 @@ suspend fun RocketChatClient.history(
     val result = handleRestCall<RestResult<List<Message>>>(request, type)
 
     return@withContext PagedResult<List<Message>>(result.result(), result.total() ?: -1, result.offset() ?: -1)
+}
+
+suspend fun RocketChatClient.getMessageReadReceipts(
+    messageId: String,
+    count: Long = 50,
+    oldest: String? = null,
+    latest: String? = null
+): PagedResult<List<ReadReceipt>> = withContext(CommonPool) {
+    val httpUrl = requestUrl(restUrl, "chat.getMessageReadReceipts").apply {
+        addQueryParameter("messageId", messageId)
+        addQueryParameter("count", count.toString())
+        oldest?.let {
+            addQueryParameter("oldest", it)
+        }
+        latest?.let {
+            addQueryParameter("latest", it)
+        }
+    }.build()
+
+    val request = requestBuilder(httpUrl).get().build()
+
+    val type = Types.newParameterizedType(
+        RestResult::class.java,
+        Types.newParameterizedType(List::class.java, ReadReceipt::class.java)
+    )
+    val result = handleRestCall<RestResult<List<ReadReceipt>>>(request, type)
+
+    return@withContext PagedResult<List<ReadReceipt>>(result.result(), result.total() ?: -1, result.offset() ?: -1)
 }
