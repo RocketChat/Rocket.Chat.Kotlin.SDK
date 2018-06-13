@@ -14,7 +14,6 @@ import kotlinx.coroutines.experimental.withContext
 
 data class ChatRoom(
     override val id: String,
-    val subscriptionId: String,
     override val type: RoomType,
     override val user: SimpleUser?,
     val status: UserStatus?,
@@ -42,9 +41,8 @@ data class ChatRoom(
     companion object {
         fun create(room: Room, subscription: Subscription, client: RocketChatClient): ChatRoom {
             return ChatRoom(id = room.id,
-                subscriptionId = subscription.id,
                 type = room.type,
-                user = room.user ?: subscription.user,
+                user = room.user,
                 status = null,
                 name = room.name ?: subscription.name,
                 fullName = room.fullName ?: subscription.fullName,
@@ -90,12 +88,4 @@ suspend fun ChatRoom.history(
 
 fun ChatRoom.subscribeMessages(callback: (Boolean, String) -> Unit): String {
     return client.subscribeRoomMessages(id, callback)
-}
-
-fun ChatRoom.userId(): String? {
-    if (type !is RoomType.DirectMessage) return null
-
-    return user?.id?.let { userId ->
-        id.replace(userId, "")
-    }
 }

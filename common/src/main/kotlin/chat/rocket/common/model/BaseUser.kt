@@ -30,13 +30,3 @@ sealed class UserStatus {
         }
     }
 }
-
-fun userStatusOf(status: String): UserStatus {
-    return when(status) {
-        "online" -> UserStatus.Online()
-        "busy" -> UserStatus.Busy()
-        "away" -> UserStatus.Away()
-        "offline" -> UserStatus.Offline()
-        else -> UserStatus.Unknown(status)
-    }
-}
