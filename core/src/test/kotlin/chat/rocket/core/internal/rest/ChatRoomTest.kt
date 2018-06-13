@@ -83,7 +83,7 @@ class ChatRoomTest {
         runBlocking {
             val members = sut.getMembers(
                 roomId = "GENERAL",
-                roomType = RoomType.CHANNEL,
+                roomType = RoomType.Channel(),
                 offset = 0,
                 count = 1
             )
@@ -100,7 +100,7 @@ class ChatRoomTest {
             .once()
 
         runBlocking {
-            sut.getMembers(roomId = "GENERAL", roomType = RoomType.CHANNEL, offset = 0, count = 1)
+            sut.getMembers(roomId = "GENERAL", roomType = RoomType.Channel(), offset = 0, count = 1)
         }
     }
 
