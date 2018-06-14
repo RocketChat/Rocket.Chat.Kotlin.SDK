@@ -1,8 +1,8 @@
 ext {
     versions = [
-            kotlin       : '1.2.40',
+            kotlin       : '1.2.50',
             kotlinter    : '1.11.2',
-            coroutine    : '0.22.5',
+            coroutine    : '0.23.1',
             dokka        : '0.9.16',
             kotshi       : '1.0.3',
             okhttp       : '3.10.0',
