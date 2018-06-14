@@ -33,7 +33,7 @@ import java.util.LinkedHashMap
  */
 class FallbackSealedClassJsonAdapter<T>(private val classType: Class<T>,
                                         fallback: String,
-                                        private val fieldName: String) : JsonAdapter<T>() {
+                                        fieldName: String) : JsonAdapter<T>() {
     private val fallbackConstant: Class<out T>
     private val fallbackConstructor: Constructor<out T>
     private val nameConstantMap: Map<String, Class<out T>>

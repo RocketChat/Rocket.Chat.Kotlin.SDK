@@ -28,6 +28,7 @@ import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.experimental.suspendCancellableCoroutine
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
@@ -65,7 +66,7 @@ fun main(args: Array<String>) {
     // using coroutines
     val job = launch(CommonPool) {
 
-        val token = client.login("luciofm-testing", "vpnfe5lnv!")
+        val token = client.login("", "")
         logger.debug("Token: userId = ${token.userId} - authToken = ${token.authToken}")
 
         launch {
@@ -188,11 +189,12 @@ fun getMeInfoByRx(client: RocketChatClient) {
 }
 
 suspend fun showFavoriteMessage(client: RocketChatClient) {
-        val result = client.getFavoriteMessages("GENERAL", RoomType.CHANNEL, 0)
+        val result = client.getFavoriteMessages("GENERAL", RoomType.Channel(), 0)
         println("favoriteMessages: $result")
 }
+
 suspend fun showFileList(client: RocketChatClient) {
-        val result = client.getFiles("GENERAL", RoomType.CHANNEL, 0)
+        val result = client.getFiles("GENERAL", RoomType.Channel(), 0)
         println("Attachment from the File List: $result")
 }
 
