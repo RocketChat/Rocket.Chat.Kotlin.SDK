@@ -115,7 +115,6 @@ class ChatRoomTest {
             assertTrue(result)
         }
     }
-<<<<<<< HEAD
 
     @Test
     fun `leaveChat() should succeed without throwing`() {
@@ -126,7 +125,7 @@ class ChatRoomTest {
                 .once()
 
         runBlocking {
-            val result = sut.leaveChat(roomId = "GENERAL", roomType = RoomType.CHANNEL)
+            val result = sut.leaveChat(roomId = "GENERAL", roomType = RoomType.CHANNEL())
             assertTrue(result)
         }
     }
@@ -308,48 +307,4 @@ class ChatRoomTest {
             assertTrue(result)
         }
     }
-
-    // TODO Fix tests!
-    @Test
-    fun `queryUsers() should succeed without throwing`() {
-        mockServer.expect()
-                .get()
-                .withPath("/api/v1/users.list?query=%7B%20%22name%22%3A%20%7B%20%22%5Cu0024regex%22%3A%20%22g%22%20%7D%20%7D")
-                .andReturn(200, QUERY_USERS_SUCCESS)
-                .once()
-
-        runBlocking {
-            val result = sut.queryUsers("g")
-        }
-    }
-
-    @Test(expected = RocketChatAuthException::class)
-    fun `queryUsers() should fail with RocketChatAuthException if not logged in`() {
-        mockServer.expect()
-                .get()
-                .withPath("/api/v1/users.list?query=%7B%20%22name%22%3A%20%7B%20%22%5Cu0024regex%22%3A%20%22g%22%20%7D%20%7D")
-                .andReturn(401, MUST_BE_LOGGED_ERROR)
-                .once()
-
-        runBlocking {
-            val result = sut.queryUsers("g")
-        }
-    }
-
-    //request fails because the query param is malformed for eg '{ "name": { "$dummy": "g" } }'
-    // instead of '{ "name": { "$regex": "g" } }'
-    @Test(expected = RocketChatApiException::class)
-    fun `queryUsers() should fail because of incorrect param`() {
-        mockServer.expect()
-                .get()
-                .withPath("/api/v1/users.list?query=%7B%20%22name%22%3A%20%7B%20%22%5Cu0024regex%22%3A%20%22g%22%20%7D%20%7D")
-                .andReturn(400, INCORRECT_PARAM_PROVIDED)
-                .once()
-
-        runBlocking {
-            val result = sut.queryUsers("g")
-        }
-    }
-=======
->>>>>>> ae49eb9cd1f573c53e7fd565c4c86629b510176d
 }
