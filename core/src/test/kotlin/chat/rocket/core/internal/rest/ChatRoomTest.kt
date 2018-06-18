@@ -3,6 +3,7 @@ package chat.rocket.core.internal.rest
 import chat.rocket.common.RocketChatException
 import chat.rocket.common.model.RoomType
 import chat.rocket.common.model.Token
+import chat.rocket.common.model.roomTypeOf
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
@@ -119,13 +120,13 @@ class ChatRoomTest {
     @Test
     fun `leaveChat() should succeed without throwing`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/channels.leave")
-                .andReturn(200, SUCCESS)
-                .once()
+            .post()
+            .withPath("/api/v1/channels.leave")
+            .andReturn(200, SUCCESS)
+            .once()
 
         runBlocking {
-            val result = sut.leaveChat(roomId = "GENERAL", roomType = RoomType.CHANNEL())
+            val result = sut.leaveChat(roomId = "GENERAL", roomType = roomTypeOf(RoomType.CHANNEL))
             assertTrue(result)
         }
     }
@@ -133,13 +134,13 @@ class ChatRoomTest {
     @Test(expected = RocketChatException::class)
     fun `leaveChat() should fail with RocketChatAuthException if not logged in`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/channels.leave")
-                .andReturn(401, MUST_BE_LOGGED_ERROR)
-                .once()
+            .post()
+            .withPath("/api/v1/channels.leave")
+            .andReturn(401, MUST_BE_LOGGED_ERROR)
+            .once()
 
         runBlocking {
-            val result = sut.leaveChat(roomId = "GENERAL", roomType = RoomType.CHANNEL)
+            val result = sut.leaveChat(roomId = "GENERAL", roomType = roomTypeOf(RoomType.CHANNEL))
             assertTrue(result)
         }
     }
@@ -147,14 +148,16 @@ class ChatRoomTest {
     @Test
     fun `setTopic() should succeed without throwing`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/channels.setTopic")
-                .andReturn(200, SUCCESS)
-                .once()
+            .post()
+            .withPath("/api/v1/channels.setTopic")
+            .andReturn(200, SUCCESS)
+            .once()
 
         runBlocking {
-            val result = sut.setTopic(roomId = "GENERAL", roomType = RoomType.CHANNEL,
-                    topic = "New Topic")
+            val result = sut.setTopic(
+                roomId = "GENERAL", roomType = roomTypeOf(RoomType.CHANNEL),
+                topic = "New Topic"
+            )
             assertTrue(result)
         }
     }
@@ -162,14 +165,16 @@ class ChatRoomTest {
     @Test
     fun `setDescription() should succeed without throwing`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/channels.setDescription")
-                .andReturn(200, SUCCESS)
-                .once()
+            .post()
+            .withPath("/api/v1/channels.setDescription")
+            .andReturn(200, SUCCESS)
+            .once()
 
         runBlocking {
-            val result = sut.setDescription(roomId = "GENERAL", roomType = RoomType.CHANNEL,
-                    description = "New Description")
+            val result = sut.setDescription(
+                roomId = "GENERAL", roomType = roomTypeOf(RoomType.CHANNEL),
+                description = "New Description"
+            )
             assertTrue(result)
         }
     }
@@ -177,14 +182,16 @@ class ChatRoomTest {
     @Test
     fun `setAnnouncement() should succeed without throwing`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/channels.setAnnouncement")
-                .andReturn(200, SUCCESS)
-                .once()
+            .post()
+            .withPath("/api/v1/channels.setAnnouncement")
+            .andReturn(200, SUCCESS)
+            .once()
 
         runBlocking {
-            val result = sut.setAnnouncement(roomId = "GENERAL", roomType = RoomType.CHANNEL,
-                    announcement = "New Announcement")
+            val result = sut.setAnnouncement(
+                roomId = "GENERAL", roomType = roomTypeOf(RoomType.CHANNEL),
+                announcement = "New Announcement"
+            )
             assertTrue(result)
         }
     }
@@ -192,14 +199,16 @@ class ChatRoomTest {
     @Test
     fun `setReadOnly() should succeed without throwing`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/channels.setReadOnly")
-                .andReturn(200, SUCCESS)
-                .once()
+            .post()
+            .withPath("/api/v1/channels.setReadOnly")
+            .andReturn(200, SUCCESS)
+            .once()
 
         runBlocking {
-            val result = sut.setReadOnly(roomId = "GENERAL", roomType = RoomType.CHANNEL,
-                    readOnly = true)
+            val result = sut.setReadOnly(
+                roomId = "GENERAL", roomType = roomTypeOf(RoomType.CHANNEL),
+                readOnly = true
+            )
             assertTrue(result)
         }
     }
@@ -207,14 +216,16 @@ class ChatRoomTest {
     @Test
     fun `setType() should succeed without throwing`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/channels.setType")
-                .andReturn(200, SUCCESS)
-                .once()
+            .post()
+            .withPath("/api/v1/channels.setType")
+            .andReturn(200, SUCCESS)
+            .once()
 
         runBlocking {
-            val result = sut.setType(roomId = "GENERAL", roomType = RoomType.CHANNEL,
-                    type = "c")
+            val result = sut.setType(
+                roomId = "GENERAL", roomType = roomTypeOf(RoomType.CHANNEL),
+                type = "c"
+            )
             assertTrue(result)
         }
     }
@@ -222,13 +233,13 @@ class ChatRoomTest {
     @Test
     fun `rename() should succeed without throwing`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/channels.rename")
-                .andReturn(200, SUCCESS)
-                .once()
+            .post()
+            .withPath("/api/v1/channels.rename")
+            .andReturn(200, SUCCESS)
+            .once()
 
         runBlocking {
-            val result = sut.rename(roomId = "GENERAL", roomType = RoomType.CHANNEL, newName = "name")
+            val result = sut.rename(roomId = "GENERAL", roomType = roomTypeOf(RoomType.CHANNEL), newName = "name")
             assertTrue(result)
         }
     }
@@ -236,14 +247,16 @@ class ChatRoomTest {
     @Test
     fun `setJoinCode() should succeed without throwing`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/channels.setJoinCode")
-                .andReturn(200, SUCCESS)
-                .once()
+            .post()
+            .withPath("/api/v1/channels.setJoinCode")
+            .andReturn(200, SUCCESS)
+            .once()
 
         runBlocking {
-            val result = sut.setJoinCode(roomId = "GENERAL", roomType = RoomType.CHANNEL,
-                    joinCode = "some_password")
+            val result = sut.setJoinCode(
+                roomId = "GENERAL", roomType = roomTypeOf(RoomType.CHANNEL),
+                joinCode = "some_password"
+            )
             assertTrue(result)
         }
     }
@@ -251,14 +264,16 @@ class ChatRoomTest {
     @Test
     fun `archive() should succeed without throwing`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/channels.archive")
-                .andReturn(200, SUCCESS)
-                .once()
+            .post()
+            .withPath("/api/v1/channels.archive")
+            .andReturn(200, SUCCESS)
+            .once()
 
         runBlocking {
-            val result = sut.archive(roomId = "GENERAL", roomType = RoomType.CHANNEL,
-                    archiveRoom = true)
+            val result = sut.archive(
+                roomId = "GENERAL", roomType = roomTypeOf(RoomType.CHANNEL),
+                archiveRoom = true
+            )
             assertTrue(result)
         }
     }
@@ -266,14 +281,16 @@ class ChatRoomTest {
     @Test
     fun `unarchive() should succeed without throwing`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/channels.unarchive")
-                .andReturn(200, SUCCESS)
-                .once()
+            .post()
+            .withPath("/api/v1/channels.unarchive")
+            .andReturn(200, SUCCESS)
+            .once()
 
         runBlocking {
-            val result = sut.archive(roomId = "GENERAL", roomType = RoomType.CHANNEL,
-                    archiveRoom = false)
+            val result = sut.archive(
+                roomId = "GENERAL", roomType = roomTypeOf(RoomType.CHANNEL),
+                archiveRoom = false
+            )
             assertTrue(result)
         }
     }
@@ -281,14 +298,16 @@ class ChatRoomTest {
     @Test
     fun `open() should succeed without throwing`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/channels.open")
-                .andReturn(200, SUCCESS)
-                .once()
+            .post()
+            .withPath("/api/v1/channels.open")
+            .andReturn(200, SUCCESS)
+            .once()
 
         runBlocking {
-            val result = sut.hide(roomId = "GENERAL", roomType = RoomType.CHANNEL,
-                    hideRoom = false)
+            val result = sut.hide(
+                roomId = "GENERAL", roomType = roomTypeOf(RoomType.CHANNEL),
+                hideRoom = false
+            )
             assertTrue(result)
         }
     }
@@ -296,14 +315,16 @@ class ChatRoomTest {
     @Test
     fun `close() should succeed without throwing`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/channels.close")
-                .andReturn(200, SUCCESS)
-                .once()
+            .post()
+            .withPath("/api/v1/channels.close")
+            .andReturn(200, SUCCESS)
+            .once()
 
         runBlocking {
-            val result = sut.hide(roomId = "GENERAL", roomType = RoomType.CHANNEL,
-                    hideRoom = true)
+            val result = sut.hide(
+                roomId = "GENERAL", roomType = roomTypeOf(RoomType.CHANNEL),
+                hideRoom = true
+            )
             assertTrue(result)
         }
     }
