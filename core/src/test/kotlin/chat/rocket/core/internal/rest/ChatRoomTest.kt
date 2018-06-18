@@ -1,7 +1,5 @@
 package chat.rocket.core.internal.rest
 
-import chat.rocket.common.RocketChatApiException
-import chat.rocket.common.RocketChatAuthException
 import chat.rocket.common.RocketChatException
 import chat.rocket.common.model.RoomType
 import chat.rocket.common.model.Token
@@ -49,10 +47,10 @@ class ChatRoomTest {
     @Test
     fun `markAsRead() should succeed without throwing`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/subscriptions.read")
-                .andReturn(200, SUCCESS)
-                .once()
+            .post()
+            .withPath("/api/v1/subscriptions.read")
+            .andReturn(200, SUCCESS)
+            .once()
 
         runBlocking {
             sut.markAsRead(roomId = "GENERAL")
@@ -62,10 +60,10 @@ class ChatRoomTest {
     @Test(expected = RocketChatException::class)
     fun `markAsRead() should fail with RocketChatAuthException if not logged in`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/subscriptions.read")
-                .andReturn(401, MUST_BE_LOGGED_ERROR)
-                .once()
+            .post()
+            .withPath("/api/v1/subscriptions.read")
+            .andReturn(401, MUST_BE_LOGGED_ERROR)
+            .once()
 
         runBlocking {
             sut.markAsRead(roomId = "GENERAL")
@@ -75,13 +73,18 @@ class ChatRoomTest {
     @Test
     fun `getMembers() should succeed without throwing`() {
         mockServer.expect()
-                .get()
-                .withPath("/api/v1/channels.members?roomId=GENERAL&offset=0&count=1")
-                .andReturn(200, MEMBERS_OK)
-                .once()
+            .get()
+            .withPath("/api/v1/channels.members?roomId=GENERAL&offset=0&count=1")
+            .andReturn(200, MEMBERS_OK)
+            .once()
 
         runBlocking {
-            val members = sut.getMembers(roomId = "GENERAL", roomType = RoomType.CHANNEL, offset = 0, count = 1)
+            val members = sut.getMembers(
+                roomId = "GENERAL",
+                roomType = RoomType.Channel(),
+                offset = 0,
+                count = 1
+            )
             System.out.println("Members: $members")
         }
     }
@@ -89,29 +92,30 @@ class ChatRoomTest {
     @Test(expected = RocketChatException::class)
     fun `getMembers() should fail with RocketChatAuthException if not logged in`() {
         mockServer.expect()
-                .get()
-                .withPath("/api/v1/channels.members?roomId=GENERAL&offset=0")
-                .andReturn(401, MUST_BE_LOGGED_ERROR)
-                .once()
+            .get()
+            .withPath("/api/v1/channels.members?roomId=GENERAL&offset=0")
+            .andReturn(401, MUST_BE_LOGGED_ERROR)
+            .once()
 
         runBlocking {
-            sut.getMembers(roomId = "GENERAL", roomType = RoomType.CHANNEL, offset = 0, count = 1)
+            sut.getMembers(roomId = "GENERAL", roomType = RoomType.Channel(), offset = 0, count = 1)
         }
     }
 
     @Test
     fun `joinChat() should succeed without throwing`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/channels.join")
-                .andReturn(200, SUCCESS)
-                .once()
+            .post()
+            .withPath("/api/v1/channels.join")
+            .andReturn(200, SUCCESS)
+            .once()
 
         runBlocking {
             val result = sut.joinChat(roomId = "GENERAL")
             assertTrue(result)
         }
     }
+<<<<<<< HEAD
 
     @Test
     fun `leaveChat() should succeed without throwing`() {
@@ -346,4 +350,6 @@ class ChatRoomTest {
             val result = sut.queryUsers("g")
         }
     }
+=======
+>>>>>>> ae49eb9cd1f573c53e7fd565c4c86629b510176d
 }

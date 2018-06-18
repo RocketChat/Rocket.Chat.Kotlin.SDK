@@ -14,7 +14,8 @@ import chat.rocket.core.internal.realtime.*
 import chat.rocket.core.internal.realtime.socket.model.State
 import chat.rocket.core.internal.realtime.socket.connect
 import chat.rocket.core.internal.rest.chatRooms
-import chat.rocket.core.internal.rest.getRoomFavoriteMessages
+import chat.rocket.core.internal.rest.getFavoriteMessages
+import chat.rocket.core.internal.rest.getFiles
 import chat.rocket.core.internal.rest.login
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.history
@@ -27,6 +28,7 @@ import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.experimental.suspendCancellableCoroutine
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
@@ -64,7 +66,7 @@ fun main(args: Array<String>) {
     // using coroutines
     val job = launch(CommonPool) {
 
-        val token = client.login("luciofm-testing", "vpnfe5lnv!")
+        val token = client.login("", "")
         logger.debug("Token: userId = ${token.userId} - authToken = ${token.authToken}")
 
         launch {
@@ -80,9 +82,9 @@ fun main(args: Array<String>) {
                         logger.debug("Connected")
                         client.subscribeSubscriptions { _, _ -> }
                         client.subscribeRooms { _, _ -> }
-                        client.subscribeUserData { _, _ -> }
-                        client.subscribeActiveUsers { _, _ ->  }
-                        client.subscribeTypingStatus("GENERAL") {_, _ ->  }
+//                        client.subscribeUserData { _, _ -> }
+//                        client.subscribeActiveUsers { _, _ ->  }
+//                        client.subscribeTypingStatus("GENERAL") {_, _ ->  }
                     }
                 }
             }
@@ -120,11 +122,12 @@ fun main(args: Array<String>) {
         }
 
         launch {
-            delay(10000)
-            client.setTemporaryStatus(UserStatus.Online())
-            delay(2000)
-            client.setDefaultStatus(UserStatus.Away())
-            client.setTypingStatus("GENERAL", "luciofm-testing", true)
+//            delay(10000)
+//            client.setTemporaryStatus(UserStatus.Online())
+//            delay(2000)
+//            client.setDefaultStatus(UserStatus.Away())
+//            client.setTypingStatus("GENERAL", "luciofm-testing", true)
+            showFileList(client)
         }
 
         client.connect()
@@ -185,9 +188,14 @@ fun getMeInfoByRx(client: RocketChatClient) {
             }
 }
 
-suspend fun pinMessage(client: RocketChatClient) {
-        val result = client.getRoomFavoriteMessages("GENERAL", RoomType.CHANNEL, 0)
+suspend fun showFavoriteMessage(client: RocketChatClient) {
+        val result = client.getFavoriteMessages("GENERAL", RoomType.Channel(), 0)
         println("favoriteMessages: $result")
+}
+
+suspend fun showFileList(client: RocketChatClient) {
+        val result = client.getFiles("GENERAL", RoomType.Channel(), 0)
+        println("Attachment from the File List: $result")
 }
 
 class SimpleTokenRepository : TokenRepository {

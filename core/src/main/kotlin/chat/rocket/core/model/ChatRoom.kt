@@ -14,6 +14,7 @@ import kotlinx.coroutines.experimental.withContext
 
 data class ChatRoom(
     override val id: String,
+    val subscriptionId: String,
     override val type: RoomType,
     override val user: SimpleUser?,
     val status: UserStatus?,
@@ -37,34 +38,38 @@ data class ChatRoom(
     val userMentions: Long?,
     val groupMentions: Long?,
     val lastMessage: Message?,
-    val client: RocketChatClient
+    val client: RocketChatClient,
+    val broadcast: Boolean
 ) : BaseRoom {
     companion object {
         fun create(room: Room, subscription: Subscription, client: RocketChatClient): ChatRoom {
             return ChatRoom(id = room.id,
-                    type = room.type,
-                    user = room.user,
-                    status = null,
-                    name = room.name ?: subscription.name,
-                    fullName = room.fullName ?: subscription.fullName,
-                    readonly = room.readonly,
-                    updatedAt = room.updatedAt ?: subscription.updatedAt,
-                    timestamp = subscription.timestamp,
-                    lastSeen = subscription.lastSeen,
-                    topic = room.topic,
-                    description = room.description,
-                    announcement = room.announcement,
-                    default = subscription.isDefault,
-                    favorite = subscription.isFavorite,
-                    open = subscription.open,
-                    alert = subscription.alert,
-                    unread = subscription.unread,
-                    roles = subscription.roles,
-                    archived = subscription.archived,
-                    userMentions = subscription.userMentions,
-                    groupMentions = subscription.groupMentions,
-                    lastMessage = room.lastMessage,
-                    client = client)
+                subscriptionId = subscription.id,
+                type = room.type,
+                user = room.user ?: subscription.user,
+                status = null,
+                name = room.name ?: subscription.name,
+                fullName = room.fullName ?: subscription.fullName,
+                readonly = room.readonly,
+                updatedAt = room.updatedAt ?: subscription.updatedAt,
+                timestamp = subscription.timestamp,
+                lastSeen = subscription.lastSeen,
+                topic = room.topic,
+                description = room.description,
+                announcement = room.announcement,
+                default = subscription.isDefault,
+                favorite = subscription.isFavorite,
+                open = subscription.open,
+                alert = subscription.alert,
+                unread = subscription.unread,
+                roles = subscription.roles,
+                archived = subscription.archived,
+                userMentions = subscription.userMentions,
+                groupMentions = subscription.groupMentions,
+                lastMessage = room.lastMessage,
+                client = client,
+                broadcast = room.broadcast
+            )
         }
     }
 
@@ -89,4 +94,12 @@ suspend fun ChatRoom.history(
 
 fun ChatRoom.subscribeMessages(callback: (Boolean, String) -> Unit): String {
     return client.subscribeRoomMessages(id, callback)
+}
+
+fun ChatRoom.userId(): String? {
+    if (type !is RoomType.DirectMessage) return null
+
+    return user?.id?.let { userId ->
+        id.replace(userId, "")
+    }
 }
