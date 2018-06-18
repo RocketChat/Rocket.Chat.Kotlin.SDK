@@ -4,8 +4,16 @@ import chat.rocket.common.model.BaseResult
 import chat.rocket.common.model.RoomType
 import chat.rocket.common.model.User
 import chat.rocket.core.RocketChatClient
+import chat.rocket.core.internal.model.ChatRoomAnnouncementPayload
+import chat.rocket.core.internal.model.ChatRoomDescriptionPayload
+import chat.rocket.core.internal.model.ChatRoomJoinCodePayload
+import chat.rocket.core.internal.model.ChatRoomNamePayload
+import chat.rocket.core.internal.model.ChatRoomPayload
+import chat.rocket.core.internal.model.ChatRoomReadOnlyPayload
+import chat.rocket.core.internal.model.ChatRoomTopicPayload
+import chat.rocket.core.internal.model.ChatRoomTypePayload
 import chat.rocket.core.internal.RestResult
-import chat.rocket.core.internal.model.*
+import chat.rocket.core.internal.model.RoomIdPayload
 import chat.rocket.core.model.ChatRoomRole
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.Room
@@ -113,8 +121,18 @@ suspend fun RocketChatClient.getPinnedMessages(
     return@withContext PagedResult<List<Message>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
 }
 
+/**
+ * Returns the information of a chat room
+ *
+ * @param roomId The ID of the room.
+ * @param roomName The name of the room.
+ * @param roomType The type of the room.
+ *
+ * @return A [Room] object
+ */
 suspend fun RocketChatClient.getInfo(
-    roomId: String, roomName: String?,
+    roomId: String,
+    roomName: String?,
     roomType: RoomType
 ): Room = withContext(CommonPool) {
     val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "info"))
@@ -128,13 +146,13 @@ suspend fun RocketChatClient.getInfo(
     return@withContext handleRestCall<RestResult<Room>>(request, type).result()
 }
 
-
 /**
  * Returns the list of files of a chat room.
  *
  * @param roomId The ID of the room.
  * @param roomType The type of the room.
  * @param offset The offset to paging which specifies the first entry to return from a collection.
+ *
  * @return The list of files of a chat room.
  */
 suspend fun RocketChatClient.getFiles(
