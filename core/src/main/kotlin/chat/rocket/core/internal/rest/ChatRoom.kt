@@ -187,7 +187,6 @@ suspend fun RocketChatClient.getFiles(
     return@withContext PagedResult<List<GenericAttachment>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
 }
 
-
 /**
  * Returns the information of a chat room
  *
