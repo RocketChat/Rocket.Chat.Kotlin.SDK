@@ -71,11 +71,12 @@ suspend fun RocketChatClient.getMentions(
     offset: Long,
     count: Long
 ): PagedResult<List<Message>> = withContext(CommonPool) {
-    val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "getAllUserMentionsByChannel"))
-        .addQueryParameter("roomId", roomId)
-        .addQueryParameter("offset", offset.toString())
-        .addQueryParameter("count", count.toString())
-        .build()
+    val httpUrl =
+        requestUrl(restUrl, getRestApiMethodNameForMentionsByRoomType(roomType, "getAllUserMentionsByChannel"))
+            .addQueryParameter("roomId", roomId)
+            .addQueryParameter("offset", offset.toString())
+            .addQueryParameter("count", count.toString())
+            .build()
 
     val request = requestBuilder(httpUrl).get().build()
 
