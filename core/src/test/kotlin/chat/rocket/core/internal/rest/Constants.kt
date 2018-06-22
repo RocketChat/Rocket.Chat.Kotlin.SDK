@@ -50,30 +50,11 @@ const val MENTIONS_OK = "{\n" +
         "            ],\n" +
         "            \"channels\": [],\n" +
         "            \"_updatedAt\": \"2018-03-12T14:59:14.171Z\"\n" +
-        "        },\n" +
-        "        {\n" +
-        "            \"_id\": \"rwerwfjuii6TjSv5tLWb\",\n" +
-        "            \"rid\": \"GENERAL\",\n" +
-        "            \"msg\": \"@rocket.cat\",\n" +
-        "            \"ts\": \"2018-03-12T14:59:14.166Z\",\n" +
-        "            \"u\": {\n" +
-        "                \"_id\": \"47cRd58HnWwpqxhaZ\",\n" +
-        "                \"username\": \"test\",\n" +
-        "                \"name\": \"test\"\n" +
-        "            },\n" +
-        "            \"mentions\": [\n" +
-        "                {\n" +
-        "                    \"_id\": \"47cRd58HnWwpqxhaZ\",\n" +
-        "                    \"username\": \"rocket.cat\"\n" +
-        "                }\n" +
-        "            ],\n" +
-        "            \"channels\": [],\n" +
-        "            \"_updatedAt\": \"2018-03-12T14:59:14.171Z\"\n" +
         "        }\n" +
         "    ],\n" +
-        "    \"count\": 2,\n" +
-        "    \"offset\": 10,\n" +
-        "    \"total\": 2,\n" +
+        "    \"count\": 1,\n" +
+        "    \"offset\": 0,\n" +
+        "    \"total\": 1,\n" +
         "    \"success\": true\n" +
         "}"
 
