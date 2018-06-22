@@ -38,13 +38,6 @@ internal fun getRestApiMethodNameByRoomType(roomType: RoomType, method: String):
     }
 }
 
-internal fun getRestApiMethodNameForMentionsByRoomType(roomType: RoomType, method: String): String {
-    return when (roomType) {
-        is RoomType.DirectMessage -> "dm.$method"
-        else -> "channels.$method"
-    }
-}
-
 internal fun requestUrl(baseUrl: HttpUrl, method: String): HttpUrl.Builder {
     return baseUrl.newBuilder()
         .addPathSegment("api")

@@ -107,7 +107,7 @@ class ChatRoomTest {
             .once()
 
         runBlocking {
-            val mentions = sut.getMentions(roomId = "GENERAL", roomType = RoomType.Channel(), offset = 0, count = 1)
+            val mentions = sut.getMentions(roomId = "GENERAL", offset = 0, count = 1)
             System.out.println("Mentions: $mentions")
         }
     }
@@ -121,7 +121,7 @@ class ChatRoomTest {
             .once()
 
         runBlocking {
-            sut.getMentions(roomId = "GENERAL", roomType = RoomType.Channel(), offset = 0, count = 1)
+            sut.getMentions(roomId = "GENERAL", offset = 0, count = 1)
         }
     }
 
