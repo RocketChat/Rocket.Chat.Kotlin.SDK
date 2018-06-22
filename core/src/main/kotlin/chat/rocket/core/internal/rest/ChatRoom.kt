@@ -61,7 +61,6 @@ suspend fun RocketChatClient.getMembers(
  * Returns the list of mentions of a chat room.
  *
  * @param roomId The ID of the room.
- * @param roomType The type of the room.
  * @param offset The offset to paging which specifies the first entry to return from a collection.
  * @param count The amount of item to return from a collection.
  * @return The list of mentions from the authenticated user of a chat room.
