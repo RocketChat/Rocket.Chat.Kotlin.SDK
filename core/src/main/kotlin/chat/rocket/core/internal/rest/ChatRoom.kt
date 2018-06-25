@@ -57,6 +57,37 @@ suspend fun RocketChatClient.getMembers(
 }
 
 /**
+ * Returns the list of mentions of a chat room.
+ *
+ * @param roomId The ID of the room.
+ * @param offset The offset to paging which specifies the first entry to return from a collection.
+ * @param count The amount of item to return from a collection.
+ * @return The list of mentions from the authenticated user of a chat room.
+ */
+suspend fun RocketChatClient.getMentions(
+    roomId: String,
+    offset: Long,
+    count: Long
+): PagedResult<List<Message>> = withContext(CommonPool) {
+    val httpUrl = requestUrl(restUrl, "channels.getAllUserMentionsByChannel")
+        .addQueryParameter("roomId", roomId)
+        .addQueryParameter("offset", offset.toString())
+        .addQueryParameter("count", count.toString())
+        .addQueryParameter("sort", "{\"ts\":-1}")
+        .build()
+
+    val request = requestBuilder(httpUrl).get().build()
+
+    val type = Types.newParameterizedType(
+        RestResult::class.java,
+        Types.newParameterizedType(List::class.java, Message::class.java)
+    )
+
+    val result = handleRestCall<RestResult<List<Message>>>(request, type)
+    return@withContext PagedResult<List<Message>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
+}
+
+/**
  * Returns the list of favorites messages of a chat room.
  *
  * @param roomId The ID of the room.
@@ -122,31 +153,6 @@ suspend fun RocketChatClient.getPinnedMessages(
 }
 
 /**
- * Returns the information of a chat room
- *
- * @param roomId The ID of the room.
- * @param roomName The name of the room.
- * @param roomType The type of the room.
- *
- * @return A [Room] object
- */
-suspend fun RocketChatClient.getInfo(
-    roomId: String,
-    roomName: String?,
-    roomType: RoomType
-): Room = withContext(CommonPool) {
-    val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "info"))
-            .addQueryParameter("roomId", roomId)
-            .addQueryParameter("roomName", roomName)
-            .build()
-
-    val request = requestBuilder(url).get().build()
-
-    val type = Types.newParameterizedType(RestResult::class.java, Room::class.java)
-    return@withContext handleRestCall<RestResult<Room>>(request, type).result()
-}
-
-/**
  * Returns the list of files of a chat room.
  *
  * @param roomId The ID of the room.
@@ -178,6 +184,31 @@ suspend fun RocketChatClient.getFiles(
 
     val result = handleRestCall<RestResult<List<GenericAttachment>>>(request, type)
     return@withContext PagedResult<List<GenericAttachment>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
+}
+
+/**
+ * Returns the information of a chat room
+ *
+ * @param roomId The ID of the room.
+ * @param roomName The name of the room.
+ * @param roomType The type of the room.
+ *
+ * @return A [Room] object
+ */
+suspend fun RocketChatClient.getInfo(
+    roomId: String,
+    roomName: String?,
+    roomType: RoomType
+): Room = withContext(CommonPool) {
+    val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "info"))
+            .addQueryParameter("roomId", roomId)
+            .addQueryParameter("roomName", roomName)
+            .build()
+
+    val request = requestBuilder(url).get().build()
+
+    val type = Types.newParameterizedType(RestResult::class.java, Room::class.java)
+    return@withContext handleRestCall<RestResult<Room>>(request, type).result()
 }
 
 /**

@@ -80,12 +80,7 @@ class ChatRoomTest {
             .once()
 
         runBlocking {
-            val members = sut.getMembers(
-                roomId = "GENERAL",
-                roomType = RoomType.Channel(),
-                offset = 0,
-                count = 1
-            )
+            val members = sut.getMembers(roomId = "GENERAL", roomType = RoomType.Channel(), offset = 0, count = 1)
             System.out.println("Members: $members")
         }
     }
@@ -100,6 +95,34 @@ class ChatRoomTest {
 
         runBlocking {
             sut.getMembers(roomId = "GENERAL", roomType = RoomType.Channel(), offset = 0, count = 1)
+        }
+    }
+
+    // TODO Fix test
+//    @Test
+//    fun `getMentions() should succeed without throwing`() {
+//        mockServer.expect()
+//            .get()
+//            .withPath("/api/v1/channels.getAllUserMentionsByChannel?roomId=GENERAL&offset=0&count=1")
+//            .andReturn(200, MENTIONS_OK)
+//            .once()
+//
+//        runBlocking {
+//            val mentions = sut.getMentions(roomId = "GENERAL", offset = 0, count = 1)
+//            System.out.println("Mentions: $mentions")
+//        }
+//    }
+
+    @Test(expected = RocketChatException::class)
+    fun `getMentions() should fail with RocketChatAuthException if not logged in`() {
+        mockServer.expect()
+            .get()
+            .withPath("/api/v1/channels.getAllUserMentionsByChannel?roomId=GENERAL&offset=0&count=1")
+            .andReturn(401, MUST_BE_LOGGED_ERROR)
+            .once()
+
+        runBlocking {
+            sut.getMentions(roomId = "GENERAL", offset = 0, count = 1)
         }
     }
 
