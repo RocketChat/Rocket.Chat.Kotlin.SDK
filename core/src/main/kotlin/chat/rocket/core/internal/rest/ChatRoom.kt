@@ -74,6 +74,7 @@ suspend fun RocketChatClient.getMentions(
         .addQueryParameter("roomId", roomId)
         .addQueryParameter("offset", offset.toString())
         .addQueryParameter("count", count.toString())
+        .addQueryParameter("sort", "{\"ts\":-1}")
         .build()
 
     val request = requestBuilder(httpUrl).get().build()
