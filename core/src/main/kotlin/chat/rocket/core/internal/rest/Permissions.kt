@@ -13,7 +13,7 @@ import kotlinx.coroutines.experimental.withContext
  */
 suspend fun RocketChatClient.permissions(): List<Permission> = withContext(CommonPool) {
     val url = requestUrl(restUrl, "permissions").build()
-    val request = requestBuilder(url).get().build()
+    val request = requestBuilderForAuthenticatedMethods(url).get().build()
 
     val type = Types.newParameterizedType(List::class.java, Permission::class.java)
     return@withContext handleRestCall<List<Permission>>(request, type)

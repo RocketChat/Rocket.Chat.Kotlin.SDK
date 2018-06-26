@@ -17,7 +17,7 @@ suspend fun RocketChatClient.commands(offset: Int = 0, count: Int = 0): PagedRes
             .addQueryParameter("count", count.toString())
             .build()
 
-    val request = requestBuilder(httpUrl).get().build()
+    val request = requestBuilderForAuthenticatedMethods(httpUrl).get().build()
     val type = Types.newParameterizedType(RestResult::class.java,
             Types.newParameterizedType(List::class.java, Command::class.java))
     val result = handleRestCall<RestResult<List<Command>>>(request, type)
@@ -34,6 +34,6 @@ suspend fun RocketChatClient.runCommand(command: Command, roomId: String): Boole
     val payloadBody = adapter.toJson(payload)
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
-    val request = requestBuilder(httpUrl).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(httpUrl).post(body).build()
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }

@@ -19,7 +19,7 @@ suspend fun RocketChatClient.registerPushToken(token: String) = withContext(Comm
     val body = RequestBody.create(RocketChatClient.CONTENT_TYPE_JSON, payloadBody)
 
     val httpUrl = requestUrl(restUrl, "push.token").build()
-    val request = requestBuilder(httpUrl).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(httpUrl).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, PushToken::class.java)
 
@@ -34,7 +34,7 @@ suspend fun RocketChatClient.unregisterPushToken(token: String) = withContext(Co
     val body = RequestBody.create(RocketChatClient.CONTENT_TYPE_JSON, payloadBody)
 
     val httpUrl = requestUrl(restUrl, "push.token").build()
-    val request = requestBuilder(httpUrl).delete(body).build()
+    val request = requestBuilderForAuthenticatedMethods(httpUrl).delete(body).build()
 
     handleRestCall<BaseResult>(request, BaseResult::class.java)
 }

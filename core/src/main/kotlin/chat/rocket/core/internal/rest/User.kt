@@ -35,7 +35,7 @@ import java.io.File
  */
 suspend fun RocketChatClient.me(): Myself {
     val httpUrl = requestUrl(restUrl, "me").build()
-    val request = requestBuilder(httpUrl).get().build()
+    val request = requestBuilderForAuthenticatedMethods(httpUrl).get().build()
 
     return handleRestCall(request, Myself::class.java)
 }
@@ -64,7 +64,7 @@ suspend fun RocketChatClient.updateProfile(
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val httpUrl = requestUrl(restUrl, "users.update").build()
-    val request = requestBuilder(httpUrl).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(httpUrl).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, User::class.java)
     return handleRestCall<RestResult<User>>(request, type).result()
@@ -95,7 +95,7 @@ suspend fun RocketChatClient.updateOwnBasicInformation(
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val httpUrl = requestUrl(restUrl, "users.updateOwnBasicInfo").build()
-    val request = requestBuilder(httpUrl).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(httpUrl).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, User::class.java)
     return handleRestCall<RestResult<User>>(request, type).result()
@@ -116,7 +116,7 @@ suspend fun RocketChatClient.resetAvatar(userId: String): Boolean {
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val httpUrl = requestUrl(restUrl, "users.resetAvatar").build()
-    val request = requestBuilder(httpUrl).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(httpUrl).post(body).build()
 
     return handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
@@ -141,7 +141,7 @@ suspend fun RocketChatClient.setAvatar(file: File, mimeType: String): Boolean {
             .build()
 
     val httpUrl = requestUrl(restUrl, "users.setAvatar").build()
-    val request = requestBuilder(httpUrl).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(httpUrl).post(body).build()
 
     return handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
@@ -161,7 +161,7 @@ suspend fun RocketChatClient.setAvatar(avatarUrl: String): Boolean {
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val httpUrl = requestUrl(restUrl, "users.setAvatar").build()
-    val request = requestBuilder(httpUrl).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(httpUrl).post(body).build()
 
     return handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
@@ -186,7 +186,7 @@ suspend fun RocketChatClient.chatRooms(timestamp: Long = 0, filterCustom: Boolea
  */
 suspend fun RocketChatClient.roles(): UserRole = withContext(CommonPool) {
     val httpUrl = requestUrl(restUrl, "user.roles").build()
-    val request = requestBuilder(httpUrl).get().build()
+    val request = requestBuilderForAuthenticatedMethods(httpUrl).get().build()
     return@withContext handleRestCall<UserRole>(request, UserRole::class.java)
 }
 
@@ -232,7 +232,7 @@ internal suspend fun RocketChatClient.listSubscriptions(timestamp: Long = 0): Re
     val date = CalendarISO8601Converter().fromTimestamp(timestamp)
     urlBuilder.addQueryParameter("updatedAt", date)
 
-    val request = requestBuilder(urlBuilder.build()).get().build()
+    val request = requestBuilderForAuthenticatedMethods(urlBuilder.build()).get().build()
 
     val type = Types.newParameterizedType(RestMultiResult::class.java,
             Types.newParameterizedType(List::class.java, Subscription::class.java))
@@ -245,7 +245,7 @@ internal suspend fun RocketChatClient.listRooms(timestamp: Long = 0): RestMultiR
     val date = CalendarISO8601Converter().fromTimestamp(timestamp)
     urlBuilder.addQueryParameter("updatedAt", date)
 
-    val request = requestBuilder(urlBuilder.build()).get().build()
+    val request = requestBuilderForAuthenticatedMethods(urlBuilder.build()).get().build()
 
     val type = Types.newParameterizedType(RestMultiResult::class.java,
             Types.newParameterizedType(List::class.java, Room::class.java))

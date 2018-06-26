@@ -59,6 +59,7 @@ fun main(args: Array<String>) {
     val client = RocketChatClient.create {
         httpClient = okHttpClient
         restUrl = "https://unstable.rocket.chat"
+        userAgent = "Rocket.Chat.Kotlin.SDK"
         tokenRepository = SimpleTokenRepository()
         platformLogger = logger
     }

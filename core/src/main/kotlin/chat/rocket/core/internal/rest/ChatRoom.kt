@@ -46,7 +46,7 @@ suspend fun RocketChatClient.getMembers(
         .addQueryParameter("count", count.toString())
         .build()
 
-    val request = requestBuilder(httpUrl).get().build()
+    val request = requestBuilderForAuthenticatedMethods(httpUrl).get().build()
 
     val type = Types.newParameterizedType(
         RestResult::class.java,
@@ -77,7 +77,7 @@ suspend fun RocketChatClient.getMentions(
         .addQueryParameter("sort", "{\"ts\":-1}")
         .build()
 
-    val request = requestBuilder(httpUrl).get().build()
+    val request = requestBuilderForAuthenticatedMethods(httpUrl).get().build()
 
     val type = Types.newParameterizedType(
         RestResult::class.java,
@@ -109,7 +109,7 @@ suspend fun RocketChatClient.getFavoriteMessages(
         .addQueryParameter("query", "{\"starred._id\":{\"\$in\":[\"$userId\"]}}")
         .build()
 
-    val request = requestBuilder(httpUrl).get().build()
+    val request = requestBuilderForAuthenticatedMethods(httpUrl).get().build()
 
     val type = Types.newParameterizedType(
         RestResult::class.java,
@@ -142,7 +142,7 @@ suspend fun RocketChatClient.getPinnedMessages(
         .addQueryParameter("query", "{\"pinned\":true}")
         .build()
 
-    val request = requestBuilder(httpUrl).get().build()
+    val request = requestBuilderForAuthenticatedMethods(httpUrl).get().build()
 
     val type = Types.newParameterizedType(
         RestResult::class.java,
@@ -176,7 +176,7 @@ suspend fun RocketChatClient.getFiles(
         .addQueryParameter("sort", "{\"uploadedAt\":-1}")
         .build()
 
-    val request = requestBuilder(httpUrl).get().build()
+    val request = requestBuilderForAuthenticatedMethods(httpUrl).get().build()
 
     val type = Types.newParameterizedType(
         RestResult::class.java,
@@ -206,7 +206,7 @@ suspend fun RocketChatClient.getInfo(
             .addQueryParameter("roomName", roomName)
             .build()
 
-    val request = requestBuilder(url).get().build()
+    val request = requestBuilderForAuthenticatedMethods(url).get().build()
 
     val type = Types.newParameterizedType(RestResult::class.java, Room::class.java)
     return@withContext handleRestCall<RestResult<Room>>(request, type).result()
@@ -226,7 +226,7 @@ suspend fun RocketChatClient.markAsRead(roomId: String) {
         val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
         val url = requestUrl(restUrl, "subscriptions.read").build()
-        val request = requestBuilder(url).post(body).build()
+        val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
         handleRestCall<Any>(request, Any::class.java)
     }
@@ -241,7 +241,7 @@ suspend fun RocketChatClient.joinChat(roomId: String): Boolean = withContext(Com
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, "channels.join").build()
-    val request = requestBuilder(url).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
@@ -265,7 +265,7 @@ suspend fun RocketChatClient.leaveChat(
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "leave")).build()
-    val request = requestBuilder(url).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
@@ -291,7 +291,7 @@ suspend fun RocketChatClient.rename(
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "rename")).build()
-    val request = requestBuilder(url).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
@@ -317,7 +317,7 @@ suspend fun RocketChatClient.setReadOnly(
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "setReadOnly")).build()
-    val request = requestBuilder(url).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
@@ -343,7 +343,7 @@ suspend fun RocketChatClient.setType(
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "setType")).build()
-    val request = requestBuilder(url).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
@@ -369,7 +369,7 @@ suspend fun RocketChatClient.setJoinCode(
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "setJoinCode")).build()
-    val request = requestBuilder(url).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
@@ -395,7 +395,7 @@ suspend fun RocketChatClient.setTopic(
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "setTopic")).build()
-    val request = requestBuilder(url).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
@@ -421,7 +421,7 @@ suspend fun RocketChatClient.setDescription(
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "setDescription")).build()
-    val request = requestBuilder(url).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
@@ -447,7 +447,7 @@ suspend fun RocketChatClient.setAnnouncement(
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "setAnnouncement")).build()
-    val request = requestBuilder(url).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
@@ -474,7 +474,7 @@ suspend fun RocketChatClient.archive(
 
     val method: String = if (archiveRoom) "archive" else "unarchive"
     val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, method)).build()
-    val request = requestBuilder(url).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
@@ -501,7 +501,7 @@ suspend fun RocketChatClient.hide(
 
     val method: String = if (hideRoom) "close" else "open"
     val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, method)).build()
-    val request = requestBuilder(url).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
@@ -524,7 +524,7 @@ suspend fun RocketChatClient.favorite(
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, "rooms.favorite").build()
-    val request = requestBuilder(url).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
@@ -546,7 +546,7 @@ suspend fun RocketChatClient.chatRoomRoles(
         .addQueryParameter("roomName", roomName)
         .build()
 
-    val request = requestBuilder(httpUrl).get().build()
+    val request = requestBuilderForAuthenticatedMethods(httpUrl).get().build()
 
     val type = Types.newParameterizedType(
         RestResult::class.java,

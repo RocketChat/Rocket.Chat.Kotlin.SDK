@@ -31,7 +31,7 @@ suspend fun RocketChatClient.createChannel(
 
     val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "create")).build()
 
-    val request = requestBuilder(url).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
     val type = Types.newParameterizedType(RestResult::class.java, Room::class.java)
 
     return@withContext handleRestCall<RestResult<Room>>(request, type).result()

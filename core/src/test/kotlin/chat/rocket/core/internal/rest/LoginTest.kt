@@ -48,6 +48,7 @@ class LoginTest {
         sut = RocketChatClient.create {
             httpClient = client
             restUrl = mockServer.url("/")
+            userAgent = "Rocket.Chat.Kotlin.SDK"
             tokenRepository = this@LoginTest.tokenProvider
             platformLogger = PlatformLogger.NoOpLogger()
         }

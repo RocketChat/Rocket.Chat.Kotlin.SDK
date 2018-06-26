@@ -10,6 +10,6 @@ suspend fun RocketChatClient.spotlight(query: String): SpotlightResult = withCon
             .addQueryParameter("query", query)
             .build()
 
-    val request = requestBuilder(httpUrl).get().build()
+    val request = requestBuilderForAuthenticatedMethods(httpUrl).get().build()
     return@withContext handleRestCall<SpotlightResult>(request, SpotlightResult::class.java)
 }
