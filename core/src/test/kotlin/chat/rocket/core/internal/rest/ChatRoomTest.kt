@@ -319,7 +319,7 @@ class ChatRoomTest {
     }
 
     @Test
-    fun `open() should succeed without throwing`() {
+    fun `hide() (as false) should succeed without throwing`() {
         mockServer.expect()
             .post()
             .withPath("/api/v1/channels.open")
@@ -336,7 +336,7 @@ class ChatRoomTest {
     }
 
     @Test
-    fun `close() should succeed without throwing`() {
+    fun `hide() (as true) should succeed without throwing`() {
         mockServer.expect()
             .post()
             .withPath("/api/v1/channels.close")
@@ -348,6 +348,34 @@ class ChatRoomTest {
                 roomId = "GENERAL", roomType = roomTypeOf(RoomType.CHANNEL),
                 hideRoom = true
             )
+            assertTrue(result)
+        }
+    }
+
+    @Test
+    fun `favorite() (as false) should succeed without throwing`() {
+        mockServer.expect()
+            .post()
+            .withPath("/api/v1/rooms.favorite")
+            .andReturn(200, SUCCESS)
+            .once()
+
+        runBlocking {
+            val result = sut.favorite(roomId = "GENERAL", favorite = false)
+            assertTrue(result)
+        }
+    }
+
+    @Test
+    fun `favorite() (as true) should succeed without throwing`() {
+        mockServer.expect()
+            .post()
+            .withPath("/api/v1/rooms.favorite")
+            .andReturn(200, SUCCESS)
+            .once()
+
+        runBlocking {
+            val result = sut.favorite(roomId = "GENERAL", favorite = true)
             assertTrue(result)
         }
     }

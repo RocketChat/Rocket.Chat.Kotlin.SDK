@@ -12,6 +12,7 @@ import chat.rocket.core.internal.model.ChatRoomPayload
 import chat.rocket.core.internal.model.ChatRoomReadOnlyPayload
 import chat.rocket.core.internal.model.ChatRoomTopicPayload
 import chat.rocket.core.internal.model.ChatRoomTypePayload
+import chat.rocket.core.internal.model.ChatRoomFavoritePayload
 import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.model.RoomIdPayload
 import chat.rocket.core.model.ChatRoomRole
@@ -500,6 +501,29 @@ suspend fun RocketChatClient.hide(
 
     val method: String = if (hideRoom) "close" else "open"
     val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, method)).build()
+    val request = requestBuilder(url).post(body).build()
+
+    return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
+}
+
+/**
+ * Favorites or unfavorites a chat room.
+ *
+ * @param roomId The ID of the room.
+ * @param favorite The value to favorite(true)/unfavorite(false) the chat room.
+ *
+ * @return Whether the task was successful or not.
+ */
+suspend fun RocketChatClient.favorite(
+    roomId: String,
+    favorite: Boolean
+) = withContext(CommonPool) {
+    val payload = ChatRoomFavoritePayload(roomId, favorite)
+    val adapter = moshi.adapter(ChatRoomFavoritePayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val url = requestUrl(restUrl, "rooms.favorite").build()
     val request = requestBuilder(url).post(body).build()
 
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
