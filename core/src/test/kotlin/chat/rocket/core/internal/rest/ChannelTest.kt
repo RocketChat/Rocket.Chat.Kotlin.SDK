@@ -21,14 +21,10 @@ import org.mockito.MockitoAnnotations
 import org.hamcrest.CoreMatchers.`is` as isEqualTo
 
 class ChannelTest {
-
     private lateinit var mockServer: DefaultMockServer
-
     private lateinit var sut: RocketChatClient
-
     @Mock
     private lateinit var tokenProvider: TokenRepository
-
     private val authToken = Token("userId", "authToken")
 
     @Before
@@ -42,6 +38,7 @@ class ChannelTest {
         sut = RocketChatClient.create {
             httpClient = client
             restUrl = mockServer.url("/")
+            userAgent = "Rocket.Chat.Kotlin.SDK"
             tokenRepository = this@ChannelTest.tokenProvider
             platformLogger = PlatformLogger.NoOpLogger()
         }
@@ -51,27 +48,37 @@ class ChannelTest {
     @Test
     fun `createChannel() should successfully create new channel`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/channels.create")
-                .andReturn(200, CREATE_CHANNEL_SUCCESS)
-                .once()
+            .post()
+            .withPath("/api/v1/channels.create")
+            .andReturn(200, CREATE_CHANNEL_SUCCESS)
+            .once()
 
         runBlocking {
-                sut.createChannel(roomType = RoomType.Channel(), name = "duplicate", usersList = listOf("aniket03"), readOnly = false)
+            sut.createChannel(
+                roomType = RoomType.Channel(),
+                name = "duplicate",
+                usersList = listOf("aniket03"),
+                readOnly = false
+            )
         }
     }
 
     @Test
     fun `createChannel() should fail as a result of duplicate channel`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/channels.create")
-                .andReturn(400, FAIL_DUPLICATE_CHANNEL)
-                .once()
+            .post()
+            .withPath("/api/v1/channels.create")
+            .andReturn(400, FAIL_DUPLICATE_CHANNEL)
+            .once()
 
         runBlocking {
             try {
-                val createChannel = sut.createChannel(roomType = RoomType.Channel(), name = "elf", usersList = listOf("aniket03"), readOnly = false)
+                sut.createChannel(
+                    roomType = RoomType.Channel(),
+                    name = "elf",
+                    usersList = listOf("aniket03"),
+                    readOnly = false
+                )
                 throw RocketChatException("unreachable code")
             } catch (ex: Exception) {
                 assertThat(ex.message, isEqualTo("A channel with name 'elf' exists [error-duplicate-channel-name]"))
@@ -82,14 +89,19 @@ class ChannelTest {
     @Test
     fun `createChannel() should fail with RocketChatAuthException if not logged in`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/channels.create")
-                .andReturn(401, MUST_BE_LOGGED_ERROR)
-                .once()
+            .post()
+            .withPath("/api/v1/channels.create")
+            .andReturn(401, MUST_BE_LOGGED_ERROR)
+            .once()
 
         runBlocking {
             try {
-                sut.createChannel(roomType = RoomType.Channel(), name = "elf", usersList = listOf("aniket03"), readOnly = false)
+                sut.createChannel(
+                    roomType = RoomType.Channel(),
+                    name = "elf",
+                    usersList = listOf("aniket03"),
+                    readOnly = false
+                )
                 throw RocketChatException("unreachable code")
             } catch (ex: Exception) {
                 assertThat(ex, isEqualTo(instanceOf(RocketChatAuthException::class.java)))

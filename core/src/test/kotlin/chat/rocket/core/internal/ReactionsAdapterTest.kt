@@ -50,6 +50,7 @@ class ReactionsAdapterTest {
         val rocket = RocketChatClient.create {
             httpClient = client
             restUrl = "http://8.8.8.8"
+            userAgent = "Rocket.Chat.Kotlin.SDK"
             tokenRepository = tokenProvider
             platformLogger = PlatformLogger.NoOpLogger()
         }

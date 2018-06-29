@@ -38,6 +38,7 @@ class PermissionsTest {
         sut = RocketChatClient.create {
             httpClient = client
             restUrl = mockServer.url("/")
+            userAgent = "Rocket.Chat.Kotlin.SDK"
             tokenRepository = this@PermissionsTest.tokenProvider
             platformLogger = PlatformLogger.NoOpLogger()
         }

@@ -40,6 +40,7 @@ class LogoutTest {
         sut = RocketChatClient.create {
             httpClient = client
             restUrl = mockServer.url("/")
+            userAgent = "Rocket.Chat.Kotlin.SDK"
             tokenRepository = this@LogoutTest.tokenProvider
             platformLogger = PlatformLogger.NoOpLogger()
         }

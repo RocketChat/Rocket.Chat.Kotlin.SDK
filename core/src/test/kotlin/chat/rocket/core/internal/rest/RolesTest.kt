@@ -69,6 +69,7 @@ class RolesTest {
         sut = RocketChatClient.create {
             httpClient = client
             restUrl = mockServer.url("/")
+            userAgent = "Rocket.Chat.Kotlin.SDK"
             tokenRepository = this@RolesTest.tokenProvider
             platformLogger = PlatformLogger.NoOpLogger()
         }

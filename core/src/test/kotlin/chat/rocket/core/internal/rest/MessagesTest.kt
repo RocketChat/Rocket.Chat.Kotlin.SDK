@@ -44,6 +44,7 @@ class MessagesTest {
         sut = RocketChatClient.create {
             httpClient = client
             restUrl = mockServer.url("/")
+            userAgent = "Rocket.Chat.Kotlin.SDK"
             tokenRepository = this@MessagesTest.tokenProvider
             platformLogger = PlatformLogger.NoOpLogger()
         }

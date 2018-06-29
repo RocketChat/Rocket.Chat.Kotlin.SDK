@@ -46,10 +46,7 @@ class Socket(
         .addHeader("Accept-Encoding", "gzip, deflate, sdch")
         .addHeader("Accept-Language", "en-US,en;q=0.8")
         .addHeader("Pragma", "no-cache")
-        .addHeader(
-            "User-Agent",
-            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36"
-        )
+        .header("User-Agent", client.agent)
         .build()
 
     private val httpClient = client.httpClient

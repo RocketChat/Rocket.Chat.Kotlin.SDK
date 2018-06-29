@@ -10,7 +10,6 @@ import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
 import okhttp3.HttpUrl
-import okhttp3.Request
 
 suspend fun RocketChatClient.serverInfo(): ServerInfo = withContext(CommonPool) {
     val url = restUrl.newBuilder()
@@ -18,7 +17,7 @@ suspend fun RocketChatClient.serverInfo(): ServerInfo = withContext(CommonPool) 
         .addPathSegment("info")
         .build()
 
-    val request = Request.Builder().url(url).get().build()
+    val request = requestBuilder(url).get().build()
 
     val response = handleRequest(request)
     val responseUrl = response.request().url()
@@ -32,10 +31,10 @@ private fun HttpUrl.baseUrl(): HttpUrl {
     val segments = pathSegments()
     val info = segments.indexOf("info")
     val api = segments.indexOf("api")
-    return newBuilder()
-            .removePathSegment(info)
-            .removePathSegment(api)
-            .build()
+
+    return newBuilder().removePathSegment(info)
+        .removePathSegment(api)
+        .build()
 }
 
 suspend fun RocketChatClient.configurations(): Map<String, Map<String, String>> = withContext(CommonPool) {
@@ -45,7 +44,7 @@ suspend fun RocketChatClient.configurations(): Map<String, Map<String, String>> 
         addPathSegment("service.configurations")
     }.build()
 
-    val request = Request.Builder().url(url).get().build()
+    val request = requestBuilder(url).get().build()
 
     val payload = handleRestCall<ConfigurationsPayload>(
         request,
@@ -79,7 +78,7 @@ suspend fun RocketChatClient.settingsOauth(): SettingsOauth = withContext(Common
         .addPathSegment("settings.oauth")
         .build()
 
-    val request = Request.Builder().url(url).get().build()
+    val request = requestBuilder(url).get().build()
 
     handleRestCall<SettingsOauth>(request, SettingsOauth::class.java)
 }
@@ -98,7 +97,7 @@ suspend fun RocketChatClient.settings(vararg filter: String): Map<String, Value<
         }
     }.build()
 
-    val request = Request.Builder().url(url).get().build()
+    val request = requestBuilder(url).get().build()
 
     val type = Types.newParameterizedType(
         Map::class.java, String::class.java,
