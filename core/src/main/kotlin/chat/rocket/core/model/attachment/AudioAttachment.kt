@@ -5,6 +5,7 @@ import com.squareup.moshi.Json
 data class AudioAttachment(
     override val title: String?,
     override val description: String?,
+    override val text: String?,
     @Json(name = "title_link") override val titleLink: String?,
     @Json(name = "title_link_download") override val titleLinkDownload: Boolean?,
     @Json(name = "audio_url") private val audioUrl: String,
