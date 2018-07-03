@@ -11,6 +11,7 @@ import se.ansman.kotshi.JsonSerializable
 data class Meta(
     val title: String?,
     val description: String?,
+    val text: String?,
     val imageUrl: String?,
     val raw: Map<String, String>
 )
@@ -24,9 +25,10 @@ class MetaJsonAdapter(moshi: Moshi) : JsonAdapter<Meta>() {
         rawMeta?.let {
             val title = getTitle(rawMeta)
             val description = getDescription(rawMeta)
+            val text = getText(rawMeta)
             val imageUrl = getImageUrl(rawMeta)
 
-            return Meta(title, description, imageUrl, rawMeta)
+            return Meta(title, description, text, imageUrl, rawMeta)
         }
 
         return null
@@ -47,6 +49,11 @@ class MetaJsonAdapter(moshi: Moshi) : JsonAdapter<Meta>() {
         rawMeta["twitterDescription"]?.let { return it }
         rawMeta["description"]?.let { return it }
         rawMeta["sailthruDescription"]?.let { return it }
+        return null
+    }
+
+    private fun getText(rawMeta: Map<String, String>): String? {
+        rawMeta["text"]?.let { return it }
         return null
     }
 
