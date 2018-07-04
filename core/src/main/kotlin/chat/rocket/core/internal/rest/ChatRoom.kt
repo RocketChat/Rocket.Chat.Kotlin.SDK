@@ -530,6 +530,33 @@ suspend fun RocketChatClient.favorite(
 }
 
 /**
+ * Search for messages in a channel by id and text message.
+ *
+ * @param roomId The ID of the room.
+ * @param searchText The text message to search in messages.
+ * @return The list of messages that satisfy the [searchText] term.
+ */
+suspend fun RocketChatClient.searchMessages(
+    roomId: String,
+    searchText: String
+): PagedResult<List<Message>> = withContext(CommonPool) {
+    val httpUrl = requestUrl(restUrl, "chat.search")
+        .addQueryParameter("roomId", roomId)
+        .addQueryParameter("searchText", searchText)
+        .build()
+
+    val request = requestBuilderForAuthenticatedMethods(httpUrl).get().build()
+
+    val type = Types.newParameterizedType(
+        RestResult::class.java,
+        Types.newParameterizedType(List::class.java, Message::class.java)
+    )
+
+    val result = handleRestCall<RestResult<List<Message>>>(request, type)
+    return@withContext PagedResult<List<Message>>(result.result(), result.total() ?: 0, result.offset() ?: 0)
+}
+
+/**
  * Return a list of users in a channel [roomName] that have roles other than 'user' on it.
  *
  * @param roomType Type of the room (DIRECT, GROUP, CHANNEL, etc)
