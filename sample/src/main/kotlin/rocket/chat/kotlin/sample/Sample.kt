@@ -67,7 +67,7 @@ fun main(args: Array<String>) {
     // using coroutines
     val job = launch(CommonPool) {
 
-        val token = client.login("", "")
+        val token = client.login("luciofm-testing", "vpnfe5lnv!")
         logger.debug("Token: userId = ${token.userId} - authToken = ${token.authToken}")
 
         launch {
