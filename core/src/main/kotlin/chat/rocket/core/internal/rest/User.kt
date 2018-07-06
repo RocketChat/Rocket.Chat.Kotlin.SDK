@@ -15,6 +15,7 @@ import chat.rocket.core.internal.model.OwnBasicInformationPayload
 import chat.rocket.core.internal.model.OwnBasicInformationPayloadData
 import chat.rocket.core.model.ChatRoom
 import chat.rocket.core.model.Myself
+import chat.rocket.core.model.Removed
 import chat.rocket.core.model.UserRole
 import chat.rocket.core.model.Room
 import com.squareup.moshi.Types
@@ -172,7 +173,7 @@ suspend fun RocketChatClient.setAvatar(avatarUrl: String): Boolean {
  * @param timestamp Timestamp of the last call to get only updates and removes, defaults to 0 which loads all rooms
  * @param filterCustom Filter custom rooms from the response, default true
  */
-suspend fun RocketChatClient.chatRooms(timestamp: Long = 0, filterCustom: Boolean = true): RestMultiResult<List<ChatRoom>> {
+suspend fun RocketChatClient.chatRooms(timestamp: Long = 0, filterCustom: Boolean = true): RestMultiResult<List<ChatRoom>, List<Removed>> {
     val rooms = async { listRooms(timestamp) }
     val subscriptions = async { listSubscriptions(timestamp) }
 
@@ -191,12 +192,12 @@ suspend fun RocketChatClient.roles(): UserRole = withContext(CommonPool) {
 }
 
 internal fun RocketChatClient.combine(
-    rooms: RestMultiResult<List<Room>>,
-    subscriptions: RestMultiResult<List<Subscription>>,
+    rooms: RestMultiResult<List<Room>, List<Removed>>,
+    subscriptions: RestMultiResult<List<Subscription>, List<Removed>>,
     filterCustom: Boolean
-): RestMultiResult<List<ChatRoom>> {
+): RestMultiResult<List<ChatRoom>, List<Removed>> {
     val update = combine(rooms.update, subscriptions.update, filterCustom)
-    val remove = combine(rooms.remove, subscriptions.remove, filterCustom)
+    val remove = combineRemoved(rooms.remove, subscriptions.remove, filterCustom)
 
     logger.debug { "Rooms: update(${rooms.update.size}, remove(${rooms.remove.size}" }
     logger.debug { "Subscriptions: update(${subscriptions.update.size}, remove(${subscriptions.remove.size}" }
@@ -227,28 +228,50 @@ internal fun RocketChatClient.combine(rooms: List<Room>?, subscriptions: List<Su
     return chatRooms.filterNot { chatRoom -> filterCustom && chatRoom.type is RoomType.Custom }
 }
 
-internal suspend fun RocketChatClient.listSubscriptions(timestamp: Long = 0): RestMultiResult<List<Subscription>> {
-    val urlBuilder = requestUrl(restUrl, "subscriptions.get")
-    val date = CalendarISO8601Converter().fromTimestamp(timestamp)
-    urlBuilder.addQueryParameter("updatedAt", date)
+internal fun RocketChatClient.combineRemoved(rooms: List<Removed>?, subscriptions: List<Removed>?, filterCustom: Boolean): List<Removed> {
+    val map = HashMap<String, Removed>()
+    rooms?.forEach {
+        map[it.id] = it
+    }
 
-    val request = requestBuilderForAuthenticatedMethods(urlBuilder.build()).get().build()
+    val removed = ArrayList<Removed>(subscriptions?.size ?: 0)
 
-    val type = Types.newParameterizedType(RestMultiResult::class.java,
-            Types.newParameterizedType(List::class.java, Subscription::class.java))
-    val result = handleRestCall<RestMultiResult<List<Subscription>>>(request, type)
-    return result
+    subscriptions?.forEach {
+        val room = map[it.id]
+        val subscription = it
+        // In case of any inconsistency we just ignore the room/subscription...
+        // This should be a very, very rare situation, like the user leaving/joining a channel
+        // between the 2 calls.
+        room?.let {
+            removed.add(it)
+        }
+    }
+
+    return removed
 }
 
-internal suspend fun RocketChatClient.listRooms(timestamp: Long = 0): RestMultiResult<List<Room>> {
-    val urlBuilder = requestUrl(restUrl, "rooms.get")
+internal suspend fun RocketChatClient.listSubscriptions(timestamp: Long = 0): RestMultiResult<List<Subscription>, List<Removed>> {
+    val urlBuilder = requestUrl(restUrl, "subscriptions.get")
     val date = CalendarISO8601Converter().fromTimestamp(timestamp)
-    urlBuilder.addQueryParameter("updatedAt", date)
+    urlBuilder.addQueryParameter("updatedSince", date)
 
     val request = requestBuilderForAuthenticatedMethods(urlBuilder.build()).get().build()
 
     val type = Types.newParameterizedType(RestMultiResult::class.java,
-            Types.newParameterizedType(List::class.java, Room::class.java))
-    val result = handleRestCall<RestMultiResult<List<Room>>>(request, type)
-    return result
+            Types.newParameterizedType(List::class.java, Subscription::class.java),
+            Types.newParameterizedType(List::class.java, Removed::class.java))
+    return handleRestCall(request, type)
+}
+
+internal suspend fun RocketChatClient.listRooms(timestamp: Long = 0): RestMultiResult<List<Room>, List<Removed>> {
+    val urlBuilder = requestUrl(restUrl, "rooms.get")
+    val date = CalendarISO8601Converter().fromTimestamp(timestamp)
+    urlBuilder.addQueryParameter("updatedSince", date)
+
+    val request = requestBuilderForAuthenticatedMethods(urlBuilder.build()).get().build()
+
+    val type = Types.newParameterizedType(RestMultiResult::class.java,
+            Types.newParameterizedType(List::class.java, Room::class.java),
+            Types.newParameterizedType(List::class.java, Removed::class.java))
+    return handleRestCall(request, type)
 }

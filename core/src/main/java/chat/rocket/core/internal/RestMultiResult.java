@@ -15,20 +15,20 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-public class RestMultiResult<T> {
-    private T update;
-    private T remove;
+public class RestMultiResult<T1, T2> {
+    private T1 update;
+    private T2 remove;
 
-    private RestMultiResult(T update, T remove) {
+    private RestMultiResult(T1 update, T2 remove) {
         this.update = update;
         this.remove = remove;
     }
 
-    public T getUpdate(){
+    public T1 getUpdate(){
         return update;
     }
 
-    public T getRemove() {
+    public T2 getRemove() {
         return remove;
     }
 
@@ -40,33 +40,35 @@ public class RestMultiResult<T> {
                 '}';
     }
 
-    public static <T> RestMultiResult<T> create(T update, T remove) {
+    public static <T1, T2> RestMultiResult<T1, T2> create(T1 update, T2 remove) {
         return new RestMultiResult<>(update, remove);
     }
 
-    public static class MoshiJsonAdapter<T> extends JsonAdapter<RestMultiResult<T>> {
+    public static class MoshiJsonAdapter<T1, T2> extends JsonAdapter<RestMultiResult<T1, T2>> {
         private static final String[] NAMES = new String[] {"update", "remove"};
         private static final JsonReader.Options OPTIONS = JsonReader.Options.of(NAMES);
-        private final JsonAdapter<T> tAdaptper;
+        private final JsonAdapter<T1> t1Adaptper;
+        private final JsonAdapter<T2> t2Adaptper;
 
         MoshiJsonAdapter(Moshi moshi, Type[] types) {
-            this.tAdaptper = adapter(moshi, types[0]);
+            this.t1Adaptper = adapter(moshi, types[0]);
+            this.t2Adaptper = adapter2(moshi, types[1]);
         }
 
         @Nullable
         @Override
-        public RestMultiResult<T> fromJson(@NotNull JsonReader reader) throws IOException {
+        public RestMultiResult<T1, T2> fromJson(@NotNull JsonReader reader) throws IOException {
             reader.beginObject();
-            T update = null;
-            T remove = null;
+            T1 update = null;
+            T2 remove = null;
             while (reader.hasNext()) {
                 switch (reader.selectName(OPTIONS)) {
                     case 0: {
-                        update = this.tAdaptper.fromJson(reader);
+                        update = this.t1Adaptper.fromJson(reader);
                         break;
                     }
                     case 1: {
-                        remove = this.tAdaptper.fromJson(reader);
+                        remove = this.t2Adaptper.fromJson(reader);
                         break;
                     }
                     default: {
@@ -80,12 +82,16 @@ public class RestMultiResult<T> {
         }
 
         @Override
-        public void toJson(@NotNull JsonWriter writer, @Nullable RestMultiResult<T> value)
+        public void toJson(@NotNull JsonWriter writer, @Nullable RestMultiResult<T1, T2> value)
                 throws IOException {
 
         }
 
-        private JsonAdapter<T> adapter(Moshi moshi, Type adapterType) {
+        private JsonAdapter<T1> adapter(Moshi moshi, Type adapterType) {
+            return moshi.adapter(adapterType);
+        }
+
+        private JsonAdapter<T2> adapter2(Moshi moshi, Type adapterType) {
             return moshi.adapter(adapterType);
         }
     }
