@@ -1,7 +1,6 @@
 package chat.rocket.core.model.attachment
 
 import chat.rocket.common.internal.ISO8601Date
-import chat.rocket.common.model.User
 import com.squareup.moshi.Json
 import se.ansman.kotshi.JsonSerializable
 
@@ -11,8 +10,12 @@ data class GenericAttachment(
     val name: String?,
     val type: String?,
     val size: String?,
-    val user: User?,
+    val userId: String,
+    val user: UserData,
     val path: String?,
     @ISO8601Date
     val uploadedAt: Long?
 )
+
+@JsonSerializable
+data class UserData(val username: String?, val name: String?)
