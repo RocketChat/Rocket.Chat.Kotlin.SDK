@@ -95,6 +95,24 @@ sealed class MessageType {
     class Unspecified(val rawType: String) : MessageType()
 }
 
+fun MessageType?.asString(): String? {
+    return when(this) {
+        is MessageType.RoomNameChanged -> "r"
+        is MessageType.UserAdded -> "au"
+        is MessageType.UserRemoved -> "ru"
+        is MessageType.UserJoined -> "uj"
+        is MessageType.UserLeft -> "ul"
+        is MessageType.Welcome -> "wm"
+        is MessageType.MessageRemoved -> "rm"
+        is MessageType.MessagePinned -> "message_pinned"
+        is MessageType.UserMuted -> "user-muted"
+        is MessageType.UserUnMuted -> "user-unmuted"
+        is MessageType.SubscriptionRoleAdded -> "subscription-role-added"
+        is MessageType.SubscriptionRoleRemoved -> "subscription-role-removed"
+        else -> null
+    }
+}
+
 fun Message.isSystemMessage() = when (type) {
     is MessageType.MessageRemoved,
     is MessageType.UserJoined,
