@@ -193,6 +193,11 @@ class Socket(
             MessageType.ADDED, MessageType.UPDATED -> {
                 // FIXME - for now just set the state to connected
                 setState(State.Connected())
+
+                //Also process the message
+                if (message.type == MessageType.ADDED) {
+                    processSubscriptionsAdded(message, text)
+                }
             }
             MessageType.RESULT -> {
                 processLoginResult(text)
