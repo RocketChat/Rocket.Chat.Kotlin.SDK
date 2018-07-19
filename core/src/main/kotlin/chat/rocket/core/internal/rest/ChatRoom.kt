@@ -484,14 +484,14 @@ suspend fun RocketChatClient.archive(
  *
  * @param roomId The ID of the room.
  * @param roomType The type of the room.
- * @param hideRoom The hidden status of the room.
+ * @param hideRoom The hidden status of the room (default: true).
  *
  * @return Whether the task was successful or not.
  */
 suspend fun RocketChatClient.hide(
     roomId: String,
     roomType: RoomType,
-    hideRoom: Boolean
+    hideRoom: Boolean = true
 ) = withContext(CommonPool) {
     val payload = RoomIdPayload(roomId)
     val adapter = moshi.adapter(RoomIdPayload::class.java)
@@ -505,6 +505,19 @@ suspend fun RocketChatClient.hide(
 
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
+
+/**
+ * Shows a chat room
+ *
+ * @param roomId The ID of the room.
+ * @param roomType The type of the room.
+ *
+ * @return Whether the task was successful or not.
+ */
+suspend fun RocketChatClient.show(
+    roomId: String,
+    roomType: RoomType
+): Boolean = hide(roomId, roomType, false)
 
 /**
  * Favorites or unfavorites a chat room.
