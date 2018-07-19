@@ -228,6 +228,9 @@ class Socket(
             MessageType.READY -> {
                 processSubscriptionResult(text)
             }
+            MessageType.RESULT -> {
+                processMethodResult(text)
+            }
             MessageType.ERROR -> {
                 logger.info { "Error: ${message.errorReason}" }
             }
