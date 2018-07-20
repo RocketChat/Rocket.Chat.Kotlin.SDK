@@ -4,19 +4,16 @@ import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
-import com.nhaarman.mockito_kotlin.verify
 import io.fabric8.mockwebserver.DefaultMockServer
 import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.OkHttpClient
-import org.hamcrest.CoreMatchers.`is` as isEqualTo
-import org.hamcrest.MatcherAssert
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
+import org.hamcrest.CoreMatchers.`is` as isEqualTo
 
 class CustomEmojiTest {
 
@@ -426,7 +423,7 @@ class CustomEmojiTest {
             assertThat(customEmojis.size, isEqualTo(48))
             assertThat(customEmojis[0].name, isEqualTo("troll"))
             assertThat(customEmojis[1].name, isEqualTo("justdoit"))
-            assertThat(customEmojis[2].name, isEqualTo("fingerscrossed"))
+            assertThat(customEmojis[2].name, isEqualTo("headdesk"))
             assertThat(customEmojis[47].name, isEqualTo("kuririn"))
             assertThat(customEmojis[0].extension, isEqualTo("jpg"))
             assertThat(customEmojis[1].extension, isEqualTo("png"))
