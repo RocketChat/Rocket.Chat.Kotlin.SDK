@@ -260,7 +260,20 @@ internal suspend fun RocketChatClient.listSubscriptions(timestamp: Long = 0): Re
     val type = Types.newParameterizedType(RestMultiResult::class.java,
             Types.newParameterizedType(List::class.java, Subscription::class.java),
             Types.newParameterizedType(List::class.java, Removed::class.java))
-    return handleRestCall(request, type)
+
+    val response = handleRestCall<RestMultiResult<List<Subscription>, List<Removed>>>(request, type)
+
+    // Some subscriptions doesn't have a name, but just a fname (some livechats)
+    // Copy fname to name, and filter any subscription that still doesn't have a name
+    val subs = response.update.map { subscription ->
+        if (subscription.name == null && subscription.fullName != null) {
+            subscription.copy(name = subscription.fullName)
+        } else {
+            subscription
+        }
+    }.filterNot { subscription -> subscription.name.isNullOrEmpty() }
+
+    return RestMultiResult.create(subs, response.remove)
 }
 
 internal suspend fun RocketChatClient.listRooms(timestamp: Long = 0): RestMultiResult<List<Room>, List<Removed>> {

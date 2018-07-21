@@ -48,7 +48,7 @@ data class ChatRoom(
                 type = room.type,
                 user = room.user ?: subscription.user,
                 status = null,
-                name = room.name ?: subscription.name,
+                name = room.name ?: subscription.name!!, // we guarantee on listSubscriptions() that it has a name
                 fullName = room.fullName ?: subscription.fullName,
                 readonly = room.readonly,
                 updatedAt = room.updatedAt ?: subscription.updatedAt,

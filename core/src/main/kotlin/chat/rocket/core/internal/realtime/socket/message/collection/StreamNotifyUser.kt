@@ -48,7 +48,16 @@ private fun Socket.processRoomStream(state: String, data: JSONObject) {
 
 private fun Socket.processSubscriptionStream(state: String, data: JSONObject) {
     val adapter = moshi.adapter<Subscription>(Subscription::class.java)
-    val subscription = adapter.fromJson(data.toString())
+    val subscription = adapter.fromJson(data.toString())?.let { sub ->
+        // Filter subscriptions that don't have both name and fname
+        if (sub.name == null && sub.fullName == null) {
+            null
+        } else if (sub.name == null && sub.fullName != null) {
+            sub.copy(name = sub.fullName)
+        } else {
+            sub
+        }
+    }
 
     subscription?.apply {
         launch(parent = parentJob) {

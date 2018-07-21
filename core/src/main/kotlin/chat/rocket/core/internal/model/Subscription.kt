@@ -15,7 +15,7 @@ data class Subscription(
     @Json(name = "_id") override val id: String,
     @Json(name = "t") override val type: RoomType,
     @Json(name = "u") override val user: SimpleUser?,
-    val name: String,
+    val name: String?,
     @Json(name = "fname") override val fullName: String?,
     @Json(name = "ro") override val readonly: Boolean? = false,
     @Json(name = "ts") @ISO8601Date val timestamp: Long?,
