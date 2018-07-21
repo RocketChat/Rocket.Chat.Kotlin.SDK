@@ -271,7 +271,7 @@ internal suspend fun RocketChatClient.listSubscriptions(timestamp: Long = 0): Re
         } else {
             subscription
         }
-    }.filter { subscription -> subscription.name.isNullOrEmpty() }
+    }.filterNot { subscription -> subscription.name.isNullOrEmpty() }
 
     return RestMultiResult.create(subs, response.remove)
 }
