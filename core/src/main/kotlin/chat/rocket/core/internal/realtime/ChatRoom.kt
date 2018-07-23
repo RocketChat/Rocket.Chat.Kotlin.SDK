@@ -45,7 +45,11 @@ fun RocketChatClient.subscribeRoomMessages(roomId: String, callback: (Boolean, S
     }
 }
 
-suspend fun RocketChatClient.createDirectMessage(username: String) =
-    withContext(CommonPool) {
-        socket.send(createDirectMessage(socket.generateId(), username))
+fun RocketChatClient.createDirectMessage(username: String, callback: (Boolean, String) -> Unit): String {
+    with(socket) {
+        val id = generateId()
+        send(createDirectMessage(id, username))
+        subscriptionsMap[id] = callback
+        return id
     }
+}

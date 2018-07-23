@@ -69,6 +69,7 @@ class RolesTest {
         sut = RocketChatClient.create {
             httpClient = client
             restUrl = mockServer.url("/")
+            userAgent = "Rocket.Chat.Kotlin.SDK"
             tokenRepository = this@RolesTest.tokenProvider
             platformLogger = PlatformLogger.NoOpLogger()
         }
@@ -85,7 +86,7 @@ class RolesTest {
             .once()
 
         runBlocking {
-            val chatRoomRoles = sut.chatRoomRoles(roomType = RoomType.PRIVATE_GROUP, roomName = "private-general")
+            val chatRoomRoles = sut.chatRoomRoles(roomType = RoomType.PrivateGroup(), roomName = "private-general")
 
             println(chatRoomRoles)
 
@@ -128,7 +129,7 @@ class RolesTest {
             .once()
 
         runBlocking {
-            val chatRoomRoles = sut.chatRoomRoles(roomType = RoomType.CHANNEL, roomName = "general")
+            val chatRoomRoles = sut.chatRoomRoles(roomType = RoomType.Channel(), roomName = "general")
 
             assertThat(chatRoomRoles.size, isEqualTo(2))
 

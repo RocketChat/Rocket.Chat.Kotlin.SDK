@@ -34,6 +34,7 @@ import java.security.InvalidParameterException
 class RocketChatClient private constructor(
     internal val httpClient: OkHttpClient,
     baseUrl: String,
+    userAgent: String,
     internal val tokenRepository: TokenRepository,
     internal val logger: Logger
 ) {
@@ -55,6 +56,7 @@ class RocketChatClient private constructor(
 
     internal lateinit var restUrl: HttpUrl
     val url: String
+    val agent: String
     val roomsChannel = Channel<StreamMessage<Room>>()
     val subscriptionsChannel = Channel<StreamMessage<Subscription>>()
     val messagesChannel = Channel<Message>()
@@ -65,6 +67,7 @@ class RocketChatClient private constructor(
 
     init {
         url = sanitizeUrl(baseUrl)
+        agent = userAgent
 
         HttpUrl.parse(url)?.let {
             restUrl = it
@@ -94,6 +97,7 @@ class RocketChatClient private constructor(
     private constructor(builder: Builder) : this(
         builder.httpClient,
         builder.restUrl,
+        builder.userAgent,
         builder.tokenRepository,
         Logger(builder.platformLogger, builder.restUrl))
 
@@ -111,12 +115,15 @@ class RocketChatClient private constructor(
 
         lateinit var httpClient: OkHttpClient
         lateinit var restUrl: String
+        lateinit var userAgent: String
         lateinit var tokenRepository: TokenRepository
         lateinit var platformLogger: PlatformLogger
 
         fun httpClient(init: Builder.() -> OkHttpClient) = apply { httpClient = init() }
 
         fun restUrl(init: Builder.() -> String) = apply { restUrl = init() }
+
+        fun userAgent(init: Builder.() -> String) = apply { userAgent = init() }
 
         fun tokenRepository(init: Builder.() -> TokenRepository) = apply { tokenRepository = init() }
 

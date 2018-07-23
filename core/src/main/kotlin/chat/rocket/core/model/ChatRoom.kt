@@ -14,6 +14,7 @@ import kotlinx.coroutines.experimental.withContext
 
 data class ChatRoom(
     override val id: String,
+    val subscriptionId: String,
     override val type: RoomType,
     override val user: SimpleUser?,
     val status: UserStatus?,
@@ -32,6 +33,8 @@ data class ChatRoom(
     val open: Boolean,
     val alert: Boolean,
     val unread: Long,
+    val roles: List<String>?,
+    val archived: Boolean,
     val userMentions: Long?,
     val groupMentions: Long?,
     val lastMessage: Message?,
@@ -41,10 +44,11 @@ data class ChatRoom(
     companion object {
         fun create(room: Room, subscription: Subscription, client: RocketChatClient): ChatRoom {
             return ChatRoom(id = room.id,
+                subscriptionId = subscription.id,
                 type = room.type,
-                user = room.user,
+                user = room.user ?: subscription.user,
                 status = null,
-                name = room.name ?: subscription.name,
+                name = room.name ?: subscription.name!!, // we guarantee on listSubscriptions() that it has a name
                 fullName = room.fullName ?: subscription.fullName,
                 readonly = room.readonly,
                 updatedAt = room.updatedAt ?: subscription.updatedAt,
@@ -58,6 +62,8 @@ data class ChatRoom(
                 open = subscription.open,
                 alert = subscription.alert,
                 unread = subscription.unread,
+                roles = subscription.roles,
+                archived = subscription.archived,
                 userMentions = subscription.userMentions,
                 groupMentions = subscription.groupMentions,
                 lastMessage = room.lastMessage,
@@ -88,4 +94,12 @@ suspend fun ChatRoom.history(
 
 fun ChatRoom.subscribeMessages(callback: (Boolean, String) -> Unit): String {
     return client.subscribeRoomMessages(id, callback)
+}
+
+fun ChatRoom.userId(): String? {
+    if (type !is RoomType.DirectMessage) return null
+
+    return user?.id?.let { userId ->
+        id.replace(userId, "")
+    }
 }

@@ -2,15 +2,15 @@ package chat.rocket.core.internal.realtime.socket
 
 import chat.rocket.common.model.User
 import chat.rocket.core.RocketChatClient
-import chat.rocket.core.internal.realtime.socket.message.model.MessageType
-import chat.rocket.core.internal.realtime.socket.message.model.SocketMessage
 import chat.rocket.core.internal.model.Subscription
-import chat.rocket.core.internal.realtime.socket.model.ReconnectionStrategy
 import chat.rocket.core.internal.realtime.message.CONNECT_MESSAGE
 import chat.rocket.core.internal.realtime.message.pingMessage
 import chat.rocket.core.internal.realtime.message.pongMessage
-import chat.rocket.core.internal.realtime.socket.model.StreamMessage
+import chat.rocket.core.internal.realtime.socket.message.model.MessageType
+import chat.rocket.core.internal.realtime.socket.message.model.SocketMessage
+import chat.rocket.core.internal.realtime.socket.model.ReconnectionStrategy
 import chat.rocket.core.internal.realtime.socket.model.State
+import chat.rocket.core.internal.realtime.socket.model.StreamMessage
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room
@@ -46,10 +46,7 @@ class Socket(
         .addHeader("Accept-Encoding", "gzip, deflate, sdch")
         .addHeader("Accept-Language", "en-US,en;q=0.8")
         .addHeader("Pragma", "no-cache")
-        .addHeader(
-            "User-Agent",
-            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36"
-        )
+        .header("User-Agent", client.agent)
         .build()
 
     private val httpClient = client.httpClient
@@ -196,6 +193,11 @@ class Socket(
             MessageType.ADDED, MessageType.UPDATED -> {
                 // FIXME - for now just set the state to connected
                 setState(State.Connected())
+
+                //Also process the message
+                if (message.type == MessageType.ADDED) {
+                    processSubscriptionsAdded(message, text)
+                }
             }
             MessageType.RESULT -> {
                 processLoginResult(text)
@@ -225,6 +227,9 @@ class Socket(
             }
             MessageType.READY -> {
                 processSubscriptionResult(text)
+            }
+            MessageType.RESULT -> {
+                processMethodResult(text)
             }
             MessageType.ERROR -> {
                 logger.info { "Error: ${message.errorReason}" }

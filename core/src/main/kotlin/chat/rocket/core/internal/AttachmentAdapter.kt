@@ -138,16 +138,16 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 imagePreview?.let {
                     preview = "data:${imageType!!};base64,$it"
                 }
-                ImageAttachment(title, description, titleLink, titleLinkDownload, imageUrl, imageType, imageSize, preview)
+                ImageAttachment(title, description, text, titleLink, titleLinkDownload, imageUrl, imageType, imageSize, preview)
             }
             videoUrl != null -> {
-                VideoAttachment(title, description, titleLink, titleLinkDownload, videoUrl, videoType, videoSize)
+                VideoAttachment(title, description, text, titleLink, titleLinkDownload, videoUrl, videoType, videoSize)
             }
             audioUrl != null -> {
-                AudioAttachment(title, description, titleLink, titleLinkDownload, audioUrl, audioType, audioSize)
+                AudioAttachment(title, description, text, titleLink, titleLinkDownload, audioUrl, audioType, audioSize)
             }
             titleLink != null -> {
-                GenericFileAttachment(title, description, titleLink, titleLink, titleLinkDownload)
+                GenericFileAttachment(title, description, text, titleLink, titleLink, titleLinkDownload)
             }
             text != null && color != null && fallback != null -> {
                 ColorAttachment(color, text, fallback)
@@ -245,6 +245,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
         writer.beginObject()
         writer.name("title").value(attachment.title)
         writer.name("description").value(attachment.description)
+        writer.name("text").value(attachment.text)
         writer.name("title_link").value(attachment.titleLink)
         writer.name("title_link_download").value(attachment.titleLinkDownload)
         when (attachment) {

@@ -15,12 +15,13 @@ data class Subscription(
     @Json(name = "_id") override val id: String,
     @Json(name = "t") override val type: RoomType,
     @Json(name = "u") override val user: SimpleUser?,
-    val name: String,
+    val name: String?,
     @Json(name = "fname") override val fullName: String?,
     @Json(name = "ro") override val readonly: Boolean? = false,
     @Json(name = "ts") @ISO8601Date val timestamp: Long?,
     @Json(name = "ls") @ISO8601Date val lastSeen: Long?,
     @Json(name = "_updatedAt") @ISO8601Date override val updatedAt: Long?,
+    val roles: List<String>?,
     @Json(name = "default")
     @JsonDefaultValueBoolean(false)
     val isDefault: Boolean,
@@ -31,6 +32,8 @@ data class Subscription(
     val open: Boolean,
     @JsonDefaultValueBoolean(false)
     val alert: Boolean,
+    @JsonDefaultValueBoolean(false)
+    val archived: Boolean,
     @JsonDefaultValueLong(0)
     val unread: Long,
     @JsonDefaultValueLong(0)

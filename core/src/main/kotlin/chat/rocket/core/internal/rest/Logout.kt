@@ -10,7 +10,7 @@ import kotlinx.coroutines.experimental.withContext
 suspend fun RocketChatClient.logout() {
     withContext(CommonPool) {
         val httpUrl = requestUrl(restUrl, "logout").build()
-        val request = requestBuilder(httpUrl).get().build()
+        val request = requestBuilderForAuthenticatedMethods(httpUrl).get().build()
 
         handleRestCall<Any>(request, Any::class.java)
     }

@@ -69,3 +69,19 @@ internal fun Socket.processSubscriptionResult(message: String) {
         callback(true, subId)
     }
 }
+
+internal fun Socket.processMethodResult(message: String) {
+    val id: String
+    try {
+        val json = JSONObject(message)
+        id = json.getString("id")
+    } catch (ex: Exception) {
+        ex.printStackTrace()
+        return
+    }
+
+    val callback = subscriptionsMap.remove(id)
+    callback?.let {
+        callback(true, id)
+    }
+}

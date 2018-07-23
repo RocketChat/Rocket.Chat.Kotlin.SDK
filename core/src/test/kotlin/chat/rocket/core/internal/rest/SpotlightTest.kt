@@ -38,6 +38,7 @@ class SpotlightTest {
         sut = RocketChatClient.create {
             httpClient = client
             restUrl = mockServer.url("/")
+            userAgent = "Rocket.Chat.Kotlin.SDK"
             tokenRepository = this@SpotlightTest.tokenProvider
             platformLogger = PlatformLogger.NoOpLogger()
         }

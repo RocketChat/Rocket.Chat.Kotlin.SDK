@@ -10,7 +10,6 @@ import chat.rocket.common.RocketChatTwoFactorException
 import chat.rocket.common.internal.AuthenticationErrorMessage
 import chat.rocket.common.internal.ErrorMessage
 import chat.rocket.common.model.RoomType
-import chat.rocket.common.model.Token
 import chat.rocket.common.util.Logger
 import chat.rocket.core.RocketChatClient
 import com.squareup.moshi.JsonAdapter
@@ -45,13 +44,14 @@ internal fun requestUrl(baseUrl: HttpUrl, method: String): HttpUrl.Builder {
         .addPathSegment(method)
 }
 
-internal fun RocketChatClient.requestBuilder(httpUrl: HttpUrl): Request.Builder {
-    val builder = Request.Builder().url(httpUrl)
+internal fun RocketChatClient.requestBuilder(httpUrl: HttpUrl): Request.Builder =
+    Request.Builder().url(httpUrl).header("User-Agent", agent)
 
-    val token: Token? = tokenRepository.get(this.url)
-    token?.let {
-        builder.addHeader("X-Auth-Token", token.authToken)
-            .addHeader("X-User-Id", token.userId)
+internal fun RocketChatClient.requestBuilderForAuthenticatedMethods(httpUrl: HttpUrl): Request.Builder {
+    val builder = Request.Builder().url(httpUrl).header("User-Agent", agent)
+
+    tokenRepository.get(this.url)?.let {
+        builder.addHeader("X-Auth-Token", it.authToken).addHeader("X-User-Id", it.userId)
     }
 
     return builder

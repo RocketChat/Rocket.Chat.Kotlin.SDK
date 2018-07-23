@@ -19,7 +19,6 @@ import chat.rocket.core.internal.model.OauthData
 import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
-import okhttp3.Request
 import okhttp3.RequestBody
 
 /**
@@ -42,8 +41,7 @@ suspend fun RocketChatClient.login(username: String, password: String, pin: Stri
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, "login").build()
-
-    val request = Request.Builder().url(url).post(body).build()
+    val request = requestBuilder(url).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
     val result = handleRestCall<RestResult<Token>>(request, type).result()
@@ -73,8 +71,7 @@ suspend fun RocketChatClient.loginWithEmail(email: String, password: String, pin
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, "login").build()
-
-    val request = Request.Builder().url(url).post(body).build()
+    val request = requestBuilder(url).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
     val result = handleRestCall<RestResult<Token>>(request, type).result()
@@ -104,8 +101,7 @@ suspend fun RocketChatClient.loginWithLdap(username: String, password: String): 
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, "login").build()
-
-    val request = Request.Builder().url(url).post(body).build()
+    val request = requestBuilder(url).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
     val result = handleRestCall<RestResult<Token>>(request, type).result()
@@ -134,8 +130,7 @@ suspend fun RocketChatClient.loginWithCas(casCredential: String): Token = withCo
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, "login").build()
-
-    val request = Request.Builder().url(url).post(body).build()
+    val request = requestBuilder(url).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
     val result = handleRestCall<RestResult<Token>>(request, type).result()
@@ -164,8 +159,7 @@ suspend fun RocketChatClient.loginWithSaml(samlCredential: String): Token = with
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, "login").build()
-
-    val request = Request.Builder().url(url).post(body).build()
+    val request = requestBuilder(url).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
     val result = handleRestCall<RestResult<Token>>(request, type).result()
@@ -195,8 +189,7 @@ suspend fun RocketChatClient.loginWithOauth(credentialToken: String, credentialS
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, "login").build()
-
-    val request = Request.Builder().url(url).post(body).build()
+    val request = requestBuilder(url).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
     val result = handleRestCall<RestResult<Token>>(request, type).result()
@@ -233,7 +226,7 @@ suspend fun RocketChatClient.signup(
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, "users.register").build()
-    val request = Request.Builder().url(url).post(body).build()
+    val request = requestBuilder(url).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, User::class.java)
     handleRestCall<RestResult<User>>(request, type).result()
@@ -253,7 +246,7 @@ suspend fun RocketChatClient.forgotPassword(email: String): Boolean {
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, "users.forgotPassword").build()
-    val request = Request.Builder().url(url).post(body).build()
+    val request = requestBuilder(url).post(body).build()
 
     return handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }

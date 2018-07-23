@@ -5,6 +5,7 @@ import com.squareup.moshi.Json
 data class VideoAttachment(
     override val title: String?,
     override val description: String?,
+    override val text: String?,
     @Json(name = "title_link") override val titleLink: String?,
     @Json(name = "title_link_download") override val titleLinkDownload: Boolean?,
     @Json(name = "video_url") private val videoUrl: String,

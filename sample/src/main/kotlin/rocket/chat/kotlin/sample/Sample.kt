@@ -28,6 +28,7 @@ import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.experimental.suspendCancellableCoroutine
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
@@ -58,6 +59,7 @@ fun main(args: Array<String>) {
     val client = RocketChatClient.create {
         httpClient = okHttpClient
         restUrl = "https://unstable.rocket.chat"
+        userAgent = "Rocket.Chat.Kotlin.SDK"
         tokenRepository = SimpleTokenRepository()
         platformLogger = logger
     }
@@ -188,11 +190,12 @@ fun getMeInfoByRx(client: RocketChatClient) {
 }
 
 suspend fun showFavoriteMessage(client: RocketChatClient) {
-        val result = client.getFavoriteMessages("GENERAL", RoomType.CHANNEL, 0)
+        val result = client.getFavoriteMessages("GENERAL", RoomType.Channel(), 0)
         println("favoriteMessages: $result")
 }
+
 suspend fun showFileList(client: RocketChatClient) {
-        val result = client.getFiles("GENERAL", RoomType.CHANNEL, 0)
+        val result = client.getFiles("GENERAL", RoomType.Channel(), 0)
         println("Attachment from the File List: $result")
 }
 
