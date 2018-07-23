@@ -6,8 +6,6 @@ import chat.rocket.core.internal.realtime.message.activeUsersMessage
 import chat.rocket.core.internal.realtime.message.defaultStatusMessage
 import chat.rocket.core.internal.realtime.message.temporaryStatusMessage
 import chat.rocket.core.internal.realtime.message.userDataChangesMessage
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.withContext
 
 fun RocketChatClient.setDefaultStatus(status: UserStatus) {
     socket.send(defaultStatusMessage(socket.generateId(), status))
