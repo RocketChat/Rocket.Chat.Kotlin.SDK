@@ -6,14 +6,12 @@ import chat.rocket.core.internal.realtime.message.activeUsersMessage
 import chat.rocket.core.internal.realtime.message.defaultStatusMessage
 import chat.rocket.core.internal.realtime.message.temporaryStatusMessage
 import chat.rocket.core.internal.realtime.message.userDataChangesMessage
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.withContext
 
-suspend fun RocketChatClient.setDefaultStatus(status: UserStatus) = withContext(CommonPool) {
+fun RocketChatClient.setDefaultStatus(status: UserStatus) {
     socket.send(defaultStatusMessage(socket.generateId(), status))
 }
 
-suspend fun RocketChatClient.setTemporaryStatus(status: UserStatus) = withContext(CommonPool) {
+fun RocketChatClient.setTemporaryStatus(status: UserStatus) {
     when {
         (status is UserStatus.Online || status is UserStatus.Away) -> {
             socket.send(temporaryStatusMessage(socket.generateId(), status))
