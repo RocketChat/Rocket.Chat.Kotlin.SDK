@@ -241,7 +241,7 @@ class UserTest {
 
         runBlocking {
             val file = temporaryFolder.newFile("avatar.png")
-            val result = sut.setAvatar(file, "image/png")
+            val result = sut.setAvatar("avatarFileName", "image/png") { file.inputStream() }
             assert(result)
         }
     }

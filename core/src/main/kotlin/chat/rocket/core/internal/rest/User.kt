@@ -26,6 +26,7 @@ import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import java.io.File
+import java.io.InputStream
 
 /**
  * Returns the current logged user information, useful to check if the Token from TokenProvider
@@ -130,15 +131,16 @@ suspend fun RocketChatClient.resetAvatar(userId: String): Boolean {
  *
  * @return True if the avatar was setted up, false otherwise.
  */
-suspend fun RocketChatClient.setAvatar(file: File, mimeType: String): Boolean {
+suspend fun RocketChatClient.setAvatar(fileName: String, mimeType: String, inputStreamProvider: () -> InputStream?): Boolean {
     if (mimeType != "image/gif" && mimeType != "image/png" && mimeType != "image/jpeg" && mimeType != "image/bmp" && mimeType != "image/webp") {
         throw RocketChatException("Invalid image type $mimeType")
     }
 
     val body = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
-            .addFormDataPart("image", file.name,
-                    RequestBody.create(MediaType.parse(mimeType), file))
+            .addFormDataPart("image", fileName,
+                InputStreamRequestBody(MediaType.parse(mimeType), inputStreamProvider)
+            )
             .build()
 
     val httpUrl = requestUrl(restUrl, "users.setAvatar").build()
