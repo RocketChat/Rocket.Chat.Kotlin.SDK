@@ -20,7 +20,10 @@ import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.channels.SendChannel
 import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.isActive
 import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.newSingleThreadContext
+import kotlinx.coroutines.experimental.withContext
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
@@ -28,6 +31,7 @@ import okhttp3.WebSocketListener
 import okio.ByteString
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.coroutines.experimental.coroutineContext
 
 const val PING_INTERVAL = 15L
 
@@ -65,6 +69,8 @@ class Socket(
     private val currentId = AtomicInteger(1)
 
     internal val subscriptionsMap = HashMap<String, (Boolean, String) -> Unit>()
+
+    internal val connectionContext = newSingleThreadContext("connection-context")
 
     private val reconnectionStrategy =
         ReconnectionStrategy(Int.MAX_VALUE, 3000)
@@ -115,12 +121,17 @@ class Socket(
 
         if (reconnectionStrategy.numberOfAttempts < reconnectionStrategy.maxAttempts) {
             reconnectJob?.cancel()
-            reconnectJob = launch {
+            reconnectJob = launch(connectionContext) {
                 logger.debug {
                     "Reconnecting in: ${reconnectionStrategy.reconnectInterval}"
                 }
                 delayReconnection(reconnectionStrategy.reconnectInterval)
-                if (!isActive) return@launch
+                if (!isActive) {
+                    logger.debug {
+                        "Reconnect job inactive, ignoring"
+                    }
+                    return@launch
+                }
                 reconnectionStrategy.processAttempts()
                 connect()
             }
@@ -131,15 +142,20 @@ class Socket(
 
     private suspend fun delayReconnection(reconnectInterval: Int) {
         val seconds = reconnectInterval / 1000
-        async {
+        withContext(connectionContext) {
             for (second in 0..(seconds - 1)) {
-                if (!isActive) return@async
+                if (!coroutineContext.isActive) {
+                    logger.debug {
+                        "Reconnect job inactive, ignoring"
+                    }
+                    return@withContext
+                }
                 val left = seconds - second
                 logger.debug { "$left second(s) left" }
                 setState(State.Waiting(left))
                 delay(1000)
             }
-        }.await()
+        }
     }
 
     private fun processIncomingMessage(text: String) {
@@ -296,7 +312,7 @@ class Socket(
     }
 
     private fun sendState(state: State) {
-        launch {
+        launch(connectionContext) {
             for (channel in statusChannelList) {
                 logger.debug { "Sending $state to $channel" }
                 channel.send(state)
