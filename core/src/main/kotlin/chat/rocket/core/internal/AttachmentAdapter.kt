@@ -19,6 +19,9 @@ import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import chat.rocket.core.model.attachment.actions.Action
+import chat.rocket.core.model.attachment.actions.ActionsAttachment
+import chat.rocket.core.model.attachment.actions.ButtonAction
 import java.lang.reflect.Type
 
 class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<Attachment>() {
@@ -28,6 +31,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
     private val tsAdapter = moshi.adapter<Long>(Long::class.java, ISO8601Date::class.java)
     private val fieldAdapter = moshi.adapter<Field>(Field::class.java)
     private val colorAdapter = moshi.adapter<Color>(Color::class.java)
+    private val actionAdapter = moshi.adapter<ButtonAction>(ButtonAction::class.java)
 
     private val NAMES = arrayOf(
             "title",                // 0
@@ -55,7 +59,8 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
             "author_link",          // 22
             "image_preview",        // 23
             "fields",               // 24
-            "fallback"              // 25
+            "fallback",             // 25
+            "actions"               // 26
     )
 
     private val OPTIONS = JsonReader.Options.of(*NAMES)
@@ -91,6 +96,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
         var imagePreview: String? = null          // 23
         var fields: List<Field>? = null           // 24
         var fallback: String? = null              // 25
+        var actions: List<Action>? = null         // 26
 
         reader.beginObject()
         while (reader.hasNext()) {
@@ -121,6 +127,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 23 -> imagePreview = reader.nextStringOrNull()
                 24 -> fields = parseFields(reader)
                 25 -> fallback = reader.nextStringOrNull()
+                26 -> actions = parseActions(reader)
                 else -> {
                     val name = reader.nextName()
                     logger.debug {
@@ -157,6 +164,9 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
             }
             authorLink != null -> {
                 AuthorAttachment(authorLink, authorIcon, authorName, fields)
+            }
+            actions != null -> {
+                ActionsAttachment(title, actions)
             }
             else -> {
                 logger.debug {
@@ -204,6 +214,43 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
         }
     }
 
+    private fun parseActions(reader: JsonReader): List<Action>? {
+        return when {
+            reader.peek() == JsonReader.Token.NULL -> return reader.nextNull<List<Action>>()
+            reader.peek() == JsonReader.Token.BEGIN_ARRAY -> {
+                reader.beginArray()
+                if (reader.peek() == JsonReader.Token.NULL) {
+                    reader.skipValue()
+                    reader.endArray()
+                    return null
+                }
+                val list = ArrayList<Action>()
+                while (reader.hasNext()) {
+                    val action = actionAdapter.fromJson(reader)
+                    action?.let {
+                        list.add(it)
+                    }
+                }
+                reader.endArray()
+                list
+            }
+            reader.peek() == JsonReader.Token.BEGIN_OBJECT -> {
+                val list = ArrayList<Action>()
+                reader.beginObject()
+                val action = actionAdapter.fromJson(reader)
+                action?.let {
+                    list.add(it)
+                }
+                reader.endObject()
+                list
+            }
+            else -> {
+                reader.skipValue()
+                null
+            }
+        }
+    }
+
     override fun toJson(writer: JsonWriter, value: Attachment?) {
         if (value == null) {
             writer.nullValue()
@@ -213,6 +260,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 is MessageAttachment -> writeMessageAttachment(writer, value)
                 is FileAttachment -> writeFileAttachment(writer, value)
                 is AuthorAttachment -> writeAuthorAttachment(writer, value)
+                is ActionsAttachment -> writeActionsAttachment(writer, value)
             }
         }
     }
@@ -310,6 +358,37 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 writer.name("title").value(it.title)
                 writer.name("value").value(it.value)
                 writer.endObject()
+            }
+            writer.endArray()
+        }
+    }
+
+    private fun writeActionsAttachment(writer: JsonWriter, attachment: ActionsAttachment) {
+        writer.beginObject()
+        with(writer) {
+            name("title").value(attachment.title)
+            attachment.actions?.let { writeActions(writer, it) }
+        }
+        writer.endObject()
+    }
+
+    private fun writeActions(writer: JsonWriter, actions: List<Action>) {
+        if (actions.isNotEmpty()) {
+            writer.name("actions")
+            writer.beginArray()
+            actions.forEach {
+                if (it is ButtonAction) {
+                    writer.beginObject()
+                    writer.name("type").value(it.type)
+                    it.text?.run { writer.name("text").value(it.text) }
+                    it.url?.run { writer.name("url").value(it.url) }
+                    it.isWebView?.run { writer.name("is_webview").value(it.isWebView) }
+                    it.webViewHeightRatio?.run { writer.name("webview_height_ratio").value(it.webViewHeightRatio) }
+                    it.imageUrl?.run { writer.name("image_url").value(it.imageUrl) }
+                    it.message?.run { writer.name("msg").value(it.message) }
+                    it.isMessageInChatWindow?.run { writer.name("msg_in_chat_window").value(it.isMessageInChatWindow) }
+                    writer.endObject()
+                }
             }
             writer.endArray()
         }
