@@ -3,7 +3,7 @@ ext {
             kotlin       : '1.2.51',
             kotlinter    : '1.11.2',
             coroutine    : '0.23.1',
-            dokka        : '0.9.16',
+            dokka        : '0.9.17',
             kotshi       : '1.0.3',
             okhttp       : '3.10.0',
             moshi        : '1.6.0-SNAPSHOT'
