@@ -16,11 +16,13 @@ import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room
 import com.squareup.moshi.JsonAdapter
 import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.channels.SendChannel
 import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.isActive
 import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.newSingleThreadContext
+import kotlinx.coroutines.experimental.withContext
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
@@ -28,6 +30,7 @@ import okhttp3.WebSocketListener
 import okio.ByteString
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.coroutines.experimental.coroutineContext
 
 const val PING_INTERVAL = 15L
 
@@ -60,15 +63,14 @@ class Socket(
     internal var parentJob: Job? = null
     private var readJob: Job? = null
     private var pingJob: Job? = null
-    private var reconnectJob: Job? = null
     private var timeoutJob: Job? = null
     private val currentId = AtomicInteger(1)
 
     internal val subscriptionsMap = HashMap<String, (Boolean, String) -> Unit>()
 
-    private val reconnectionStrategy =
-        ReconnectionStrategy(Int.MAX_VALUE, 3000)
-
+    private val connectionContext = newSingleThreadContext("connection-context")
+    private val reconnectionStrategy = ReconnectionStrategy()
+    private var reconnectJob: Job? = null
     private var selfDisconnect = false
 
     init {
@@ -76,12 +78,16 @@ class Socket(
         messageAdapter = moshi.adapter(SocketMessage::class.java)
     }
 
-    internal fun connect() {
+    internal fun connect(resetCounter: Boolean = false) {
         selfDisconnect = false
         // reset id counter
         currentId.set(1)
         parentJob?.cancel()
         reconnectJob?.cancel()
+
+        if (resetCounter) {
+            reconnectionStrategy.reset()
+        }
 
         parentJob = Job()
         processingChannel = Channel()
@@ -113,16 +119,21 @@ class Socket(
 
         logger.info { "startReconnection" }
 
-        if (reconnectionStrategy.numberOfAttempts < reconnectionStrategy.maxAttempts) {
+        if (reconnectionStrategy.shouldRetry) {
             reconnectJob?.cancel()
-            reconnectJob = launch {
+            reconnectJob = launch(connectionContext) {
                 logger.debug {
                     "Reconnecting in: ${reconnectionStrategy.reconnectInterval}"
                 }
                 delayReconnection(reconnectionStrategy.reconnectInterval)
-                if (!isActive) return@launch
+                if (!isActive) {
+                    logger.debug {
+                        "Reconnect job inactive, ignoring"
+                    }
+                    return@launch
+                }
                 reconnectionStrategy.processAttempts()
-                connect()
+                connect(false)
             }
         } else {
             logger.info { "Exhausted reconnection attempts: ${reconnectionStrategy.numberOfAttempts} - ${reconnectionStrategy.maxAttempts}" }
@@ -131,15 +142,20 @@ class Socket(
 
     private suspend fun delayReconnection(reconnectInterval: Int) {
         val seconds = reconnectInterval / 1000
-        async {
+        withContext(connectionContext) {
             for (second in 0..(seconds - 1)) {
-                if (!isActive) return@async
+                if (!coroutineContext.isActive) {
+                    logger.debug {
+                        "Reconnect job inactive, ignoring"
+                    }
+                    return@withContext
+                }
                 val left = seconds - second
                 logger.debug { "$left second(s) left" }
                 setState(State.Waiting(left))
                 delay(1000)
             }
-        }.await()
+        }
     }
 
     private fun processIncomingMessage(text: String) {
@@ -296,7 +312,7 @@ class Socket(
     }
 
     private fun sendState(state: State) {
-        launch {
+        launch(connectionContext) {
             for (channel in statusChannelList) {
                 logger.debug { "Sending $state to $channel" }
                 channel.send(state)
@@ -319,7 +335,7 @@ class Socket(
                 processIncomingMessage(message)
             }
         }
-        reconnectionStrategy.numberOfAttempts = 0
+        reconnectionStrategy.reset()
         send(CONNECT_MESSAGE)
     }
 
@@ -355,8 +371,8 @@ class Socket(
     }
 }
 
-fun RocketChatClient.connect() {
-    socket.connect()
+fun RocketChatClient.connect(resetCounter: Boolean = false) {
+    socket.connect(resetCounter)
 }
 
 fun RocketChatClient.disconnect() {
