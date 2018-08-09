@@ -63,17 +63,14 @@ class Socket(
     internal var parentJob: Job? = null
     private var readJob: Job? = null
     private var pingJob: Job? = null
-    private var reconnectJob: Job? = null
     private var timeoutJob: Job? = null
     private val currentId = AtomicInteger(1)
 
     internal val subscriptionsMap = HashMap<String, (Boolean, String) -> Unit>()
 
-    internal val connectionContext = newSingleThreadContext("connection-context")
-
-    private val reconnectionStrategy =
-        ReconnectionStrategy(Int.MAX_VALUE, 3000)
-
+    private val connectionContext = newSingleThreadContext("connection-context")
+    private val reconnectionStrategy = ReconnectionStrategy()
+    private var reconnectJob: Job? = null
     private var selfDisconnect = false
 
     init {
@@ -81,12 +78,16 @@ class Socket(
         messageAdapter = moshi.adapter(SocketMessage::class.java)
     }
 
-    internal fun connect() {
+    internal fun connect(resetCounter: Boolean = false) {
         selfDisconnect = false
         // reset id counter
         currentId.set(1)
         parentJob?.cancel()
         reconnectJob?.cancel()
+
+        if (resetCounter) {
+            reconnectionStrategy.reset()
+        }
 
         parentJob = Job()
         processingChannel = Channel()
@@ -118,7 +119,7 @@ class Socket(
 
         logger.info { "startReconnection" }
 
-        if (reconnectionStrategy.numberOfAttempts < reconnectionStrategy.maxAttempts) {
+        if (reconnectionStrategy.shouldRetry) {
             reconnectJob?.cancel()
             reconnectJob = launch(connectionContext) {
                 logger.debug {
@@ -132,7 +133,7 @@ class Socket(
                     return@launch
                 }
                 reconnectionStrategy.processAttempts()
-                connect()
+                connect(false)
             }
         } else {
             logger.info { "Exhausted reconnection attempts: ${reconnectionStrategy.numberOfAttempts} - ${reconnectionStrategy.maxAttempts}" }
@@ -334,7 +335,7 @@ class Socket(
                 processIncomingMessage(message)
             }
         }
-        reconnectionStrategy.numberOfAttempts = 0
+        reconnectionStrategy.reset()
         send(CONNECT_MESSAGE)
     }
 
@@ -370,8 +371,8 @@ class Socket(
     }
 }
 
-fun RocketChatClient.connect() {
-    socket.connect()
+fun RocketChatClient.connect(resetCounter: Boolean = false) {
+    socket.connect(resetCounter)
 }
 
 fun RocketChatClient.disconnect() {
