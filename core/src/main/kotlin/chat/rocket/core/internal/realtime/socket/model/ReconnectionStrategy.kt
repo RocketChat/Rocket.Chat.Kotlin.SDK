@@ -1,7 +1,10 @@
 package chat.rocket.core.internal.realtime.socket.model
 
-open class ReconnectionStrategy(val maxAttempts: Int = INFINITE,
-                                private val interval: Int = DEFAULT_RECONNECT_INTERVAL) {
+open class ReconnectionStrategy(
+    val maxAttempts: Int = INFINITE,
+    private val interval: Int = DEFAULT_RECONNECT_INTERVAL
+) {
+
     var numberOfAttempts: Int = 0
 
     fun processAttempts() {
