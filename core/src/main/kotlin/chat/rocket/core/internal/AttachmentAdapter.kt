@@ -60,7 +60,8 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
             "image_preview",        // 23
             "fields",               // 24
             "fallback",             // 25
-            "actions"               // 26
+            "button_alignment",     // 26
+            "actions"               // 27
     )
 
     private val OPTIONS = JsonReader.Options.of(*NAMES)
@@ -96,7 +97,8 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
         var imagePreview: String? = null          // 23
         var fields: List<Field>? = null           // 24
         var fallback: String? = null              // 25
-        var actions: List<Action>? = null         // 26
+        var buttonAlignment: String? = null       // 26
+        var actions: List<Action>? = null         // 27
 
         reader.beginObject()
         while (reader.hasNext()) {
@@ -127,7 +129,8 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 23 -> imagePreview = reader.nextStringOrNull()
                 24 -> fields = parseFields(reader)
                 25 -> fallback = reader.nextStringOrNull()
-                26 -> actions = parseActions(reader)
+                26 -> buttonAlignment = reader.nextStringOrNull()
+                27 -> actions = parseActions(reader)
                 else -> {
                     val name = reader.nextName()
                     logger.debug {
@@ -166,7 +169,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 AuthorAttachment(authorLink, authorIcon, authorName, fields)
             }
             actions != null -> {
-                ActionsAttachment(title, actions)
+                ActionsAttachment(title, actions, buttonAlignment = buttonAlignment ?: "vertical")
             }
             else -> {
                 logger.debug {
@@ -367,6 +370,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
         writer.beginObject()
         with(writer) {
             name("title").value(attachment.title)
+            name("button_alignment").value(attachment.buttonAlignment)
             attachment.actions?.let { writeActions(writer, it) }
         }
         writer.endObject()
@@ -380,13 +384,13 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 if (it is ButtonAction) {
                     writer.beginObject()
                     writer.name("type").value(it.type)
-                    it.text?.run { writer.name("text").value(it.text) }
-                    it.url?.run { writer.name("url").value(it.url) }
-                    it.isWebView?.run { writer.name("is_webview").value(it.isWebView) }
-                    it.webViewHeightRatio?.run { writer.name("webview_height_ratio").value(it.webViewHeightRatio) }
-                    it.imageUrl?.run { writer.name("image_url").value(it.imageUrl) }
-                    it.message?.run { writer.name("msg").value(it.message) }
-                    it.isMessageInChatWindow?.run { writer.name("msg_in_chat_window").value(it.isMessageInChatWindow) }
+                    it.text?.let { writer.name("text").value(it) }
+                    it.url?.let { writer.name("url").value(it) }
+                    it.isWebView?.let { writer.name("is_webview").value(it) }
+                    it.webViewHeightRatio?.let { writer.name("webview_height_ratio").value(it) }
+                    it.imageUrl?.let { writer.name("image_url").value(it) }
+                    it.message?.let { writer.name("msg").value(it) }
+                    it.isMessageInChatWindow?.let { writer.name("msg_in_chat_window").value(it) }
                     writer.endObject()
                 }
             }
