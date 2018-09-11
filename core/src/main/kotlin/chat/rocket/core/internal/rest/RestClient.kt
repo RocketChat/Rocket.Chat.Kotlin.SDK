@@ -45,10 +45,13 @@ internal fun requestUrl(baseUrl: HttpUrl, method: String): HttpUrl.Builder {
 }
 
 internal fun RocketChatClient.requestBuilder(httpUrl: HttpUrl): Request.Builder =
-    Request.Builder().url(httpUrl).header("User-Agent", agent)
+    Request.Builder()
+        .url(httpUrl)
+        .header("User-Agent", agent)
+        .tag(Any())
 
 internal fun RocketChatClient.requestBuilderForAuthenticatedMethods(httpUrl: HttpUrl): Request.Builder {
-    val builder = Request.Builder().url(httpUrl).header("User-Agent", agent)
+    val builder = requestBuilder(httpUrl)
 
     tokenRepository.get(this.url)?.let {
         builder.addHeader("X-Auth-Token", it.authToken).addHeader("X-User-Id", it.userId)
@@ -195,9 +198,11 @@ private inline fun <T> CancellableContinuation<T>.tryResumeWithException(getter:
     resumeWithException(getter())
 }
 
-private fun OkHttpClient.cancel(tag: Any) {
-    dispatcher().queuedCalls().filter { tag == it.request().tag() }.forEach { it.cancel() }
-    dispatcher().runningCalls().filter { tag == it.request().tag() }.forEach { it.cancel() }
+private fun OkHttpClient.cancel(tag: Any?) {
+    tag?.let {
+        dispatcher().queuedCalls().filter { tag == it.request().tag() }.forEach { it.cancel() }
+        dispatcher().runningCalls().filter { tag == it.request().tag() }.forEach { it.cancel() }
+    }
 }
 
 internal val MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8")

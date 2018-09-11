@@ -9,6 +9,8 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'org.jetbrains.dokka'
 apply plugin: "org.jmailen.kotlinter"
 
+sourceCompatibility = JavaVersion.VERSION_1_8
+
 dependencies {
     compile project (':common')
 
