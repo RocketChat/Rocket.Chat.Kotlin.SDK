@@ -17,6 +17,10 @@ class ReactionsAdapter : JsonAdapter<Reactions>() {
             reader.endArray()
             return reactions
         }
+        if (reader.peek() == JsonReader.Token.NULL) {
+            reader.skipValue()
+            return reactions
+        }
         reader.beginObject()
         while (reader.hasNext()) {
             val usernames = mutableListOf<String>()
@@ -31,7 +35,7 @@ class ReactionsAdapter : JsonAdapter<Reactions>() {
                 reader.endArray()
             }
             reader.endObject()
-            reactions.put(shortname, usernames)
+            reactions[shortname] = usernames
         }
         reader.endObject()
         return reactions
