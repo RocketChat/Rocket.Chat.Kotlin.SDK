@@ -96,7 +96,7 @@ sealed class MessageType {
 }
 
 fun MessageType?.asString(): String? {
-    return when(this) {
+    return when (this) {
         is MessageType.RoomNameChanged -> "r"
         is MessageType.UserAdded -> "au"
         is MessageType.UserRemoved -> "ru"
