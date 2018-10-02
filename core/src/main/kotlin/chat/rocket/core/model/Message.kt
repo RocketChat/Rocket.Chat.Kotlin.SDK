@@ -92,6 +92,9 @@ sealed class MessageType {
     @Json(name = "subscription-role-removed")
     class SubscriptionRoleRemoved : MessageType()
 
+    @Json(name = "room_changed_privacy")
+    class RoomChangedPrivacy : MessageType()
+
     class Unspecified(val rawType: String) : MessageType()
 }
 
@@ -106,6 +109,7 @@ fun Message.isSystemMessage() = when (type) {
     is MessageType.UserUnMuted,
     is MessageType.SubscriptionRoleAdded,
     is MessageType.SubscriptionRoleRemoved,
+    is MessageType.RoomChangedPrivacy,
     is MessageType.MessagePinned -> true
     else -> false
 }
