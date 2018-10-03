@@ -367,7 +367,7 @@ class Socket(
             }
             launch(parent = parentJob) {
                 if (processingChannel == null || processingChannel?.isFull == true || processingChannel?.isClosedForSend == true) {
-                    logger.debug { "processing channel is in trouble... ${processingChannel} - full ${processingChannel?.isFull} - closedForSend ${processingChannel?.isClosedForSend}" }
+                    logger.debug { "processing channel is in trouble... $processingChannel - full ${processingChannel?.isFull} - closedForSend ${processingChannel?.isClosedForSend}" }
                 }
                 processingChannel?.send(it)
             }
