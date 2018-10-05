@@ -93,6 +93,9 @@ sealed class MessageType {
     @Json(name = "subscription-role-removed")
     class SubscriptionRoleRemoved : MessageType()
 
+    @Json(name = "room_changed_privacy")
+    class RoomChangedPrivacy : MessageType()
+
     class Unspecified(val rawType: String) : MessageType()
 }
 
@@ -110,6 +113,7 @@ fun MessageType?.asString(): String? {
         is MessageType.UserUnMuted -> "user-unmuted"
         is MessageType.SubscriptionRoleAdded -> "subscription-role-added"
         is MessageType.SubscriptionRoleRemoved -> "subscription-role-removed"
+        is MessageType.RoomChangedPrivacy -> "room_changed_privacy"
         else -> null
     }
 }
@@ -125,6 +129,7 @@ fun Message.isSystemMessage() = when (type) {
     is MessageType.UserUnMuted,
     is MessageType.SubscriptionRoleAdded,
     is MessageType.SubscriptionRoleRemoved,
+    is MessageType.RoomChangedPrivacy,
     is MessageType.MessagePinned -> true
     else -> false
 }
@@ -143,6 +148,7 @@ fun messageTypeOf(type: String?): MessageType? {
         "user-unmuted" -> MessageType.UserUnMuted()
         "subscription-role-added" -> MessageType.SubscriptionRoleAdded()
         "subscription-role-removed" -> MessageType.SubscriptionRoleAdded()
+        "room_changed_privacy" -> MessageType.RoomChangedPrivacy()
         null -> null
         else -> MessageType.Unspecified(type)
     }
