@@ -7,6 +7,7 @@ import chat.rocket.core.model.attachment.AudioAttachment
 import chat.rocket.core.model.attachment.AuthorAttachment
 import chat.rocket.core.model.attachment.Color
 import chat.rocket.core.model.attachment.ColorAttachment
+import chat.rocket.core.model.attachment.DEFAULT_COLOR
 import chat.rocket.core.model.attachment.Field
 import chat.rocket.core.model.attachment.FileAttachment
 import chat.rocket.core.model.attachment.GenericFileAttachment
@@ -160,13 +161,16 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
                 GenericFileAttachment(title, description, text, titleLink, titleLink, titleLinkDownload)
             }
             text != null && color != null && fallback != null -> {
-                ColorAttachment(color, text, fallback)
+                ColorAttachment(color, text, fallback, fields)
             }
             text != null -> {
                 MessageAttachment(authorName, authorIcon, text, thumbUrl, color, messageLink, attachments, timestamp)
             }
             authorLink != null -> {
                 AuthorAttachment(authorLink, authorIcon, authorName, fields)
+            }
+            fields != null -> {
+                ColorAttachment(color ?: DEFAULT_COLOR, text ?: "", fallback, fields)
             }
             actions != null -> {
                 ActionsAttachment(title, actions, buttonAlignment = buttonAlignment ?: "vertical")
@@ -274,6 +278,7 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
             name("color").value(attachment.color.rawColor)
             name("text").value(attachment.text)
             name("fallback").value(attachment.fallback)
+            attachment.fields?.let { writeFields(writer, it) }
         }
         writer.endObject()
     }
@@ -347,12 +352,12 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
             name("author_link").value(attachment.url)
             name("author_icon").value(attachment.authorIcon)
             name("author_name").value(attachment.authorName)
-            attachment.fields?.let { writeAuthorFields(writer, it) }
+            attachment.fields?.let { writeFields(writer, it) }
         }
         writer.endObject()
     }
 
-    private fun writeAuthorFields(writer: JsonWriter, fields: List<Field>) {
+    private fun writeFields(writer: JsonWriter, fields: List<Field>) {
         if (fields.isNotEmpty()) {
             writer.name("fields")
             writer.beginArray()

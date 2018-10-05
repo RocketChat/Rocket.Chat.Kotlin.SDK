@@ -57,12 +57,12 @@ class RocketChatClient private constructor(
     internal lateinit var restUrl: HttpUrl
     val url: String
     val agent: String
-    val roomsChannel = Channel<StreamMessage<Room>>()
-    val subscriptionsChannel = Channel<StreamMessage<Subscription>>()
-    val messagesChannel = Channel<Message>()
-    val userDataChannel = Channel<Myself>()
-    val activeUsersChannel = Channel<User>()
-    val typingStatusChannel = Channel<Pair<String, Boolean>>()
+    val roomsChannel = Channel<StreamMessage<Room>>(Channel.UNLIMITED)
+    val subscriptionsChannel = Channel<StreamMessage<Subscription>>(Channel.UNLIMITED)
+    val messagesChannel = Channel<Message>(Channel.UNLIMITED)
+    val userDataChannel = Channel<Myself>(Channel.UNLIMITED)
+    val activeUsersChannel = Channel<User>(Channel.UNLIMITED)
+    val typingStatusChannel = Channel<Pair<String, Boolean>>(Channel.UNLIMITED)
     internal val socket: Socket
 
     init {

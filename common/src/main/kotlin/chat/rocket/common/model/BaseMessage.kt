@@ -12,5 +12,5 @@ interface BaseMessage {
     val avatar: String?
     val mentions: List<SimpleUser>?
     val channels: List<SimpleRoom>?
-    val isTemporary: Boolean? //TODO: Remove after we have a db
+    val synced: Boolean? //TODO: Remove after we have a db
 }
