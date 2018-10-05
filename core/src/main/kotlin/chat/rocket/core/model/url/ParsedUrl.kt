@@ -4,13 +4,13 @@ import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
 data class ParsedUrl(
-    val host: String?,
-    val hash: String?,
-    val pathname: String?,
-    val protocol: String?,
-    val port: String?,
+    val host: String? = null,
+    val hash: String? = null,
+    val pathname: String? = null,
+    val protocol: String? = null,
+    val port: String? = null,
         // TODO - bring back the query value - it can be a MAP or a Single String. on the sdk will always be a Map
         // with a custom adapter
-    val search: String?,
-    val hostname: String?
+    val search: String? = null,
+    val hostname: String? = null
 )

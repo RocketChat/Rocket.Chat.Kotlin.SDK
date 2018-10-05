@@ -6,9 +6,9 @@ import se.ansman.kotshi.JsonSerializable
 @JsonSerializable
 data class Url(
     val url: String,
-    val meta: Meta?,
-    val headers: Map<String, String>?,
-    val parsedUrl: ParsedUrl?,
+    val meta: Meta? = null,
+    val headers: Map<String, String>? = null,
+    val parsedUrl: ParsedUrl? = null,
     @JsonDefaultValueBoolean(false)
-    val ignoreParse: Boolean
+    val ignoreParse: Boolean = false
 )

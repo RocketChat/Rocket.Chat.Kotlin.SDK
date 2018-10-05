@@ -8,7 +8,8 @@ import se.ansman.kotshi.JsonSerializable
 data class ColorAttachment(
     val color: Color,
     val text: String,
-    val fallback: String? = null
+    val fallback: String? = null,
+    val fields: List<Field>? = null
 ) : Attachment {
     override val url: String
         get() = "#$color"
@@ -16,9 +17,9 @@ data class ColorAttachment(
 
 @FallbackSealedClass(name = "Custom", fieldName = "colorValue")
 sealed class Color(val color: Int, val rawColor: String) {
-    @Json(name = "good") class Good : Color(0x35AC19, "good")
-    @Json(name = "warning") class Warning : Color(0xFCB316, "warning")
-    @Json(name = "danger") class Danger : Color(0xD30230, "danger")
+    @Json(name = "good") class Good : Color(parseColor("#35AC19"), "#35AC19")
+    @Json(name = "warning") class Warning : Color(parseColor("#FCB316"), "#FCB316")
+    @Json(name = "danger") class Danger : Color(parseColor("#D30230"), "#D30230")
     class Custom(private val colorValue: String) : Color(parseColor(colorValue), colorValue)
 
     override fun toString(): String {
@@ -26,18 +27,28 @@ sealed class Color(val color: Int, val rawColor: String) {
     }
 }
 
-private const val DEFAULT_COLOR = 0xA0A0A0
-private fun parseColor(rawColor: String): Int {
+private const val DEFAULT_COLOR_INT = 0xA0A0A0
+const val DEFAULT_COLOR_STR = "#A0A0A0"
+val DEFAULT_COLOR = Color.Custom(DEFAULT_COLOR_STR)
+
+fun String?.asColorInt() = parseColor(this ?: DEFAULT_COLOR_STR)
+fun String?.asColor() = Color.Custom(this ?: DEFAULT_COLOR_STR)
+
+private fun parseColor(toParseColor: String): Int {
+    var rawColor = toParseColor.toUpperCase()
+    if (rawColor.startsWith("0X")) {
+        rawColor = "#${rawColor.drop(2)}"
+    }
     return if (rawColor.startsWith('#')) {
-        var color = rawColor.substring(1).toLong(16)
-        if (rawColor.length == 7) {
+        var color = toParseColor.substring(1).toLong(16)
+        if (toParseColor.length == 7) {
             // Set the alpha value
             color = color or -0x1000000
-        } else if (rawColor.length != 9) {
-            color = DEFAULT_COLOR.toLong()
+        } else if (toParseColor.length != 9) {
+            color = DEFAULT_COLOR_INT.toLong()
         }
         color.toInt()
     } else {
-        DEFAULT_COLOR
+        DEFAULT_COLOR_INT
     }
 }

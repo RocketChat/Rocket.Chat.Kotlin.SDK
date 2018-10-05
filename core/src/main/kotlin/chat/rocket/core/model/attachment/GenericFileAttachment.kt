@@ -1,12 +1,12 @@
 package chat.rocket.core.model.attachment
 
 data class GenericFileAttachment(
-    override val title: String?,
-    override val description: String?,
-    override val text: String?,
-    override val titleLink: String?,
+    override val title: String? = null,
+    override val description: String? = null,
+    override val text: String? = null,
+    override val titleLink: String? = null,
     val fileUrl: String,
-    override val titleLinkDownload: Boolean?
+    override val titleLinkDownload: Boolean? = null
 ) : FileAttachment {
     override val url: String
         get() = fileUrl

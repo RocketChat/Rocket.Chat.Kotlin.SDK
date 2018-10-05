@@ -9,10 +9,10 @@ import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
 data class Meta(
-    val title: String?,
-    val description: String?,
-    val text: String?,
-    val imageUrl: String?,
+    val title: String? = null,
+    val description: String? = null,
+    val text: String? = null,
+    val imageUrl: String? = null,
     val raw: Map<String, String>
 )
 

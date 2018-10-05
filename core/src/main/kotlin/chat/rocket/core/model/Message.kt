@@ -20,37 +20,38 @@ data class Message(
     override val roomId: String,
     @JsonDefaultValueString("")
     @Json(name = "msg")
-    override val message: String,
+    override val message: String = "",
     @Json(name = "ts")
     @ISO8601Date
     override val timestamp: Long,
     @Json(name = "u")
-    override val sender: SimpleUser?,
+    override val sender: SimpleUser? = null,
     @Json(name = "_updatedAt")
     @ISO8601Date
-    override val updatedAt: Long?,
+    override val updatedAt: Long? = null,
     @ISO8601Date
-    override val editedAt: Long?,
-    override val editedBy: SimpleUser?,
+    override val editedAt: Long? = null,
+    override val editedBy: SimpleUser? = null,
     @Json(name = "alias")
-    override val senderAlias: String?,
-    override val avatar: String?,
+    override val senderAlias: String? = null,
+    override val avatar: String? = null,
     @Json(name = "t")
-    val type: MessageType?,
+    val type: MessageType? = null,
     @JsonDefaultValueBoolean(false)
-    val groupable: Boolean,
+    val groupable: Boolean = false,
     @JsonDefaultValueBoolean(false)
-    val parseUrls: Boolean,
-    val urls: List<Url>?,
-    override val mentions: List<SimpleUser>?,
-    override val channels: List<SimpleRoom>?,
-    val attachments: List<Attachment>?,
+    val parseUrls: Boolean = false,
+    val urls: List<Url>? = null,
+    override val mentions: List<SimpleUser>? = null,
+    override val channels: List<SimpleRoom>? = null,
+    val attachments: List<Attachment>? = null,
     @JsonDefaultValueBoolean(false)
-    val pinned: Boolean,
-    val starred: List<SimpleUser>?,
+    val pinned: Boolean = false,
+    val starred: List<SimpleUser>? = null,
     val reactions: Reactions? = null,
     val role: String? = null,
-    override val isTemporary: Boolean? = false, //TODO: Remove after we have a db
+    @JsonDefaultValueBoolean(true)
+    override val synced: Boolean = true, //TODO: Remove after we have a db
     val unread: Boolean? = null
 ) : BaseMessage
 
@@ -95,6 +96,24 @@ sealed class MessageType {
     class Unspecified(val rawType: String) : MessageType()
 }
 
+fun MessageType?.asString(): String? {
+    return when (this) {
+        is MessageType.RoomNameChanged -> "r"
+        is MessageType.UserAdded -> "au"
+        is MessageType.UserRemoved -> "ru"
+        is MessageType.UserJoined -> "uj"
+        is MessageType.UserLeft -> "ul"
+        is MessageType.Welcome -> "wm"
+        is MessageType.MessageRemoved -> "rm"
+        is MessageType.MessagePinned -> "message_pinned"
+        is MessageType.UserMuted -> "user-muted"
+        is MessageType.UserUnMuted -> "user-unmuted"
+        is MessageType.SubscriptionRoleAdded -> "subscription-role-added"
+        is MessageType.SubscriptionRoleRemoved -> "subscription-role-removed"
+        else -> null
+    }
+}
+
 fun Message.isSystemMessage() = when (type) {
     is MessageType.MessageRemoved,
     is MessageType.UserJoined,
@@ -108,4 +127,23 @@ fun Message.isSystemMessage() = when (type) {
     is MessageType.SubscriptionRoleRemoved,
     is MessageType.MessagePinned -> true
     else -> false
+}
+
+fun messageTypeOf(type: String?): MessageType? {
+    return when (type) {
+        "r" -> MessageType.RoomNameChanged()
+        "au" -> MessageType.UserAdded()
+        "ru" -> MessageType.UserRemoved()
+        "uj" -> MessageType.UserJoined()
+        "ul" -> MessageType.UserLeft()
+        "wm" -> MessageType.Welcome()
+        "rm" -> MessageType.MessageRemoved()
+        "message_pinned" -> MessageType.MessagePinned()
+        "user-muted" -> MessageType.UserMuted()
+        "user-unmuted" -> MessageType.UserUnMuted()
+        "subscription-role-added" -> MessageType.SubscriptionRoleAdded()
+        "subscription-role-removed" -> MessageType.SubscriptionRoleAdded()
+        null -> null
+        else -> MessageType.Unspecified(type)
+    }
 }
