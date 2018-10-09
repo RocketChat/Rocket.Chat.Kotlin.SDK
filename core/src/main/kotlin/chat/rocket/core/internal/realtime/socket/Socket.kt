@@ -73,6 +73,9 @@ class Socket(
     private var reconnectJob: Job? = null
     private var selfDisconnect = false
 
+    private var messagesReceived = 0
+    private var messagesProcessed = 0
+
     init {
         setState(State.Created())
         messageAdapter = moshi.adapter(SocketMessage::class.java)
@@ -90,7 +93,7 @@ class Socket(
         }
 
         parentJob = Job()
-        processingChannel = Channel()
+        processingChannel = Channel(Channel.UNLIMITED)
         setState(State.Connecting())
         socket = httpClient.newWebSocket(request, this)
     }
@@ -159,6 +162,7 @@ class Socket(
     }
 
     private fun processIncomingMessage(text: String) {
+        messagesProcessed++
         logger.debug {
             val len = Math.min(40, text.length)
             "Process Incoming message: ${text.substring(0, len)}"
@@ -230,6 +234,7 @@ class Socket(
     private fun processMessage(message: SocketMessage, text: String) {
         when (message.type) {
             MessageType.PING -> {
+                logger.debug { "sending pong - messages received $messagesReceived - messages processed $messagesProcessed" }
                 send(pongMessage())
             }
             MessageType.ADDED -> {
@@ -278,7 +283,7 @@ class Socket(
             logger.debug { "running ping if active" }
             if (!isActive) return@launch
             schedulePingTimeout()
-            logger.debug { "sending ping" }
+            logger.debug { "sending ping - messages received $messagesReceived - messages processed $messagesProcessed" }
             send(pingMessage())
         }
     }
@@ -356,7 +361,16 @@ class Socket(
     override fun onMessage(webSocket: WebSocket, text: String?) {
         logger.debug { "Received text message: $text, channel: $processingChannel" }
         text?.let {
-            launch(parent = parentJob) { processingChannel?.send(it) }
+            messagesReceived++
+            if (parentJob == null || !parentJob!!.isActive) {
+                logger.debug { "Parent job: $parentJob" }
+            }
+            launch(parent = parentJob) {
+                if (processingChannel == null || processingChannel?.isFull == true || processingChannel?.isClosedForSend == true) {
+                    logger.debug { "processing channel is in trouble... $processingChannel - full ${processingChannel?.isFull} - closedForSend ${processingChannel?.isClosedForSend}" }
+                }
+                processingChannel?.send(it)
+            }
         }
     }
 

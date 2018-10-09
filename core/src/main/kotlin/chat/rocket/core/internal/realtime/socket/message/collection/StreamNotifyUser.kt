@@ -40,7 +40,13 @@ private fun Socket.processRoomStream(state: String, data: JSONObject) {
     val room = adapter.fromJson(data.toString())
 
     room?.apply {
+        if (parentJob == null || !parentJob!!.isActive) {
+            logger.debug { "Parent job: $parentJob" }
+        }
         launch(parent = parentJob) {
+            if (roomsChannel.isFull || roomsChannel.isClosedForSend) {
+                logger.debug { "Rooms channel is in trouble... $roomsChannel - full ${roomsChannel.isFull} - closedForSend ${roomsChannel.isClosedForSend}" }
+            }
             roomsChannel.send(StreamMessage(getMessageType(state), room))
         }
     }
