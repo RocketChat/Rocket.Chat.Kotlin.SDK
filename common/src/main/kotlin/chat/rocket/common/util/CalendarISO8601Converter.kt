@@ -4,6 +4,7 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.TimeZone
+import java.util.Locale
 
 class CalendarISO8601Converter : ISO8601Converter {
 
@@ -13,7 +14,7 @@ class CalendarISO8601Converter : ISO8601Converter {
         calendar.timeInMillis = timestamp
 
         // Quoted "Z" to indicate UTC, no timezone offset
-        val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
         df.timeZone = tz
 
         return df.format(calendar.time)
