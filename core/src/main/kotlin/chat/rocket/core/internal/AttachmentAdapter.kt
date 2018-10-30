@@ -3,25 +3,14 @@ package chat.rocket.core.internal
 import chat.rocket.common.internal.ISO8601Date
 import chat.rocket.common.util.Logger
 import chat.rocket.core.model.attachment.Attachment
-import chat.rocket.core.model.attachment.AudioAttachment
-import chat.rocket.core.model.attachment.AuthorAttachment
 import chat.rocket.core.model.attachment.Color
-import chat.rocket.core.model.attachment.ColorAttachment
-import chat.rocket.core.model.attachment.DEFAULT_COLOR
 import chat.rocket.core.model.attachment.Field
-import chat.rocket.core.model.attachment.FileAttachment
-import chat.rocket.core.model.attachment.GenericFileAttachment
-import chat.rocket.core.model.attachment.ImageAttachment
-import chat.rocket.core.model.attachment.MessageAttachment
-import chat.rocket.core.model.attachment.VideoAttachment
 import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import chat.rocket.core.model.attachment.actions.Action
-import chat.rocket.core.model.attachment.actions.ActionsAttachment
 import chat.rocket.core.model.attachment.actions.ButtonAction
 import java.lang.reflect.Type
 
@@ -143,45 +132,50 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
         }
         reader.endObject()
 
-        return when {
-            imageUrl != null -> {
-                var preview: String? = null
-                imagePreview?.let {
-                    preview = "data:${imageType!!};base64,$it"
-                }
-                ImageAttachment(title, description, text, titleLink, titleLinkDownload, imageUrl, imageType, imageSize, preview)
+        if (isAllNull(title, type, description, authorName, text, thumbUrl, color, titleLink, titleLinkDownload,
+                        imageUrl, imageType, imageSize, videoUrl, videoType, videoSize, audioUrl, audioType, audioSize,
+                        messageLink, attachments, timestamp, authorIcon, authorLink, imagePreview, fields, fallback,
+                        buttonAlignment, actions)) {
+            logger.debug {
+                "Empty attachment"
             }
-            videoUrl != null -> {
-                VideoAttachment(title, description, text, titleLink, titleLinkDownload, videoUrl, videoType, videoSize)
-            }
-            audioUrl != null -> {
-                AudioAttachment(title, description, text, titleLink, titleLinkDownload, audioUrl, audioType, audioSize)
-            }
-            titleLink != null -> {
-                GenericFileAttachment(title, description, text, titleLink, titleLink, titleLinkDownload)
-            }
-            text != null && color != null && fallback != null -> {
-                ColorAttachment(color, text, fallback, fields)
-            }
-            text != null -> {
-                MessageAttachment(authorName, authorIcon, text, thumbUrl, color, messageLink, attachments, timestamp)
-            }
-            authorLink != null -> {
-                AuthorAttachment(authorLink, authorIcon, authorName, fields)
-            }
-            fields != null -> {
-                ColorAttachment(color ?: DEFAULT_COLOR, text ?: "", fallback, fields)
-            }
-            actions != null -> {
-                ActionsAttachment(title, actions, buttonAlignment = buttonAlignment ?: "vertical")
-            }
-            else -> {
-                logger.debug {
-                    "Invalid Attachment type: supported are file and message at ${reader.path} - type: $type"
-                }
-                null
-            }
+            return null
         }
+
+        return Attachment(
+            title = title,
+            type = type,
+            description = description,
+            authorName = authorName,
+            text = text,
+            thumbUrl = thumbUrl,
+            color = color,
+            titleLink = titleLink,
+            titleLinkDownload = titleLinkDownload,
+            imageUrl = imageUrl,
+            imageType = imageType,
+            imageSize = imageSize,
+            videoUrl = videoUrl,
+            videoType = videoType,
+            videoSize = videoSize,
+            audioUrl = audioUrl,
+            audioType = audioType,
+            audioSize = audioSize,
+            messageLink = messageLink,
+            attachments = attachments,
+            timestamp = timestamp,
+            authorIcon = authorIcon,
+            authorLink = authorLink,
+            imagePreview = imagePreview,
+            fields = fields,
+            fallback = fallback,
+            buttonAlignment = buttonAlignment,
+            actions = actions
+        )
+    }
+
+    private fun isAllNull(vararg params: Any?): Boolean {
+        return params.isEmpty()
     }
 
     private fun parseFields(reader: JsonReader): List<Field>? {
@@ -258,103 +252,41 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
         }
     }
 
-    override fun toJson(writer: JsonWriter, value: Attachment?) {
-        if (value == null) {
+    override fun toJson(writer: JsonWriter, attachment: Attachment?) {
+        if (attachment == null) {
             writer.nullValue()
         } else {
-            when (value) {
-                is ColorAttachment -> writeColorAttachment(writer, value)
-                is MessageAttachment -> writeMessageAttachment(writer, value)
-                is FileAttachment -> writeFileAttachment(writer, value)
-                is AuthorAttachment -> writeAuthorAttachment(writer, value)
-                is ActionsAttachment -> writeActionsAttachment(writer, value)
+            with(writer) {
+                beginObject()
+                name("title").value(attachment.title)
+                name("description").value(attachment.description)
+                name("text").value(attachment.text)
+                name("title_link").value(attachment.titleLink)
+                name("title_link_download").value(attachment.titleLinkDownload)
+                name("image_url").value(attachment.imageUrl)
+                name("image_size").value(attachment.imageSize)
+                name("image_type").value(attachment.imageType)
+                name("image_preview").value(attachment.imagePreview)
+                name("video_url").value(attachment.videoUrl)
+                name("video_size").value(attachment.videoType)
+                name("video_type").value(attachment.videoUrl)
+                name("audio_url").value(attachment.audioUrl)
+                name("audio_size").value(attachment.audioSize)
+                name("audio_type").value(attachment.audioType)
+                name("author_link").value(attachment.authorLink)
+                name("author_icon").value(attachment.authorIcon)
+                name("author_name").value(attachment.authorName)
+                name("button_alignment").value(attachment.buttonAlignment)
+                name("color").value(attachment.color?.rawColor)
+                name("fallback").value(attachment.fallback)
+                name("thumbUrl").value(attachment.thumbUrl)
+                name("message_link").value(attachment.messageLink)
+                name("ts").value(attachment.timestamp)
+
+                attachment.actions?.let { writeActions(writer, it) }
+                attachment.fields?.let { writeFields(writer, it) }
             }
         }
-    }
-
-    private fun writeColorAttachment(writer: JsonWriter, attachment: ColorAttachment) {
-        writer.beginObject()
-        with(writer) {
-            name("color").value(attachment.color.rawColor)
-            name("text").value(attachment.text)
-            name("fallback").value(attachment.fallback)
-            attachment.fields?.let { writeFields(writer, it) }
-        }
-        writer.endObject()
-    }
-
-    private fun writeMessageAttachment(writer: JsonWriter, attachment: MessageAttachment) {
-        writer.beginObject()
-        with(writer) {
-            name("author_name").value(attachment.author)
-            name("author_icon").value(attachment.icon)
-            name("text").value(attachment.text)
-            name("thumbUrl").value(attachment.thumbUrl)
-            name("color").value(attachment.color?.toString())
-            name("message_link").value(attachment.url)
-            name("ts").value(attachment.timestamp)
-        }
-        writer.endObject()
-    }
-
-    private fun writeFileAttachment(writer: JsonWriter, attachment: FileAttachment) {
-        writer.beginObject()
-        writer.name("title").value(attachment.title)
-        writer.name("description").value(attachment.description)
-        writer.name("text").value(attachment.text)
-        writer.name("title_link").value(attachment.titleLink)
-        writer.name("title_link_download").value(attachment.titleLinkDownload)
-        when (attachment) {
-            is AudioAttachment -> writeAudioAttachment(writer, attachment)
-            is VideoAttachment -> writeVideoAttachment(writer, attachment)
-            is ImageAttachment -> writeImageAttachment(writer, attachment)
-            is GenericFileAttachment -> writeGenericFileAttachment(writer, attachment)
-        }
-        writer.endObject()
-    }
-
-    private fun writeGenericFileAttachment(writer: JsonWriter, attachment: GenericFileAttachment) {
-        with(writer) {
-            name("title").value(attachment.title)
-            name("titleLink").value(attachment.url)
-            name("titleLinkDownload").value(attachment.titleLinkDownload)
-        }
-    }
-
-    private fun writeAudioAttachment(writer: JsonWriter, attachment: AudioAttachment) {
-        with(writer) {
-            name("audio_url").value(attachment.url)
-            name("audio_size").value(attachment.size)
-            name("audio_type").value(attachment.type)
-        }
-    }
-
-    private fun writeVideoAttachment(writer: JsonWriter, attachment: VideoAttachment) {
-        with(writer) {
-            name("video_url").value(attachment.url)
-            name("video_size").value(attachment.size)
-            name("video_type").value(attachment.type)
-        }
-    }
-
-    private fun writeImageAttachment(writer: JsonWriter, attachment: ImageAttachment) {
-        with(writer) {
-            name("image_url").value(attachment.url)
-            name("image_size").value(attachment.size)
-            name("image_type").value(attachment.type)
-            name("image_preview").value(attachment.imagePreview)
-        }
-    }
-
-    private fun writeAuthorAttachment(writer: JsonWriter, attachment: AuthorAttachment) {
-        writer.beginObject()
-        with(writer) {
-            name("author_link").value(attachment.url)
-            name("author_icon").value(attachment.authorIcon)
-            name("author_name").value(attachment.authorName)
-            attachment.fields?.let { writeFields(writer, it) }
-        }
-        writer.endObject()
     }
 
     private fun writeFields(writer: JsonWriter, fields: List<Field>) {
@@ -369,16 +301,6 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
             }
             writer.endArray()
         }
-    }
-
-    private fun writeActionsAttachment(writer: JsonWriter, attachment: ActionsAttachment) {
-        writer.beginObject()
-        with(writer) {
-            name("title").value(attachment.title)
-            name("button_alignment").value(attachment.buttonAlignment)
-            attachment.actions?.let { writeActions(writer, it) }
-        }
-        writer.endObject()
     }
 
     private fun writeActions(writer: JsonWriter, actions: List<Action>) {
@@ -401,10 +323,6 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
             }
             writer.endArray()
         }
-    }
-
-    private fun checkNonNull(field: Any?, fieldName: String) {
-        if (field == null) throw JsonDataException("$fieldName is null")
     }
 }
 
