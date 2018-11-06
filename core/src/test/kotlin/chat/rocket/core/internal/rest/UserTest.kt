@@ -2,6 +2,7 @@ package chat.rocket.core.internal.rest
 
 import chat.rocket.common.RocketChatApiException
 import chat.rocket.common.RocketChatAuthException
+import chat.rocket.common.RocketChatException
 import chat.rocket.common.model.Token
 import chat.rocket.common.model.UserStatus
 import chat.rocket.common.util.PlatformLogger
@@ -214,6 +215,33 @@ class UserTest {
                 assertThat(apiException.errorType, isEqualTo("403"))
                 assertThat(apiException.message, isEqualTo("Email already exists. [403]"))
             }
+        }
+    }
+
+    @Test
+    fun `deleteOwnAccount() should succeed with valid parameters` () {
+        mockServer.expect()
+            .post()
+            .withPath("/api/v1/users.deleteOwnAccount")
+            .andReturn(200, SUCCESS)
+            .once()
+
+        runBlocking {
+            val result = sut.deleteOwnAccount("password")
+            assert(result)
+        }
+    }
+
+    @Test(expected = RocketChatException::class)
+    fun `deleteOwnAccount() should fail with RocketChatAuthException if not logged in` () {
+        mockServer.expect()
+            .post()
+            .withPath("/api/v1/users.deleteOwnAccount")
+            .andReturn(401, MUST_BE_LOGGED_ERROR)
+            .once()
+
+        runBlocking {
+            sut.deleteOwnAccount("password")
         }
     }
 
