@@ -1,4 +1,7 @@
 version: 2
+build:
+  machine:
+    java: oraclejdk8
 jobs:
     formatting:
       docker:
