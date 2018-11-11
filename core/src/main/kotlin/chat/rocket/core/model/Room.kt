@@ -22,5 +22,5 @@ data class Room(
     val announcement: String?,
     val lastMessage: Message?,
     @JsonDefaultValueBoolean(false) val broadcast: Boolean,
-    val muted: List<String> = emptyList()
+    @JvmField val muted: List<String>? = null
 ) : BaseRoom

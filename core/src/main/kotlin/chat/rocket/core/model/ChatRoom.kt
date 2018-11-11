@@ -40,7 +40,7 @@ data class ChatRoom(
     val lastMessage: Message?,
     val client: RocketChatClient,
     val broadcast: Boolean,
-    val muted: List<String> = emptyList()
+    @JvmField val muted: List<String>? = null
 ) : BaseRoom {
     companion object {
         fun create(room: Room, subscription: Subscription, client: RocketChatClient): ChatRoom {
