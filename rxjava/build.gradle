@@ -8,6 +8,7 @@ apply plugin: 'java'
 apply plugin: 'org.jetbrains.dokka'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}"
