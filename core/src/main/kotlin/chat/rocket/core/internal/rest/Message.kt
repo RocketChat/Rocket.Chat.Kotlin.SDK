@@ -5,6 +5,7 @@ import chat.rocket.common.model.RoomType
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.model.DeletePayload
+import chat.rocket.core.internal.model.MessageReportPayload
 import chat.rocket.core.internal.model.PostMessagePayload
 import chat.rocket.core.internal.model.ReactionPayload
 import chat.rocket.core.internal.model.SendMessageBody
@@ -372,4 +373,26 @@ suspend fun RocketChatClient.getMessageReadReceipts(
     val result = handleRestCall<RestResult<List<ReadReceipt>>>(request, type)
 
     return@withContext PagedResult<List<ReadReceipt>>(result.result(), result.total() ?: -1, result.offset() ?: -1)
+}
+
+/**
+ * Reports a message identified by {messageId} along with its {description}.
+ *
+ * @param messageId The id of the message.
+ * @param description The description of the message being reported.
+ */
+suspend fun RocketChatClient.reportMessage(
+    messageId: String,
+    description: String
+): Boolean = withContext(CommonPool) {
+    val payload = MessageReportPayload(messageId = messageId, description = description)
+    val adapter = moshi.adapter(MessageReportPayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val url = requestUrl(restUrl, "chat.reportMessage").build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
+
+    return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
