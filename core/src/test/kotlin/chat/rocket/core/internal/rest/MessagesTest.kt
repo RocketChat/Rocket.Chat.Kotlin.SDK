@@ -240,6 +240,20 @@ class MessagesTest {
         }
     }
 
+    @Test
+    fun `reportMessage() should return true and yield no exceptions`() {
+        mockServer.expect()
+            .post()
+            .withPath("/api/v1/chat.reportMessage")
+            .andReturn(200, SUCCESS)
+            .once()
+
+        runBlocking {
+            val result = sut.reportMessage("FCHGvHLyanhbaWjpxWz", "something untoward was said")
+            assertThat(result, isEqualTo(true))
+        }
+    }
+
     @After
     fun shutdown() {
         mockServer.shutdown()
