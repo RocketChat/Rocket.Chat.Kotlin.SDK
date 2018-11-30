@@ -201,7 +201,7 @@ suspend fun RocketChatClient.setAvatar(avatarUrl: String): Boolean {
  * @param filterCustom Filter custom rooms from the response, default true
  */
 suspend fun RocketChatClient.chatRooms(
-    timestamp: Long = 0,
+    timestamp: Long? = null,
     filterCustom: Boolean = true
 ): RestMultiResult<List<ChatRoom>, List<Removed>> {
     val rooms = async { listRooms(timestamp) }
@@ -288,10 +288,12 @@ internal fun RocketChatClient.combineRemoved(
     return removed
 }
 
-internal suspend fun RocketChatClient.listSubscriptions(timestamp: Long = 0): RestMultiResult<List<Subscription>, List<Removed>> {
+internal suspend fun RocketChatClient.listSubscriptions(timestamp: Long? = null): RestMultiResult<List<Subscription>, List<Removed>> {
     val urlBuilder = requestUrl(restUrl, "subscriptions.get")
-    val date = CalendarISO8601Converter().fromTimestamp(timestamp)
-    urlBuilder.addQueryParameter("updatedSince", date)
+    timestamp?.let {
+        val date = CalendarISO8601Converter().fromTimestamp(timestamp)
+        urlBuilder.addQueryParameter("updatedSince", date)
+    }
 
     val request = requestBuilderForAuthenticatedMethods(urlBuilder.build()).get().build()
 
@@ -316,10 +318,12 @@ internal suspend fun RocketChatClient.listSubscriptions(timestamp: Long = 0): Re
     return RestMultiResult.create(subs, response.remove)
 }
 
-internal suspend fun RocketChatClient.listRooms(timestamp: Long = 0): RestMultiResult<List<Room>, List<Removed>> {
+internal suspend fun RocketChatClient.listRooms(timestamp: Long? = null): RestMultiResult<List<Room>, List<Removed>> {
     val urlBuilder = requestUrl(restUrl, "rooms.get")
-    val date = CalendarISO8601Converter().fromTimestamp(timestamp)
-    urlBuilder.addQueryParameter("updatedSince", date)
+    timestamp?.let {
+        val date = CalendarISO8601Converter().fromTimestamp(timestamp)
+        urlBuilder.addQueryParameter("updatedSince", date)
+    }
 
     val request = requestBuilderForAuthenticatedMethods(urlBuilder.build()).get().build()
 
