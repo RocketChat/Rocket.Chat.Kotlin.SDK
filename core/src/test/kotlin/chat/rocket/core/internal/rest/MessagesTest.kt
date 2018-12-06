@@ -2,6 +2,7 @@ package chat.rocket.core.internal.rest
 
 import chat.rocket.common.RocketChatException
 import chat.rocket.common.model.Token
+import chat.rocket.common.model.roomTypeOf
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
@@ -30,7 +31,8 @@ class MessagesTest {
 
     private val authToken = Token("userId", "authToken")
 
-    @Rule @JvmField
+    @Rule
+    @JvmField
     val temporaryFolder = TemporaryFolder()
 
     @Before
@@ -55,17 +57,17 @@ class MessagesTest {
     @Test
     fun `sendMessage() should return a complete Message object`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/chat.postMessage")
-                .andReturn(200, SEND_MESSAGE_OK)
-                .once()
+            .post()
+            .withPath("/api/v1/chat.postMessage")
+            .andReturn(200, SEND_MESSAGE_OK)
+            .once()
 
         runBlocking {
             val msg = sut.postMessage(roomId = "GENERAL",
-                    text = "Sending message from SDK to #general and @here",
-                    alias = "TestingAlias",
-                    emoji = ":smirk:",
-                    avatar = "https://avatars2.githubusercontent.com/u/224255?s=88&v=4")
+                text = "Sending message from SDK to #general and @here",
+                alias = "TestingAlias",
+                emoji = ":smirk:",
+                avatar = "https://avatars2.githubusercontent.com/u/224255?s=88&v=4")
 
             with(msg) {
                 assertThat(senderAlias, isEqualTo("TestingAlias"))
@@ -108,19 +110,19 @@ class MessagesTest {
     @Test
     fun `sendMessage() with id should return a Message object with given id`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/chat.sendMessage")
-                .andReturn(200, SEND_MESSAGE_WITH_ID_OK)
-                .once()
+            .post()
+            .withPath("/api/v1/chat.sendMessage")
+            .andReturn(200, SEND_MESSAGE_WITH_ID_OK)
+            .once()
 
         runBlocking {
             val msg = sut.sendMessage(
-                    messageId = "1abbbf94-c839-4436-9476-6de03011c1e0",
-                    roomId = "GENERAL",
-                    message = "Sending message from SDK to #general and @here",
-                    alias = "TestingAlias",
-                    emoji = ":smirk:",
-                    avatar = "https://avatars2.githubusercontent.com/u/224255?s=88&v=4")
+                messageId = "1abbbf94-c839-4436-9476-6de03011c1e0",
+                roomId = "GENERAL",
+                message = "Sending message from SDK to #general and @here",
+                alias = "TestingAlias",
+                emoji = ":smirk:",
+                avatar = "https://avatars2.githubusercontent.com/u/224255?s=88&v=4")
 
             with(msg) {
                 assertThat(message, isEqualTo("Sending message from SDK to #general and @here"))
@@ -132,51 +134,51 @@ class MessagesTest {
     @Test
     fun `uploadFile() should succeed without throwing`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/rooms.upload/GENERAL")
-                .andReturn(200, SUCCESS)
-                .once()
+            .post()
+            .withPath("/api/v1/rooms.upload/GENERAL")
+            .andReturn(200, SUCCESS)
+            .once()
 
         runBlocking {
             val file = temporaryFolder.newFile("file.png")
             sut.uploadFile(roomId = "GENERAL",
-                    file = file,
-                    mimeType = "image/png",
-                    msg = "Random Message",
-                    description = "File description")
+                file = file,
+                mimeType = "image/png",
+                msg = "Random Message",
+                description = "File description")
         }
     }
 
     @Test(expected = RocketChatException::class)
     fun `uploadFile() should fail with RocketChatAuthException if not logged in`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/rooms.upload/GENERAL")
-                .andReturn(401, MUST_BE_LOGGED_ERROR)
-                .once()
+            .post()
+            .withPath("/api/v1/rooms.upload/GENERAL")
+            .andReturn(401, MUST_BE_LOGGED_ERROR)
+            .once()
 
         runBlocking {
             val file = temporaryFolder.newFile("file.png")
             sut.uploadFile(roomId = "GENERAL",
-                    file = file,
-                    mimeType = "image/png",
-                    msg = "Random Message",
-                    description = "File description")
+                file = file,
+                mimeType = "image/png",
+                msg = "Random Message",
+                description = "File description")
         }
     }
 
     @Test
     fun `deleteMessage() should return a DeleteResult object`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/chat.delete")
-                .andReturn(200, DELETE_MESSAGE_OK)
-                .once()
+            .post()
+            .withPath("/api/v1/chat.delete")
+            .andReturn(200, DELETE_MESSAGE_OK)
+            .once()
 
         runBlocking {
             val result = sut.deleteMessage(roomId = "GENERAL",
-                    msgId = "messageId",
-                    asUser = true)
+                msgId = "messageId",
+                asUser = true)
 
             with(result) {
                 assertThat(id, isEqualTo("messageId"))
@@ -189,15 +191,15 @@ class MessagesTest {
     @Test
     fun `updateMessage() should return a complete updated Message object`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/chat.update")
-                .andReturn(200, SEND_MESSAGE_OK_UPDATED)
-                .once()
+            .post()
+            .withPath("/api/v1/chat.update")
+            .andReturn(200, SEND_MESSAGE_OK_UPDATED)
+            .once()
 
         runBlocking {
             val msg = sut.updateMessage(roomId = "GENERAL",
-                    text = "Updating a message previously sent to #general",
-                    messageId = "messageId")
+                text = "Updating a message previously sent to #general",
+                messageId = "messageId")
 
             with(msg) {
                 assertThat(senderAlias, isEqualTo("TestingAlias"))
@@ -229,10 +231,10 @@ class MessagesTest {
     @Test
     fun `react() should return true and yield no exceptions`() {
         mockServer.expect()
-                .post()
-                .withPath("/api/v1/chat.react")
-                .andReturn(200, SUCCESS)
-                .once()
+            .post()
+            .withPath("/api/v1/chat.react")
+            .andReturn(200, SUCCESS)
+            .once()
 
         runBlocking {
             val result = sut.toggleReaction("FCHGvHLyanhbaWjpxWz", "vulcan")
@@ -251,6 +253,24 @@ class MessagesTest {
         runBlocking {
             val result = sut.reportMessage("FCHGvHLyanhbaWjpxWz", "something untoward was said")
             assertThat(result, isEqualTo(true))
+        }
+    }
+
+    @Test
+    fun `createDirectMessage() should return true and yield no exceptions`() {
+        mockServer.expect()
+            .post()
+            .withPath("/api/v1/im.create")
+            .andReturn(200, CREATE_DM_OK)
+            .once()
+
+        runBlocking {
+            val result = sut.createDirectMessage(username = "rocket.cat")
+            assertThat(result.id, isEqualTo("Lymsiu4Mn6xjTAan4RtMDEYc28fQ5aHpf4"))
+            assertThat(result.type, isEqualTo(roomTypeOf("d")))
+            assertThat(result.usernames.size, isEqualTo(2))
+            assertThat(result.usernames[0], isEqualTo("rocket.cat"))
+            assertThat(result.usernames[1], isEqualTo("user.test"))
         }
     }
 

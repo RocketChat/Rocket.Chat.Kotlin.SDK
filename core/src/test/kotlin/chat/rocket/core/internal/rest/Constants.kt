@@ -205,3 +205,25 @@ const val SEND_MESSAGE_WITH_ID_OK = """
   "success": true
 }
 """
+
+const val CREATE_DM_OK = """
+{
+    "room": {
+        "_id": "Lymsiu4Mn6xjTAan4RtMDEYc28fQ5aHpf4",
+        "_updatedAt": "2018-03-26T19:11:50.711Z",
+        "t": "d",
+        "msgs": 0,
+        "ts": "2018-03-26T19:11:50.711Z",
+        "meta": {
+            "revision": 0,
+            "created": 1522094603745,
+            "version": 0
+        },
+        "usernames": [
+            "rocket.cat",
+            "user.test"
+        ]
+    },
+    "success": true
+}
+"""

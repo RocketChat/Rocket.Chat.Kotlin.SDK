@@ -31,7 +31,7 @@ internal fun getRestApiMethodNameByRoomType(roomType: RoomType, method: String):
     return when (roomType) {
         is RoomType.Channel -> "channels.$method"
         is RoomType.PrivateGroup -> "groups.$method"
-        is RoomType.DirectMessage -> "dm.$method"
+        is RoomType.DirectMessage -> "im.$method"
     // TODO - handle custom rooms
         else -> "channels.$method"
     }

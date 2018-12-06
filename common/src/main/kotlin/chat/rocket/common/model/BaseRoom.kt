@@ -20,6 +20,10 @@ sealed class RoomType {
     @Json(name = LIVECHAT) class LiveChat : RoomType()
     class Custom(val rawType: String) : RoomType()
 
+    override fun equals(other: Any?): Boolean {
+        return other != null && other is RoomType && other.toString() == toString()
+    }
+
     override fun toString(): String {
         return when (this) {
             is Channel -> CHANNEL
