@@ -10,6 +10,7 @@ import chat.rocket.core.internal.model.ChatRoomJoinCodePayload
 import chat.rocket.core.internal.model.ChatRoomNamePayload
 import chat.rocket.core.internal.model.ChatRoomPayload
 import chat.rocket.core.internal.model.ChatRoomReadOnlyPayload
+import chat.rocket.core.internal.model.ChatRoomUnreadPayload
 import chat.rocket.core.internal.model.ChatRoomTopicPayload
 import chat.rocket.core.internal.model.ChatRoomTypePayload
 import chat.rocket.core.internal.model.ChatRoomFavoritePayload
@@ -226,6 +227,26 @@ suspend fun RocketChatClient.markAsRead(roomId: String) {
         val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
         val url = requestUrl(restUrl, "subscriptions.read").build()
+        val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
+
+        handleRestCall<Any>(request, Any::class.java)
+    }
+}
+
+/**
+ * Marks a room as unread.
+ *
+ * @param roomId The ID of the room.
+ */
+suspend fun RocketChatClient.markAsUnread(roomId: String) {
+    withContext(CommonPool) {
+        val payload = ChatRoomUnreadPayload(roomId)
+        val adapter = moshi.adapter(ChatRoomUnreadPayload::class.java)
+        val payloadBody = adapter.toJson(payload)
+
+        val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+        val url = requestUrl(restUrl, "subscriptions.unread").build()
         val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
         handleRestCall<Any>(request, Any::class.java)
