@@ -129,8 +129,6 @@ class ChannelTest {
         }
     }
 
-
-
     @After
     fun shutdown() {
         mockServer.shutdown()
