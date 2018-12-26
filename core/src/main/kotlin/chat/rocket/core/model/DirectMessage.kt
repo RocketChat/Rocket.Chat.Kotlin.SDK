@@ -6,7 +6,7 @@ import com.squareup.moshi.Json
 import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
-data class NewDirectMessageResult(
+data class DirectMessage(
     @Json(name = "_id")
     val id: String,
     @Json(name = "_updatedAt")
