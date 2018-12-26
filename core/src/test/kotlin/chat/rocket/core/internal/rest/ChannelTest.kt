@@ -4,6 +4,7 @@ import chat.rocket.common.RocketChatAuthException
 import chat.rocket.common.RocketChatException
 import chat.rocket.common.model.RoomType
 import chat.rocket.common.model.Token
+import chat.rocket.common.model.roomTypeOf
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
@@ -107,6 +108,24 @@ class ChannelTest {
                 assertThat(ex, isEqualTo(instanceOf(RocketChatAuthException::class.java)))
                 assertThat(ex.message, isEqualTo("You must be logged in to do this."))
             }
+        }
+    }
+
+    @Test
+    fun `createDirectMessage() should return true and yield no exceptions`() {
+        mockServer.expect()
+            .post()
+            .withPath("/api/v1/im.create")
+            .andReturn(200, CREATE_DM_OK)
+            .once()
+
+        runBlocking {
+            val result = sut.createDirectMessage("rocket.cat")
+            assertThat(result.id, isEqualTo("Lymsiu4Mn6xjTAan4RtMDEYc28fQ5aHpf4"))
+            assertThat(result.type, isEqualTo(roomTypeOf("d")))
+            assertThat(result.usernames.size, isEqualTo(2))
+            assertThat(result.usernames[0], isEqualTo("rocket.cat"))
+            assertThat(result.usernames[1], isEqualTo("user.test"))
         }
     }
 
