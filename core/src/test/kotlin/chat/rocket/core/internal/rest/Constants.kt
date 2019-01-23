@@ -185,7 +185,7 @@ const val ROLES_OK = """
   "success": true
 }
 """
-//{"message":{"_id":"1abbbf94-c839-4436-9476-6de03011c1e0","rid":"GS3Ceh7BLJGzfto78","msg":"Não"}}
+// {"message":{"_id":"1abbbf94-c839-4436-9476-6de03011c1e0","rid":"GS3Ceh7BLJGzfto78","msg":"Não"}}
 const val SEND_MESSAGE_WITH_ID_OK = """
 {
   "message": {

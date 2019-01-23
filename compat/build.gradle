@@ -36,12 +36,6 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-kotlin {
-    experimental {
-        coroutines "enable"
-    }
-}
-
 dokka {
     outputFormat = 'html'
     outputDirectory = "$buildDir/javadoc"

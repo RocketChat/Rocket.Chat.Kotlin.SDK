@@ -24,7 +24,7 @@ internal class RoomListAdapter(moshi: Moshi, private val logger: Logger) : JsonA
     private val adapter = moshi.adapter<Room>(Room::class.java)
 
     override fun toJson(writer: JsonWriter, value: List<Room>?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun fromJson(reader: JsonReader): List<Room>? {

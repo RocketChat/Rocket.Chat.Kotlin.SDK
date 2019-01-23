@@ -7,11 +7,11 @@ import chat.rocket.core.internal.realtime.message.roomsStreamMessage
 import chat.rocket.core.internal.realtime.message.streamRoomMessages
 import chat.rocket.core.internal.realtime.message.streamTypingMessage
 import chat.rocket.core.internal.realtime.message.typingMessage
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 suspend fun RocketChatClient.setTypingStatus(roomId: String, username: String, isTyping: Boolean) =
-    withContext(CommonPool) {
+    withContext(Dispatchers.IO) {
         socket.send(typingMessage(socket.generateId(), roomId, username, isTyping))
     }
 

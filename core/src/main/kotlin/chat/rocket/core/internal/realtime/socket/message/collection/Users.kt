@@ -3,7 +3,7 @@ package chat.rocket.core.internal.realtime.socket.message.collection
 import chat.rocket.common.model.User
 import chat.rocket.core.internal.realtime.socket.Socket
 import chat.rocket.core.model.Myself
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 internal const val USERS = "users"
@@ -35,7 +35,7 @@ private fun Socket.processUserDataStream(json: JSONObject, id: String) {
         if (parentJob == null || !parentJob!!.isActive) {
             logger.debug { "Parent job: $parentJob" }
         }
-        launch(parent = parentJob) {
+        launch(parentJob) {
             if (userDataChannel.isFull || userDataChannel.isClosedForSend) {
                 logger.debug { "User Data channel is in trouble... $userDataChannel - full ${userDataChannel.isFull} - closedForSend ${userDataChannel.isClosedForSend}" }
             }
@@ -64,8 +64,6 @@ private fun Socket.processActiveUsersStream(json: JSONObject, id: String) {
         if (activeUsersChannel.isFull || activeUsersChannel.isClosedForSend) {
             logger.debug { "Active Users channel is in trouble... $activeUsersChannel - full ${activeUsersChannel.isFull} - closedForSend ${activeUsersChannel.isClosedForSend}" }
         }
-        launch(parent = parentJob) {
-            activeUsersChannel.send(user)
-        }
+        launch(parentJob) { activeUsersChannel.send(user) }
     }
 }

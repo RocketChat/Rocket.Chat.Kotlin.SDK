@@ -51,7 +51,7 @@ data class Message(
     val reactions: Reactions? = null,
     val role: String? = null,
     @JsonDefaultValueBoolean(true)
-    override val synced: Boolean = true, //TODO: Remove after we have a db
+    override val synced: Boolean = true, // TODO: Remove after we have a db
     val unread: Boolean? = null
 ) : BaseMessage
 
