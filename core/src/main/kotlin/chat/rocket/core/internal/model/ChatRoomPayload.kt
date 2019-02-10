@@ -10,6 +10,15 @@ data class ChatRoomPayload(@Json(name = "rid") val roomId: String)
 data class ChatRoomUnreadPayload(val roomId: String)
 
 @JsonSerializable
+data class ChatRoomIdUserPayload(@Json(name = "rid") val roomId: String, val userId: String)
+
+@JsonSerializable
+data class ChatRoomUserIgnorePayload(@Json(name = "rid") val roomId: String, val userId: String, val ignore: Boolean)
+
+@JsonSerializable
+data class ChatRoomUserPayload(val roomId: String, val userId: String)
+
+@JsonSerializable
 data class ChatRoomNamePayload(val roomId: String, val name: String?)
 
 @JsonSerializable

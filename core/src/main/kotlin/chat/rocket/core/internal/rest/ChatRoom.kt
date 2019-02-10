@@ -8,6 +8,7 @@ import chat.rocket.core.internal.model.ChatRoomAnnouncementPayload
 import chat.rocket.core.internal.model.ChatRoomDescriptionPayload
 import chat.rocket.core.internal.model.ChatRoomJoinCodePayload
 import chat.rocket.core.internal.model.ChatRoomNamePayload
+import chat.rocket.core.internal.model.ChatRoomUserIgnorePayload
 import chat.rocket.core.internal.model.ChatRoomPayload
 import chat.rocket.core.internal.model.ChatRoomReadOnlyPayload
 import chat.rocket.core.internal.model.ChatRoomUnreadPayload
@@ -614,4 +615,24 @@ suspend fun RocketChatClient.chatRoomRoles(
         Types.newParameterizedType(List::class.java, ChatRoomRole::class.java)
     )
     return@withContext handleRestCall<RestResult<List<ChatRoomRole>>>(request, type).result()
+}
+
+/**
+ * Ignore User 
+ * @param roomId Id of the room.
+ * @param userId Id of user to remove from room.
+ * @param ignore user.
+ */
+suspend fun RocketChatClient.ignoreUser(roomId: String , userId: String, ignore: Boolean = true): Boolean =  
+    withContext(CommonPool) {
+        val payload = ChatRoomUserIgnorePayload(roomId, userId, ignore)
+        val adapter = moshi.adapter(ChatRoomUserIgnorePayload::class.java)
+        val payloadBody = adapter.toJson(payload)
+        val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+        val url = requestUrl(restUrl, "chat.ignoreUser").build()
+
+        val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
+
+        return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }
