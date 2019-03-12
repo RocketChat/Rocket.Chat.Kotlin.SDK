@@ -154,7 +154,6 @@ internal fun processCallbackError(
     logger: Logger,
     allowRedirects: Boolean = true
 ): RocketChatException {
-
     var exception: RocketChatException
     try {
         if (response.isRedirect && !allowRedirects) {
