@@ -29,3 +29,6 @@ internal fun typingMessage(id: String, roomId: String, username: String, isTypin
 internal fun createDirectMessage(id: String, username: String): String {
     return newMessage("createDirectMessage", id, "\"$username\"")
 }
+
+internal fun jitsiUpdateTimeout(id: String, roomId: String) =
+    newMessage("jitsi:updateTimeout", id, roomId)

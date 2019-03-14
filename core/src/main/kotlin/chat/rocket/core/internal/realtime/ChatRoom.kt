@@ -3,6 +3,7 @@ package chat.rocket.core.internal.realtime
 import chat.rocket.common.RocketChatAuthException
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.realtime.message.createDirectMessage
+import chat.rocket.core.internal.realtime.message.jitsiUpdateTimeout
 import chat.rocket.core.internal.realtime.message.roomsStreamMessage
 import chat.rocket.core.internal.realtime.message.streamRoomMessages
 import chat.rocket.core.internal.realtime.message.streamTypingMessage
@@ -53,3 +54,8 @@ fun RocketChatClient.createDirectMessage(username: String, callback: (Boolean, S
         return id
     }
 }
+
+suspend fun RocketChatClient.updateJitsiTimeout(roomId: String) =
+    withContext(Dispatchers.IO) {
+        socket.send(jitsiUpdateTimeout(socket.generateId(), roomId))
+    }
