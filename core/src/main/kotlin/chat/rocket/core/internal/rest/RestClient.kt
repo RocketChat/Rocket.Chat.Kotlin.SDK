@@ -46,6 +46,14 @@ internal fun requestUrl(baseUrl: HttpUrl, method: String): HttpUrl.Builder {
         .addPathSegment(method)
 }
 
+internal fun requestUrlForVideoConference(baseUrl: HttpUrl, method: String): HttpUrl.Builder {
+    return baseUrl.newBuilder()
+        .addPathSegment("api")
+        .addPathSegment("v1")
+        .addPathSegment("video-conference")
+        .addPathSegment(method)
+}
+
 internal fun RocketChatClient.requestBuilder(httpUrl: HttpUrl): Request.Builder =
     Request.Builder()
         .url(httpUrl)
