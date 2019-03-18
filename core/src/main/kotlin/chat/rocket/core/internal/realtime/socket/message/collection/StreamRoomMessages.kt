@@ -2,7 +2,7 @@ package chat.rocket.core.internal.realtime.socket.message.collection
 
 import chat.rocket.core.internal.realtime.socket.Socket
 import chat.rocket.core.model.Message
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 internal const val STREAM_ROOM_MESSAGES = "stream-room-messages"
@@ -17,9 +17,7 @@ internal fun Socket.processRoomMessage(text: String) {
         val message = adapter.fromJson(data.toString())
 
         message?.let {
-            launch(parent = parentJob) {
-                messagesChannel.send(message)
-            }
+            launch(parentJob) { messagesChannel.send(message) }
         }
     } catch (ex: Exception) {
         ex.printStackTrace()

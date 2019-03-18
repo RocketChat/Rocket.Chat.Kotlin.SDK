@@ -8,8 +8,8 @@ import chat.rocket.core.internal.model.CreateNewChannelPayload
 import chat.rocket.core.model.DirectMessage
 import chat.rocket.core.model.Room
 import com.squareup.moshi.Types
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.RequestBody
 
 /**
@@ -25,7 +25,7 @@ suspend fun RocketChatClient.createChannel(
     name: String,
     usersList: List<String>?,
     readOnly: Boolean? = false
-): Room = withContext(CommonPool) {
+): Room = withContext(Dispatchers.IO) {
     val payload = CreateNewChannelPayload(name, usersList, readOnly)
     val adapter = moshi.adapter(CreateNewChannelPayload::class.java)
     val payloadBody = adapter.toJson(payload)
@@ -46,7 +46,7 @@ suspend fun RocketChatClient.createChannel(
  * @return A DirectMessage object.
  */
 suspend fun RocketChatClient.createDirectMessage(username: String): DirectMessage =
-    withContext(CommonPool) {
+    withContext(Dispatchers.IO) {
         val payload = CreateDirectMessagePayload(username = username)
         val adapter = moshi.adapter(CreateDirectMessagePayload::class.java)
         val payloadBody = adapter.toJson(payload)

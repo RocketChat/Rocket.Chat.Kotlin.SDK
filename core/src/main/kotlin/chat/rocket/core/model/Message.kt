@@ -51,12 +51,13 @@ data class Message(
     val reactions: Reactions? = null,
     val role: String? = null,
     @JsonDefaultValueBoolean(true)
-    override val synced: Boolean = true, //TODO: Remove after we have a db
+    override val synced: Boolean = true, // TODO: Remove after we have a db
     val unread: Boolean? = null
 ) : BaseMessage
 
 @FallbackSealedClass(name = "Unspecified", fieldName = "rawType")
 sealed class MessageType {
+
     @Json(name = "r")
     class RoomNameChanged : MessageType()
 
@@ -96,6 +97,9 @@ sealed class MessageType {
     @Json(name = "room_changed_privacy")
     class RoomChangedPrivacy : MessageType()
 
+    @Json(name = "jitsi_call_started")
+    class JitsiCallStarted : MessageType()
+
     class Unspecified(val rawType: String) : MessageType()
 }
 
@@ -114,6 +118,7 @@ fun MessageType?.asString(): String? {
         is MessageType.SubscriptionRoleAdded -> "subscription-role-added"
         is MessageType.SubscriptionRoleRemoved -> "subscription-role-removed"
         is MessageType.RoomChangedPrivacy -> "room_changed_privacy"
+        is MessageType.JitsiCallStarted -> "jitsi_call_started"
         else -> null
     }
 }
@@ -130,6 +135,7 @@ fun Message.isSystemMessage() = when (type) {
     is MessageType.SubscriptionRoleAdded,
     is MessageType.SubscriptionRoleRemoved,
     is MessageType.RoomChangedPrivacy,
+    is MessageType.JitsiCallStarted,
     is MessageType.MessagePinned -> true
     else -> false
 }
@@ -149,6 +155,7 @@ fun messageTypeOf(type: String?): MessageType? {
         "subscription-role-added" -> MessageType.SubscriptionRoleAdded()
         "subscription-role-removed" -> MessageType.SubscriptionRoleAdded()
         "room_changed_privacy" -> MessageType.RoomChangedPrivacy()
+        "jitsi_call_started" -> MessageType.JitsiCallStarted()
         null -> null
         else -> MessageType.Unspecified(type)
     }

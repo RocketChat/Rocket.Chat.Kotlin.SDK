@@ -9,7 +9,7 @@ buildscript {
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
-        classpath "gradle.plugin.org.jmailen.gradle:kotlinter-gradle:${versions.kotlinter}"
+        classpath "org.jmailen.gradle:kotlinter-gradle:${versions.kotlinter}"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:${versions.dokka}"
     }
 }
