@@ -7,6 +7,9 @@ import se.ansman.kotshi.JsonSerializable
 data class ChatRoomPayload(@Json(name = "rid") val roomId: String)
 
 @JsonSerializable
+data class ChatRoomUnreadPayload(val roomId: String)
+
+@JsonSerializable
 data class ChatRoomNamePayload(val roomId: String, val name: String?)
 
 @JsonSerializable

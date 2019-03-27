@@ -2,13 +2,14 @@ package chat.rocket.core.internal.rest
 
 import chat.rocket.common.RocketChatApiException
 import chat.rocket.common.RocketChatAuthException
+import chat.rocket.common.RocketChatException
 import chat.rocket.common.model.Token
 import chat.rocket.common.model.UserStatus
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
 import io.fabric8.mockwebserver.DefaultMockServer
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.hamcrest.CoreMatchers
 import org.hamcrest.CoreMatchers.instanceOf
@@ -106,7 +107,7 @@ class UserTest {
 //    }
 
     @Test
-    fun `updateProfile() should succeed with valid parameters` () {
+    fun `updateProfile() should succeed with valid parameters`() {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/users.update")
@@ -150,7 +151,7 @@ class UserTest {
 
         runBlocking {
             try {
-                sut.updateProfile("userId", "test@email.com", null, null, "testuser" )
+                sut.updateProfile("userId", "test@email.com", null, null, "testuser")
                 throw RuntimeException("unreachable code")
             } catch (ex: Exception) {
                 assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
@@ -162,7 +163,7 @@ class UserTest {
     }
 
     @Test
-    fun `updateOwnBasicInformation() should succeed with valid parameters` () {
+    fun `updateOwnBasicInformation() should succeed with valid parameters`() {
         mockServer.expect()
                 .post()
                 .withPath("/api/v1/users.updateOwnBasicInfo")
@@ -206,7 +207,7 @@ class UserTest {
 
         runBlocking {
             try {
-                sut.updateOwnBasicInformation("userId", "test@email.com", null, null, "testuser" )
+                sut.updateOwnBasicInformation("userId", "test@email.com", null, null, "testuser")
                 throw RuntimeException("unreachable code")
             } catch (ex: Exception) {
                 assertThat(ex, isEqualTo(instanceOf(RocketChatApiException::class.java)))
@@ -214,6 +215,33 @@ class UserTest {
                 assertThat(apiException.errorType, isEqualTo("403"))
                 assertThat(apiException.message, isEqualTo("Email already exists. [403]"))
             }
+        }
+    }
+
+    @Test
+    fun `deleteOwnAccount() should succeed with valid parameters`() {
+        mockServer.expect()
+            .post()
+            .withPath("/api/v1/users.deleteOwnAccount")
+            .andReturn(200, SUCCESS)
+            .once()
+
+        runBlocking {
+            val result = sut.deleteOwnAccount("password")
+            assert(result)
+        }
+    }
+
+    @Test(expected = RocketChatException::class)
+    fun `deleteOwnAccount() should fail with RocketChatAuthException if not logged in`() {
+        mockServer.expect()
+            .post()
+            .withPath("/api/v1/users.deleteOwnAccount")
+            .andReturn(401, MUST_BE_LOGGED_ERROR)
+            .once()
+
+        runBlocking {
+            sut.deleteOwnAccount("password")
         }
     }
 

@@ -5,6 +5,7 @@ import chat.rocket.common.model.RoomType
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.model.DeletePayload
+import chat.rocket.core.internal.model.MessageReportPayload
 import chat.rocket.core.internal.model.PostMessagePayload
 import chat.rocket.core.internal.model.ReactionPayload
 import chat.rocket.core.internal.model.SendMessageBody
@@ -15,8 +16,8 @@ import chat.rocket.core.model.PagedResult
 import chat.rocket.core.model.ReadReceipt
 import chat.rocket.core.model.attachment.Attachment
 import com.squareup.moshi.Types
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.FormBody
 import okhttp3.MediaType
 import okhttp3.MultipartBody
@@ -44,7 +45,7 @@ suspend fun RocketChatClient.sendMessage(
     emoji: String? = null,
     avatar: String? = null,
     attachments: List<Attachment>? = null
-): Message = withContext(CommonPool) {
+): Message = withContext(Dispatchers.IO) {
     val payload = SendMessagePayload(
         SendMessageBody(messageId, roomId, message, alias, emoji, avatar, attachments)
     )
@@ -78,7 +79,7 @@ suspend fun RocketChatClient.postMessage(
     emoji: String? = null,
     avatar: String? = null,
     attachments: List<Attachment>? = null
-): Message = withContext(CommonPool) {
+): Message = withContext(Dispatchers.IO) {
     val payload = PostMessagePayload(roomId, text, alias, emoji, avatar, attachments)
     val adapter = moshi.adapter(PostMessagePayload::class.java)
     val payloadBody = adapter.toJson(payload)
@@ -101,7 +102,7 @@ suspend fun RocketChatClient.postMessage(
  * @return The updated Message object.
  */
 suspend fun RocketChatClient.updateMessage(roomId: String, messageId: String, text: String): Message =
-    withContext(CommonPool) {
+    withContext(Dispatchers.IO) {
         val payload = PostMessagePayload(roomId, text, null, null, null, null, messageId)
         val adapter = moshi.adapter(PostMessagePayload::class.java)
         val payloadBody = adapter.toJson(payload)
@@ -127,7 +128,7 @@ suspend fun RocketChatClient.deleteMessage(
     roomId: String,
     msgId: String,
     asUser: Boolean = false
-): DeleteResult = withContext(CommonPool) {
+): DeleteResult = withContext(Dispatchers.IO) {
     val payload = DeletePayload(roomId, msgId, asUser)
     val adapter = moshi.adapter(DeletePayload::class.java)
     val payloadBody = adapter.toJson(payload)
@@ -146,7 +147,7 @@ suspend fun RocketChatClient.deleteMessage(
  * @param messageId The message id to star.
  */
 suspend fun RocketChatClient.starMessage(messageId: String) {
-    withContext(CommonPool) {
+    withContext(Dispatchers.IO) {
         val body = FormBody.Builder().add("messageId", messageId).build()
 
         val httpUrl = requestUrl(restUrl, "chat.starMessage").build()
@@ -163,7 +164,7 @@ suspend fun RocketChatClient.starMessage(messageId: String) {
  * @param messageId The message id to unstar.
  */
 suspend fun RocketChatClient.unstarMessage(messageId: String) {
-    withContext(CommonPool) {
+    withContext(Dispatchers.IO) {
         val body = FormBody.Builder().add("messageId", messageId).build()
 
         val httpUrl = requestUrl(restUrl, "chat.unStarMessage").build()
@@ -180,7 +181,7 @@ suspend fun RocketChatClient.unstarMessage(messageId: String) {
  * @param messageId The message id to pin.
  */
 suspend fun RocketChatClient.pinMessage(messageId: String) {
-    withContext(CommonPool) {
+    withContext(Dispatchers.IO) {
         val body = FormBody.Builder().add("messageId", messageId).build()
 
         val httpUrl = requestUrl(restUrl, "chat.pinMessage").build()
@@ -197,7 +198,7 @@ suspend fun RocketChatClient.pinMessage(messageId: String) {
  * @param messageId The message id to unpin.
  */
 suspend fun RocketChatClient.unpinMessage(messageId: String) {
-    withContext(CommonPool) {
+    withContext(Dispatchers.IO) {
         val body = FormBody.Builder().add("messageId", messageId).build()
 
         val httpUrl = requestUrl(restUrl, "chat.unPinMessage").build()
@@ -215,7 +216,7 @@ suspend fun RocketChatClient.unpinMessage(messageId: String) {
  * @param messageId The message id to reaction refers.
  * @param emoji The emoji to react with or clear.
  */
-suspend fun RocketChatClient.toggleReaction(messageId: String, emoji: String): Boolean = withContext(CommonPool) {
+suspend fun RocketChatClient.toggleReaction(messageId: String, emoji: String): Boolean = withContext(Dispatchers.IO) {
     val url = requestUrl(restUrl, "chat.react").build()
 
     val payload = ReactionPayload(messageId, emoji)
@@ -244,7 +245,7 @@ suspend fun RocketChatClient.uploadFile(
     msg: String = "",
     description: String = ""
 ) {
-    withContext(CommonPool) {
+    withContext(Dispatchers.IO) {
         val body = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
             .addFormDataPart(
@@ -267,7 +268,7 @@ suspend fun RocketChatClient.uploadFile(
     description: String = "",
     inputStreamProvider: () -> InputStream?
 ) {
-    withContext(CommonPool) {
+    withContext(Dispatchers.IO) {
         val body = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
             .addFormDataPart(
@@ -296,7 +297,7 @@ suspend fun RocketChatClient.messages(
     roomType: RoomType,
     offset: Long,
     count: Long
-): PagedResult<List<Message>> = withContext(CommonPool) {
+): PagedResult<List<Message>> = withContext(Dispatchers.IO) {
     val httpUrl = requestUrl(
         restUrl,
         getRestApiMethodNameByRoomType(roomType, "messages")
@@ -323,7 +324,7 @@ suspend fun RocketChatClient.history(
     count: Long = 50,
     oldest: String? = null,
     latest: String? = null
-): PagedResult<List<Message>> = withContext(CommonPool) {
+): PagedResult<List<Message>> = withContext(Dispatchers.IO) {
     val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "history")).apply {
         addQueryParameter("roomId", roomId)
         addQueryParameter("count", count.toString())
@@ -351,7 +352,7 @@ suspend fun RocketChatClient.getMessageReadReceipts(
     count: Long = 50,
     oldest: String? = null,
     latest: String? = null
-): PagedResult<List<ReadReceipt>> = withContext(CommonPool) {
+): PagedResult<List<ReadReceipt>> = withContext(Dispatchers.IO) {
     val httpUrl = requestUrl(restUrl, "chat.getMessageReadReceipts").apply {
         addQueryParameter("messageId", messageId)
         addQueryParameter("count", count.toString())
@@ -372,4 +373,26 @@ suspend fun RocketChatClient.getMessageReadReceipts(
     val result = handleRestCall<RestResult<List<ReadReceipt>>>(request, type)
 
     return@withContext PagedResult<List<ReadReceipt>>(result.result(), result.total() ?: -1, result.offset() ?: -1)
+}
+
+/**
+ * Reports a message identified by {messageId} along with its {description}.
+ *
+ * @param messageId The id of the message.
+ * @param description The description of the message being reported.
+ */
+suspend fun RocketChatClient.reportMessage(
+    messageId: String,
+    description: String
+): Boolean = withContext(Dispatchers.IO) {
+    val payload = MessageReportPayload(messageId = messageId, description = description)
+    val adapter = moshi.adapter(MessageReportPayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val url = requestUrl(restUrl, "chat.reportMessage").build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
+
+    return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
 }

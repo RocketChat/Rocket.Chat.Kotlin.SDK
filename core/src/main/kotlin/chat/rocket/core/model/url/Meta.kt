@@ -66,7 +66,7 @@ class MetaJsonAdapter(moshi: Moshi) : JsonAdapter<Meta>() {
     }
 
     override fun toJson(writer: JsonWriter, value: Meta?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     companion object {

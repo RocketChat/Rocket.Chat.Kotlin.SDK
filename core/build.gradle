@@ -10,6 +10,7 @@ apply plugin: 'org.jetbrains.dokka'
 apply plugin: "org.jmailen.kotlinter"
 
 sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
     compile project (':common')
@@ -38,12 +39,6 @@ compileKotlin {
 
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
-}
-
-kotlin {
-    experimental {
-        coroutines "enable"
-    }
 }
 
 dokka {

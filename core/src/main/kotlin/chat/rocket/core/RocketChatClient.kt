@@ -7,7 +7,9 @@ import chat.rocket.common.model.TimestampAdapter
 import chat.rocket.common.model.User
 import chat.rocket.common.util.CalendarISO8601Converter
 import chat.rocket.common.util.Logger
+import chat.rocket.common.util.NoOpLogger
 import chat.rocket.common.util.PlatformLogger
+import chat.rocket.common.util.RealLogger
 import chat.rocket.common.util.ifNull
 import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.RestMultiResult
@@ -25,11 +27,14 @@ import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room
 import chat.rocket.core.model.url.MetaJsonAdapter
 import com.squareup.moshi.Moshi
-import kotlinx.coroutines.experimental.channels.Channel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import okhttp3.HttpUrl
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import java.security.InvalidParameterException
+import kotlin.coroutines.CoroutineContext
 
 class RocketChatClient private constructor(
     internal val httpClient: OkHttpClient,
@@ -37,7 +42,10 @@ class RocketChatClient private constructor(
     userAgent: String,
     internal val tokenRepository: TokenRepository,
     internal val logger: Logger
-) {
+) : CoroutineScope {
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Default
+
     internal val moshi: Moshi = Moshi.Builder()
         .add(FallbackSealedClassJsonAdapter.ADAPTER_FACTORY)
         .add(RestResult.JsonAdapterFactory())
@@ -99,7 +107,7 @@ class RocketChatClient private constructor(
         builder.restUrl,
         builder.userAgent,
         builder.tokenRepository,
-        Logger(builder.platformLogger, builder.restUrl))
+        if (builder.enableLogger) RealLogger(builder.platformLogger, builder.restUrl) else NoOpLogger)
 
     companion object {
         val CONTENT_TYPE_JSON = MediaType.parse("application/json; charset=utf-8")
@@ -118,6 +126,7 @@ class RocketChatClient private constructor(
         lateinit var userAgent: String
         lateinit var tokenRepository: TokenRepository
         lateinit var platformLogger: PlatformLogger
+        var enableLogger: Boolean = true
 
         fun httpClient(init: Builder.() -> OkHttpClient) = apply { httpClient = init() }
 
@@ -128,6 +137,8 @@ class RocketChatClient private constructor(
         fun tokenRepository(init: Builder.() -> TokenRepository) = apply { tokenRepository = init() }
 
         fun platformLogger(init: Builder.() -> PlatformLogger) = apply { platformLogger = init() }
+
+        fun enableLogger(init: Builder.() -> Boolean) = apply { enableLogger = init() }
 
         fun build() = RocketChatClient(this)
     }

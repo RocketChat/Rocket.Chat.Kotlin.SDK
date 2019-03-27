@@ -4,10 +4,10 @@ import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
 import chat.rocket.core.model.CustomEmoji
 import com.squareup.moshi.Types
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-suspend fun RocketChatClient.getCustomEmojis(): List<CustomEmoji> = withContext(CommonPool) {
+suspend fun RocketChatClient.getCustomEmojis(): List<CustomEmoji> = withContext(Dispatchers.IO) {
     val url = requestUrl(restUrl, "emoji-custom").build()
 
     val request = requestBuilderForAuthenticatedMethods(url).get().build()

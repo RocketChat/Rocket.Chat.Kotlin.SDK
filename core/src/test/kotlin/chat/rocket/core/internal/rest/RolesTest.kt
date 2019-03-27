@@ -6,7 +6,7 @@ import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
 import io.fabric8.mockwebserver.DefaultMockServer
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before

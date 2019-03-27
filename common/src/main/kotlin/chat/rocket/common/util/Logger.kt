@@ -1,18 +1,34 @@
 package chat.rocket.common.util
 
-class Logger(val platformLogger: PlatformLogger, private val url: String) {
+interface Logger {
+    fun debug(msg: () -> Any?)
+    fun info(msg: () -> Any?)
+    fun warn(msg: () -> Any?)
+}
 
-    val enabled: Boolean = true
+class RealLogger(val platformLogger: PlatformLogger, private val url: String) : Logger {
 
-    fun debug(msg: () -> Any?) {
-        if (enabled) platformLogger.debug("SDK($url): ${msg.toStringSafe()}")
+
+    override fun debug(msg: () -> Any?) {
+        platformLogger.debug("SDK($url): ${msg.toStringSafe()}")
     }
 
-    fun info(msg: () -> Any?) {
-        if (enabled) platformLogger.info("SDK($url): ${msg.toStringSafe()}")
+    override fun info(msg: () -> Any?) {
+        platformLogger.info("SDK($url): ${msg.toStringSafe()}")
     }
 
-    fun warn(msg: () -> Any?) {
-        if (enabled) platformLogger.warn("SDK($url): ${msg.toStringSafe()}")
+    override fun warn(msg: () -> Any?) {
+        platformLogger.warn("SDK($url): ${msg.toStringSafe()}")
+    }
+}
+
+object NoOpLogger : Logger {
+    override fun debug(msg: () -> Any?) {
+    }
+
+    override fun info(msg: () -> Any?) {
+    }
+
+    override fun warn(msg: () -> Any?) {
     }
 }

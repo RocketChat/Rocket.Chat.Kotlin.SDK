@@ -9,8 +9,8 @@ import chat.rocket.core.internal.model.Subscription
 import chat.rocket.core.internal.realtime.subscribeRoomMessages
 import chat.rocket.core.internal.rest.history
 import chat.rocket.core.internal.rest.messages
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 data class ChatRoom(
     override val id: String,
@@ -39,7 +39,8 @@ data class ChatRoom(
     val groupMentions: Long?,
     val lastMessage: Message?,
     val client: RocketChatClient,
-    val broadcast: Boolean
+    val broadcast: Boolean,
+    @JvmField val muted: List<String>? = null
 ) : BaseRoom {
     companion object {
         fun create(room: Room, subscription: Subscription, client: RocketChatClient): ChatRoom {
@@ -68,7 +69,8 @@ data class ChatRoom(
                 groupMentions = subscription.groupMentions,
                 lastMessage = room.lastMessage,
                 client = client,
-                broadcast = room.broadcast
+                broadcast = room.broadcast,
+                muted = room.muted
             )
         }
     }
@@ -80,7 +82,7 @@ data class ChatRoom(
 suspend fun ChatRoom.messages(
     offset: Long = 0,
     count: Long = 50
-): PagedResult<List<Message>> = withContext(CommonPool) {
+): PagedResult<List<Message>> = withContext(Dispatchers.IO) {
     return@withContext client.messages(id, type, offset, count)
 }
 
@@ -88,7 +90,7 @@ suspend fun ChatRoom.history(
     count: Long = 50,
     oldest: String? = null,
     latest: String? = null
-): PagedResult<List<Message>> = withContext(CommonPool) {
+): PagedResult<List<Message>> = withContext(Dispatchers.IO) {
     return@withContext client.history(id, type, count, oldest, latest)
 }
 

@@ -8,7 +8,7 @@ import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
 import io.fabric8.mockwebserver.DefaultMockServer
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.junit.Before
 import org.junit.Test
@@ -69,6 +69,32 @@ class ChatRoomTest {
 
         runBlocking {
             sut.markAsRead(roomId = "GENERAL")
+        }
+    }
+
+    @Test
+    fun `markAsUnread() should succeed without throwing`() {
+        mockServer.expect()
+            .post()
+            .withPath("/api/v1/subscriptions.unread")
+            .andReturn(200, SUCCESS)
+            .once()
+
+        runBlocking {
+            sut.markAsUnread(roomId = "GENERAL")
+        }
+    }
+
+    @Test(expected = RocketChatException::class)
+    fun `markAsUnread() should fail with RocketChatAuthException if not logged in`() {
+        mockServer.expect()
+            .post()
+            .withPath("/api/v1/subscriptions.unread")
+            .andReturn(401, MUST_BE_LOGGED_ERROR)
+            .once()
+
+        runBlocking {
+            sut.markAsUnread(roomId = "GENERAL")
         }
     }
 
