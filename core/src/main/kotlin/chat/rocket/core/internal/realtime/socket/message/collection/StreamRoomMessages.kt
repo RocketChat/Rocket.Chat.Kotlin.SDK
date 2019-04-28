@@ -2,11 +2,13 @@ package chat.rocket.core.internal.realtime.socket.message.collection
 
 import chat.rocket.core.internal.realtime.socket.Socket
 import chat.rocket.core.model.Message
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 internal const val STREAM_ROOM_MESSAGES = "stream-room-messages"
 
+@ObsoleteCoroutinesApi
 internal fun Socket.processRoomMessage(text: String) {
     try {
         val json = JSONObject(text)
