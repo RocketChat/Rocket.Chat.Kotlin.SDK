@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 data class ChatRoom(
     override val id: String,
     val subscriptionId: String,
+    val parentId: String?,
     override val type: RoomType,
     override val user: SimpleUser?,
     val status: UserStatus?,
@@ -46,10 +47,12 @@ data class ChatRoom(
         fun create(room: Room, subscription: Subscription, client: RocketChatClient): ChatRoom {
             return ChatRoom(id = room.id,
                 subscriptionId = subscription.id,
+                parentId = subscription.parentId,
                 type = room.type,
                 user = room.user ?: subscription.user,
                 status = null,
-                name = room.name ?: subscription.name!!, // we guarantee on listSubscriptions() that it has a name
+                name = if (!subscription.parentId.isNullOrEmpty()) subscription.fullName!! else room.name
+                    ?: subscription.name!!, // we guarantee on listSubscriptions() that it has a name
                 fullName = room.fullName ?: subscription.fullName,
                 readonly = room.readonly,
                 updatedAt = room.updatedAt ?: subscription.updatedAt,

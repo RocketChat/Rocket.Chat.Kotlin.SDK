@@ -9,8 +9,12 @@ import chat.rocket.core.internal.realtime.socket.message.collection.processNotif
 import chat.rocket.core.internal.realtime.socket.message.collection.processRoomMessage
 import chat.rocket.core.internal.realtime.socket.message.collection.processUserStream
 import chat.rocket.core.internal.realtime.socket.message.model.SocketMessage
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import org.json.JSONObject
 
+@ObsoleteCoroutinesApi
+@ExperimentalCoroutinesApi
 internal fun Socket.processSubscriptionsAdded(message: SocketMessage, text: String) {
     when (message.collection) {
         USERS -> {
@@ -22,6 +26,8 @@ internal fun Socket.processSubscriptionsAdded(message: SocketMessage, text: Stri
     }
 }
 
+@ObsoleteCoroutinesApi
+@ExperimentalCoroutinesApi
 internal fun Socket.processSubscriptionsRemoved(message: SocketMessage, text: String) {
     when (message.collection) {
         USERS -> {
@@ -33,6 +39,8 @@ internal fun Socket.processSubscriptionsRemoved(message: SocketMessage, text: St
     }
 }
 
+@ObsoleteCoroutinesApi
+@ExperimentalCoroutinesApi
 internal fun Socket.processSubscriptionsChanged(message: SocketMessage, text: String) {
     when (message.collection) {
         STREAM_NOTIFY_USER -> {
@@ -53,6 +61,7 @@ internal fun Socket.processSubscriptionsChanged(message: SocketMessage, text: St
     }
 }
 
+@ObsoleteCoroutinesApi
 internal fun Socket.processSubscriptionResult(message: String) {
     val subId: String
     try {
@@ -70,6 +79,7 @@ internal fun Socket.processSubscriptionResult(message: String) {
     }
 }
 
+@ObsoleteCoroutinesApi
 internal fun Socket.processMethodResult(message: String) {
     val id: String
     try {
