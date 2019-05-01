@@ -14,7 +14,7 @@ import org.mockito.MockitoAnnotations
 import org.hamcrest.CoreMatchers.`is` as isEqualTo
 
 const val REACTIONS_JSON_PAYLOAD = "{\"reactions\":{\":croissant:\":{\"usernames\":[\"test.user\",\"test.user2\"],\"names\":[\"Test User\",\"Test User 2\"]}, \":thumbsup:\":{\"usernames\":[\"test.user\",\"test.user2\"],\"names\":[\"Test User\",\"Test User 2\"]}}}"
-//const val REACTIONS_JSON_PAYLOAD = "{\"reactions\":{\":croissant:\":{\"usernames\":[\"test.user\",\"test.user2\"],\"names\":[\"Test User\",\"Test User 2\"]}}}"
+const val REACTIONS_JSON_PAYLOAD_WITHOUT_NAME = "{\"reactions\":{\":croissant:\":{\"usernames\":[\"test.user\",\"test.user2\"]}, \":thumbsup:\":{\"usernames\":[\"test.user\",\"test.user2\"]}}}"
 
 const val REACTIONS_EMPTY_JSON_PAYLOAD = "[]"
 
@@ -42,7 +42,7 @@ class ReactionsAdapterTest {
     }
 
     @Test
-    fun `should deserialize JSON with reactions`() {
+    fun `should deserialize JSON with reactions (with names)`() {
         val adapter = moshi.adapter<Reactions>(Reactions::class.java)
         adapter.fromJson(REACTIONS_JSON_PAYLOAD)?.let { reactions ->
             assertThat(reactions.size, isEqualTo(2))
@@ -50,6 +50,17 @@ class ReactionsAdapterTest {
             assertThat(reactions[":croissant:"]?.second?.size, isEqualTo(2))
             assertThat(reactions[":croissant:"]?.first?.get(0), isEqualTo("test.user"))
             assertThat(reactions[":croissant:"]?.second?.get(0), isEqualTo("Test User"))
+        }
+    }
+
+    @Test
+    fun `should deserialize JSON with reactions (without names)`() {
+        val adapter = moshi.adapter<Reactions>(Reactions::class.java)
+        adapter.fromJson(REACTIONS_JSON_PAYLOAD_WITHOUT_NAME)?.let { reactions ->
+            assertThat(reactions.size, isEqualTo(2))
+            assertThat(reactions[":croissant:"]?.first?.size, isEqualTo(2))
+            assertThat(reactions[":croissant:"]?.second?.size, isEqualTo(0))
+            assertThat(reactions[":croissant:"]?.first?.get(0), isEqualTo("test.user"))
         }
     }
 
