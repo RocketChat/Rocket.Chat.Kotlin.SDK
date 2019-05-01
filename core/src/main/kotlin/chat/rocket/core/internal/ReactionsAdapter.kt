@@ -56,7 +56,7 @@ class ReactionsAdapter : JsonAdapter<Reactions>() {
 
             reader.endObject()
             reactions.set(shortname, usernameList, nameList)
-         }
+        }
         reader.endObject()
         reader.endObject()
         return reactions
