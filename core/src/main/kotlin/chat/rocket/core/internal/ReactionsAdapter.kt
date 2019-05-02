@@ -72,7 +72,7 @@ class ReactionsAdapter : JsonAdapter<Reactions>() {
                 name("reactions")
                 beginObject()
                 value.getShortNames().forEach {
-                    writeReaction(writer, it, value.getUsernames(it)?.first, value.getNames(it)?.second)
+                    writeReaction(writer, it, value.getUsernames(it), value.getNames(it))
                 }
                 endObject()
                 endObject()
@@ -86,16 +86,14 @@ class ReactionsAdapter : JsonAdapter<Reactions>() {
             beginObject()
             name("usernames")
             beginArray()
-            usernames?.forEach {
-                writer.value(it)
-            }
+            usernames?.forEach { writer.value(it) }
             endArray()
-            name("names")
-            beginArray()
-            names?.forEach {
-                writer.value(it)
+            if (names != null && names.isNotEmpty()) {
+                name("names")
+                beginArray()
+                names.forEach { writer.value(it) }
+                endArray()
             }
-            endArray()
             endObject()
         }
     }

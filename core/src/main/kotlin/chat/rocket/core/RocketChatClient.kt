@@ -17,6 +17,7 @@ import chat.rocket.core.internal.SettingsAdapter
 import chat.rocket.core.internal.AttachmentAdapterFactory
 import chat.rocket.core.internal.RoomListAdapterFactory
 import chat.rocket.core.internal.CoreJsonAdapterFactory
+import chat.rocket.core.internal.MessageListAdapterFactory
 import chat.rocket.core.internal.ReactionsAdapter
 import chat.rocket.core.internal.model.Subscription
 import chat.rocket.core.internal.realtime.socket.Socket
@@ -53,6 +54,7 @@ class RocketChatClient private constructor(
         .add(SettingsAdapter())
         .add(AttachmentAdapterFactory(logger))
         .add(RoomListAdapterFactory(logger))
+        .add(MessageListAdapterFactory(logger))
         .add(MetaJsonAdapter.ADAPTER_FACTORY)
         .add(java.lang.Long::class.java, ISO8601Date::class.java, TimestampAdapter(CalendarISO8601Converter()))
         .add(Long::class.java, ISO8601Date::class.java, TimestampAdapter(CalendarISO8601Converter()))
