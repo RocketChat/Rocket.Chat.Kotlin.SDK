@@ -63,7 +63,7 @@ class Socket(
     private val httpClient = client.httpClient
     internal val logger = client.logger
     internal val moshi = client.moshi
-    private val messageAdapter: JsonAdapter<SocketMessage>
+    private val socketMessageAdapter: JsonAdapter<SocketMessage>
     internal var currentState: State = State.Disconnected()
     internal var socket: WebSocket? = null
     private var processingChannel: Channel<String>? = null
@@ -86,7 +86,7 @@ class Socket(
 
     init {
         setState(State.Created())
-        messageAdapter = moshi.adapter(SocketMessage::class.java)
+        socketMessageAdapter = moshi.adapter(SocketMessage::class.java)
     }
 
     @ObsoleteCoroutinesApi
@@ -178,7 +178,7 @@ class Socket(
         // Ignore empty or invalid messages
         val message: SocketMessage
         try {
-            message = messageAdapter.fromJson(text) ?: return
+            message = socketMessageAdapter.fromJson(text) ?: return
         } catch (ex: Exception) {
             logger.debug { "Error parsing message, ignoring it" }
             ex.printStackTrace()
