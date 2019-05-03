@@ -22,6 +22,7 @@ import chat.rocket.core.model.Room
 import com.squareup.moshi.Types
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType
 import okhttp3.MultipartBody
@@ -204,8 +205,8 @@ suspend fun RocketChatClient.chatRooms(
     timestamp: Long? = null,
     filterCustom: Boolean = true
 ): RestMultiResult<List<ChatRoom>, List<Removed>> {
-    val rooms = async { listRooms(timestamp) }
-    val subscriptions = async { listSubscriptions(timestamp) }
+    val rooms = coroutineScope { async { listRooms(timestamp) } }
+    val subscriptions = coroutineScope { async { listSubscriptions(timestamp) } }
 
     return combine(rooms.await(), subscriptions.await(), filterCustom)
 }
