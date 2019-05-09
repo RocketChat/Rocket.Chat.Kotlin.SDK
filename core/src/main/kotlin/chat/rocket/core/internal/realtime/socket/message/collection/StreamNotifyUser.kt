@@ -5,6 +5,7 @@ import chat.rocket.core.internal.realtime.socket.Socket
 import chat.rocket.core.internal.realtime.socket.model.StreamMessage
 import chat.rocket.core.internal.realtime.socket.model.Type
 import chat.rocket.core.model.Room
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.security.InvalidParameterException
@@ -13,6 +14,7 @@ internal const val STREAM_NOTIFY_USER = "stream-notify-user"
 private const val STREAM_ROOMS_CHANGED = "rooms-changed"
 private const val STREAM_SUBSCRIPTION_CHANGED = "subscriptions-changed"
 
+@UseExperimental(ExperimentalCoroutinesApi::class)
 internal fun Socket.processNotifyUserStream(text: String) {
     try {
         val json = JSONObject(text)
@@ -35,12 +37,13 @@ internal fun Socket.processNotifyUserStream(text: String) {
     }
 }
 
+@ExperimentalCoroutinesApi
 private fun Socket.processRoomStream(state: String, data: JSONObject) {
     val adapter = moshi.adapter<Room>(Room::class.java)
     val room = adapter.fromJson(data.toString())
 
     room?.apply {
-        if (parentJob == null || !parentJob!!.isActive) {
+        if (!parentJob.isActive) {
             logger.debug { "Parent job: $parentJob" }
         }
         launch(parentJob) {
