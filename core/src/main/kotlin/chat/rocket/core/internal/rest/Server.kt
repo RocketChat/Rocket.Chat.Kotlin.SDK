@@ -7,11 +7,11 @@ import chat.rocket.core.internal.model.ConfigurationsPayload
 import chat.rocket.core.internal.model.ServerInfoResponse
 import chat.rocket.core.model.Value
 import com.squareup.moshi.Types
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
 
-suspend fun RocketChatClient.serverInfo(): ServerInfo = withContext(CommonPool) {
+suspend fun RocketChatClient.serverInfo(): ServerInfo = withContext(Dispatchers.IO) {
     val url = restUrl.newBuilder()
         .addPathSegment("api")
         .addPathSegment("info")
@@ -37,7 +37,7 @@ private fun HttpUrl.baseUrl(): HttpUrl {
         .build()
 }
 
-suspend fun RocketChatClient.configurations(): Map<String, Map<String, String>> = withContext(CommonPool) {
+suspend fun RocketChatClient.configurations(): Map<String, Map<String, String>> = withContext(Dispatchers.IO) {
     val url = restUrl.newBuilder().apply {
         addPathSegment("api")
         addPathSegment("v1")
@@ -71,7 +71,7 @@ suspend fun RocketChatClient.configurations(): Map<String, Map<String, String>> 
  *
  * @since 0.63.0
  */
-suspend fun RocketChatClient.settingsOauth(): SettingsOauth = withContext(CommonPool) {
+suspend fun RocketChatClient.settingsOauth(): SettingsOauth = withContext(Dispatchers.IO) {
     val url = restUrl.newBuilder()
         .addPathSegment("api")
         .addPathSegment("v1")
@@ -83,7 +83,7 @@ suspend fun RocketChatClient.settingsOauth(): SettingsOauth = withContext(Common
     handleRestCall<SettingsOauth>(request, SettingsOauth::class.java)
 }
 
-suspend fun RocketChatClient.settings(vararg filter: String): Map<String, Value<Any>> = withContext(CommonPool) {
+suspend fun RocketChatClient.settings(vararg filter: String): Map<String, Value<Any>> = withContext(Dispatchers.IO) {
     val url = restUrl.newBuilder().apply {
         addPathSegment("api")
         addPathSegment("v1")

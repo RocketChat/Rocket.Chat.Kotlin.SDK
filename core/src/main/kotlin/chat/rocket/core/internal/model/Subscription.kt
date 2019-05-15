@@ -12,11 +12,12 @@ import se.ansman.kotshi.JsonSerializable
 @JsonSerializable
 data class Subscription(
     @Json(name = "rid") val roomId: String,
+    @Json(name = "prid") val parentId: String?, // Not empty if it is a discussion
     @Json(name = "_id") override val id: String,
     @Json(name = "t") override val type: RoomType,
     @Json(name = "u") override val user: SimpleUser?,
-    val name: String?,
-    @Json(name = "fname") override val fullName: String?,
+    val name: String?, // Name of the subscription
+    @Json(name = "fname") override val fullName: String?, // Full name of the user, in the case of using the full user name setting (UI_Use_Real_Name)
     @Json(name = "ro") override val readonly: Boolean? = false,
     @Json(name = "ts") @ISO8601Date val timestamp: Long?,
     @Json(name = "ls") @ISO8601Date val lastSeen: Long?,

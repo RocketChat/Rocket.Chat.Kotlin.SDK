@@ -14,8 +14,8 @@ import chat.rocket.common.util.Logger
 import chat.rocket.core.RocketChatClient
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
-import kotlinx.coroutines.experimental.CancellableContinuation
-import kotlinx.coroutines.experimental.suspendCancellableCoroutine
+import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.HttpUrl
@@ -26,6 +26,8 @@ import okhttp3.Response
 import java.io.IOException
 import java.lang.reflect.Type
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 internal fun getRestApiMethodNameByRoomType(roomType: RoomType, method: String): String {
     return when (roomType) {
@@ -41,6 +43,14 @@ internal fun requestUrl(baseUrl: HttpUrl, method: String): HttpUrl.Builder {
     return baseUrl.newBuilder()
         .addPathSegment("api")
         .addPathSegment("v1")
+        .addPathSegment(method)
+}
+
+internal fun requestUrlForVideoConference(baseUrl: HttpUrl, method: String): HttpUrl.Builder {
+    return baseUrl.newBuilder()
+        .addPathSegment("api")
+        .addPathSegment("v1")
+        .addPathSegment("video-conference")
         .addPathSegment(method)
 }
 
@@ -116,8 +126,8 @@ internal suspend fun RocketChatClient.handleRequest(
     val client = ensureClient(largeFile, allowRedirects)
     client.newCall(request).enqueue(callback)
 
-    continuation.invokeOnCompletion {
-        if (continuation.isCancelled) client.cancel(request.tag())
+    continuation.invokeOnCancellation {
+        client.cancel(request.tag())
     }
 }
 
@@ -152,7 +162,6 @@ internal fun processCallbackError(
     logger: Logger,
     allowRedirects: Boolean = true
 ): RocketChatException {
-
     var exception: RocketChatException
     try {
         if (response.isRedirect && !allowRedirects) {

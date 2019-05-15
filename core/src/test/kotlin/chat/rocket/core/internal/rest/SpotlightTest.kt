@@ -6,7 +6,7 @@ import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
 import chat.rocket.core.model.SpotlightResult
 import io.fabric8.mockwebserver.DefaultMockServer
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.hamcrest.CoreMatchers.isA
 import org.hamcrest.MatcherAssert.assertThat
@@ -19,12 +19,8 @@ import org.hamcrest.CoreMatchers.`is` as isEqualTo
 
 class SpotlightTest {
     private lateinit var mockServer: DefaultMockServer
-
     private lateinit var sut: RocketChatClient
-
-    @Mock
-    private lateinit var tokenProvider: TokenRepository
-
+    @Mock private lateinit var tokenProvider: TokenRepository
     private val authToken = Token("userId", "authToken")
 
     @Before

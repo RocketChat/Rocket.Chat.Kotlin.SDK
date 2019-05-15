@@ -21,7 +21,6 @@ dependencies {
 
     compile project (':common')
     compile project (':core')
-    compile project (':rxjava')
     compile project (':compat')
 
     compile 'com.squareup.okhttp3:logging-interceptor:3.9.0'
@@ -35,10 +34,4 @@ compileKotlin {
 }
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
-}
-
-kotlin {
-    experimental {
-        coroutines "enable"
-    }
 }

@@ -15,25 +15,30 @@ import chat.rocket.core.model.Message
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room
 import com.squareup.moshi.JsonAdapter
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.channels.Channel
-import kotlinx.coroutines.experimental.channels.SendChannel
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.isActive
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.newSingleThreadContext
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.withContext
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.coroutines.experimental.coroutineContext
+import kotlin.coroutines.CoroutineContext
 
-const val PING_INTERVAL = 15L
+const val PING_INTERVAL = 15000L
 
+@ObsoleteCoroutinesApi
 class Socket(
     internal val client: RocketChatClient,
     internal val roomsChannel: SendChannel<StreamMessage<Room>>,
@@ -42,7 +47,10 @@ class Socket(
     internal val userDataChannel: SendChannel<Myself>,
     internal val activeUsersChannel: SendChannel<User>,
     internal val typingStatusChannel: SendChannel<Pair<String, Boolean>>
-) : WebSocketListener() {
+) : WebSocketListener(), CoroutineScope {
+    internal var parentJob = Job()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Default + parentJob
 
     private val request: Request = Request.Builder()
         .url("${client.url}/websocket")
@@ -55,12 +63,11 @@ class Socket(
     private val httpClient = client.httpClient
     internal val logger = client.logger
     internal val moshi = client.moshi
-    private val messageAdapter: JsonAdapter<SocketMessage>
+    private val socketMessageAdapter: JsonAdapter<SocketMessage>
     internal var currentState: State = State.Disconnected()
     internal var socket: WebSocket? = null
     private var processingChannel: Channel<String>? = null
     internal val statusChannelList = ArrayList<Channel<State>>()
-    internal var parentJob: Job? = null
     private var readJob: Job? = null
     private var pingJob: Job? = null
     private var timeoutJob: Job? = null
@@ -68,6 +75,7 @@ class Socket(
 
     internal val subscriptionsMap = HashMap<String, (Boolean, String) -> Unit>()
 
+    @ObsoleteCoroutinesApi
     private val connectionContext = newSingleThreadContext("connection-context")
     private val reconnectionStrategy = ReconnectionStrategy()
     private var reconnectJob: Job? = null
@@ -78,14 +86,15 @@ class Socket(
 
     init {
         setState(State.Created())
-        messageAdapter = moshi.adapter(SocketMessage::class.java)
+        socketMessageAdapter = moshi.adapter(SocketMessage::class.java)
     }
 
+    @ObsoleteCoroutinesApi
     internal fun connect(resetCounter: Boolean = false) {
         selfDisconnect = false
         // reset id counter
         currentId.set(1)
-        parentJob?.cancel()
+        parentJob.cancel()
         reconnectJob?.cancel()
 
         if (resetCounter) {
@@ -98,6 +107,7 @@ class Socket(
         socket = httpClient.newWebSocket(request, this)
     }
 
+    @ObsoleteCoroutinesApi
     internal fun disconnect() {
         when (currentState) {
             State.Disconnected() -> return
@@ -113,44 +123,40 @@ class Socket(
         }
     }
 
+    @ObsoleteCoroutinesApi
     private fun startReconnection() {
         // Ignore  self disconnection
         if (selfDisconnect) {
-            logger.info { "Self disconnected, won't try to reconnect." }
+            logger.info { "SELF DISCONNECTED, WON'T TRY TO RECONNECT." }
             return
         }
 
-        logger.info { "startReconnection" }
+        logger.info { "START RECONNECTION" }
 
         if (reconnectionStrategy.shouldRetry) {
             reconnectJob?.cancel()
             reconnectJob = launch(connectionContext) {
-                logger.debug {
-                    "Reconnecting in: ${reconnectionStrategy.reconnectInterval}"
-                }
+                logger.debug { "RECONNECTING IN: ${reconnectionStrategy.reconnectInterval}" }
                 delayReconnection(reconnectionStrategy.reconnectInterval)
                 if (!isActive) {
-                    logger.debug {
-                        "Reconnect job inactive, ignoring"
-                    }
+                    logger.debug { "RECONNECT JOB INACTIVE, IGNORING" }
                     return@launch
                 }
                 reconnectionStrategy.processAttempts()
                 connect(false)
             }
         } else {
-            logger.info { "Exhausted reconnection attempts: ${reconnectionStrategy.numberOfAttempts} - ${reconnectionStrategy.maxAttempts}" }
+            logger.info { "EXHAUSTED RECONNECTION ATTEMPTS: ${reconnectionStrategy.numberOfAttempts} - ${reconnectionStrategy.maxAttempts}" }
         }
     }
 
+    @ObsoleteCoroutinesApi
     private suspend fun delayReconnection(reconnectInterval: Int) {
         val seconds = reconnectInterval / 1000
         withContext(connectionContext) {
-            for (second in 0..(seconds - 1)) {
+            for (second in 0 until seconds) {
                 if (!coroutineContext.isActive) {
-                    logger.debug {
-                        "Reconnect job inactive, ignoring"
-                    }
+                    logger.debug { "Reconnect job inactive, ignoring" }
                     return@withContext
                 }
                 val left = seconds - second
@@ -161,24 +167,25 @@ class Socket(
         }
     }
 
+    @ExperimentalCoroutinesApi
     private fun processIncomingMessage(text: String) {
         messagesProcessed++
         logger.debug {
             val len = Math.min(40, text.length)
-            "Process Incoming message: ${text.substring(0, len)}"
+            "PROCESS INCOMING MESSAGE: ${text.substring(0, len)}"
         }
 
         // Ignore empty or invalid messages
         val message: SocketMessage
         try {
-            message = messageAdapter.fromJson(text) ?: return
+            message = socketMessageAdapter.fromJson(text) ?: return
         } catch (ex: Exception) {
             logger.debug { "Error parsing message, ignoring it" }
             ex.printStackTrace()
             return
         }
 
-        reschedulePing(message.type)
+        reschedulePing()
 
         when (currentState) {
             is State.Connecting -> {
@@ -196,6 +203,7 @@ class Socket(
         }
     }
 
+    @ObsoleteCoroutinesApi
     private fun processConnectionMessage(message: SocketMessage) {
         when (message.type) {
             MessageType.CONNECTED -> {
@@ -208,106 +216,87 @@ class Socket(
         }
     }
 
+    @ObsoleteCoroutinesApi
+    @ExperimentalCoroutinesApi
     private fun processAuthenticationResponse(message: SocketMessage, text: String) {
         when (message.type) {
             MessageType.ADDED, MessageType.UPDATED -> {
                 // FIXME - for now just set the state to connected
                 setState(State.Connected())
 
-                //Also process the message
+                // Also process the message
                 if (message.type == MessageType.ADDED) {
                     processSubscriptionsAdded(message, text)
                 }
             }
-            MessageType.RESULT -> {
-                processLoginResult(text)
-            }
-            MessageType.PING -> {
-                send(pongMessage())
-            }
+            MessageType.RESULT -> processLoginResult(text)
+            MessageType.PING -> send(pongMessage())
             else -> {
                 // IGNORING FOR NOW.
             }
         }
     }
 
+    @ExperimentalCoroutinesApi
     private fun processMessage(message: SocketMessage, text: String) {
         when (message.type) {
             MessageType.PING -> {
-                logger.debug { "sending pong - messages received $messagesReceived - messages processed $messagesProcessed" }
+                logger.debug { "Sending pong - messages received $messagesReceived - messages processed $messagesProcessed" }
                 send(pongMessage())
             }
-            MessageType.ADDED -> {
-                processSubscriptionsAdded(message, text)
-            }
-            MessageType.REMOVED -> {
-                processSubscriptionsRemoved(message, text)
-            }
-            MessageType.CHANGED -> {
-                processSubscriptionsChanged(message, text)
-            }
-            MessageType.READY -> {
-                processSubscriptionResult(text)
-            }
-            MessageType.RESULT -> {
-                processMethodResult(text)
-            }
-            MessageType.ERROR -> {
-                logger.info { "Error: ${message.errorReason}" }
-            }
-            else -> {
-                logger.debug { "Ignoring message type: ${message.type}" }
-            }
+            MessageType.ADDED -> processSubscriptionsAdded(message, text)
+            MessageType.REMOVED -> processSubscriptionsRemoved(message, text)
+            MessageType.CHANGED -> processSubscriptionsChanged(message, text)
+            MessageType.READY -> processSubscriptionResult(text)
+            MessageType.RESULT -> processMethodResult(text)
+            MessageType.ERROR -> logger.warn { "ERROR on processMessage: ${message.errorReason}" }
+            else -> logger.debug { "Ignoring message type: ${message.type}" }
         }
     }
 
     internal fun send(message: String) {
-        logger.debug {
-            "Sending message: $message"
-        }
+        logger.debug { "Sending messagE: $message" }
         socket?.send(message)
     }
 
-    private fun reschedulePing(type: MessageType) {
-        logger.debug {
-            "Rescheduling ping in $PING_INTERVAL seconds"
-        }
+    private fun reschedulePing() {
+        logger.debug { "Rescheduling ping in $PING_INTERVAL milliseconds" }
 
         timeoutJob?.cancel()
-
         pingJob?.cancel()
-        pingJob = launch(parent = parentJob) {
-            logger.debug { "Scheduling ping" }
-            delay(PING_INTERVAL, TimeUnit.SECONDS)
 
-            logger.debug { "running ping if active" }
+        pingJob = launch {
+            logger.debug { "Scheduling ping" }
+            delay(PING_INTERVAL)
+
+            logger.debug { "Running ping if active" }
             if (!isActive) return@launch
             schedulePingTimeout()
-            logger.debug { "sending ping - messages received $messagesReceived - messages processed $messagesProcessed" }
+            logger.debug { "Sending ping - messages received $messagesReceived - messages processed $messagesProcessed" }
             send(pingMessage())
         }
     }
 
     private suspend fun schedulePingTimeout() {
         val timeout = (PING_INTERVAL * 1.5).toLong()
-        logger.debug { "Scheduling ping timeout in $timeout" }
-        timeoutJob = launch(parent = parentJob) {
-            delay(timeout, TimeUnit.SECONDS)
-
-            if (!isActive) return@launch
-            when (currentState) {
-                is State.Disconnected,
-                is State.Disconnecting -> {
-                    logger.warn { "PONG not received, but already disconnected" }
-                }
-                else -> {
-                    logger.warn { "PONG not received" }
-                    socket?.cancel()
+        logger.debug { "Scheduling ping timeout in $timeout milliseconds" }
+        timeoutJob = coroutineScope {
+            launch(parentJob) {
+                delay(timeout)
+                if (!isActive) return@launch
+                when (currentState) {
+                    is State.Disconnected,
+                    is State.Disconnecting -> logger.warn { "Pong not received, but already disconnected" }
+                    else -> {
+                        logger.warn { "Pong not received" }
+                        socket?.cancel()
+                    }
                 }
             }
         }
     }
 
+    @ObsoleteCoroutinesApi
     internal fun setState(newState: State) {
         if (newState != currentState) {
             logger.debug { "Setting state to: $newState - oldState: $currentState, channels: ${statusChannelList.size}" }
@@ -316,6 +305,7 @@ class Socket(
         }
     }
 
+    @ObsoleteCoroutinesApi
     private fun sendState(state: State) {
         launch(connectionContext) {
             for (channel in statusChannelList) {
@@ -331,11 +321,12 @@ class Socket(
 
     private fun close() {
         processingChannel?.close()
-        parentJob?.cancel()
+        parentJob.cancel()
     }
 
+    @ExperimentalCoroutinesApi
     override fun onOpen(webSocket: WebSocket, response: Response?) {
-        readJob = launch(parent = parentJob) {
+        readJob = launch {
             for (message in processingChannel!!) {
                 processIncomingMessage(message)
             }
@@ -344,28 +335,38 @@ class Socket(
         send(CONNECT_MESSAGE)
     }
 
+    @ObsoleteCoroutinesApi
     override fun onFailure(webSocket: WebSocket, throwable: Throwable?, response: Response?) {
-        logger.warn { throwable?.message }
+        logger.warn { "Socket.onFailure(). THROWABLE MESSAGE: ${throwable?.message} -  RESPONSE MESSAGE: ${response?.message()}" }
         throwable?.printStackTrace()
         setState(State.Disconnected())
         close()
         startReconnection()
     }
 
+    @ObsoleteCoroutinesApi
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String?) {
-        logger.debug { "webSocket.onClosing - CLOSING SOCKET" }
+        logger.warn { "Socket.onClosing() called. Received CODE = $code - Received REASON = $reason" }
         setState(State.Disconnecting())
         startReconnection()
     }
+    @ObsoleteCoroutinesApi
+    override fun onClosed(webSocket: WebSocket, code: Int, reason: String?) {
+        logger.warn { "Socket.onClosed() called. Received CODE = $code - Received REASON = $reason" }
+        setState(State.Disconnected())
+        close()
+        startReconnection()
+    }
 
+    @ExperimentalCoroutinesApi
     override fun onMessage(webSocket: WebSocket, text: String?) {
-        logger.debug { "Received text message: $text, channel: $processingChannel" }
+        logger.warn { "Socket.onMessage(). Received TEXT = $text for processing channel = $processingChannel" }
         text?.let {
             messagesReceived++
-            if (parentJob == null || !parentJob!!.isActive) {
+            if (!parentJob.isActive) {
                 logger.debug { "Parent job: $parentJob" }
             }
-            launch(parent = parentJob) {
+            launch {
                 if (processingChannel == null || processingChannel?.isFull == true || processingChannel?.isClosedForSend == true) {
                     logger.debug { "processing channel is in trouble... $processingChannel - full ${processingChannel?.isFull} - closedForSend ${processingChannel?.isClosedForSend}" }
                 }
@@ -375,20 +376,12 @@ class Socket(
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString?) {
-        logger.debug { "Received ByteString message: $bytes" }
-    }
-
-    override fun onClosed(webSocket: WebSocket, code: Int, reason: String?) {
-        setState(State.Disconnected())
-        close()
-        startReconnection()
+        logger.warn { "Socket.onMessage() called. Received ByteString message: $bytes" }
     }
 }
 
-fun RocketChatClient.connect(resetCounter: Boolean = false) {
-    socket.connect(resetCounter)
-}
+@ObsoleteCoroutinesApi
+fun RocketChatClient.connect(resetCounter: Boolean = false) = socket.connect(resetCounter)
 
-fun RocketChatClient.disconnect() {
-    socket.disconnect()
-}
+@ObsoleteCoroutinesApi
+fun RocketChatClient.disconnect() = socket.disconnect()

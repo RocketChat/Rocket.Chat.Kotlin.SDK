@@ -20,9 +20,10 @@ import chat.rocket.core.model.Removed
 import chat.rocket.core.model.UserRole
 import chat.rocket.core.model.Room
 import com.squareup.moshi.Types
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -204,8 +205,8 @@ suspend fun RocketChatClient.chatRooms(
     timestamp: Long? = null,
     filterCustom: Boolean = true
 ): RestMultiResult<List<ChatRoom>, List<Removed>> {
-    val rooms = async { listRooms(timestamp) }
-    val subscriptions = async { listSubscriptions(timestamp) }
+    val rooms = coroutineScope { async { listRooms(timestamp) } }
+    val subscriptions = coroutineScope { async { listSubscriptions(timestamp) } }
 
     return combine(rooms.await(), subscriptions.await(), filterCustom)
 }
@@ -215,7 +216,7 @@ suspend fun RocketChatClient.chatRooms(
  *
  * @return UserRole object specifying current user roles.
  */
-suspend fun RocketChatClient.roles(): UserRole = withContext(CommonPool) {
+suspend fun RocketChatClient.roles(): UserRole = withContext(Dispatchers.IO) {
     val httpUrl = requestUrl(restUrl, "user.roles").build()
     val request = requestBuilderForAuthenticatedMethods(httpUrl).get().build()
     return@withContext handleRestCall<UserRole>(request, UserRole::class.java)

@@ -24,34 +24,34 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
     private val actionAdapter = moshi.adapter<ButtonAction>(ButtonAction::class.java)
 
     private val NAMES = arrayOf(
-            "title",                // 0
-            "type",                 // 1
-            "description",          // 2
-            "author_name",          // 3
-            "text",                 // 4
-            "thumb_url",            // 5
-            "color",                // 6
-            "title_link",           // 7
-            "title_link_download",  // 8
-            "image_url",            // 9
-            "image_type",           // 10
-            "image_size",           // 11
-            "video_url",            // 12
-            "video_type",           // 13
-            "video_size",           // 14
-            "audio_url",            // 15
-            "audio_type",           // 16
-            "audio_size",           // 17
-            "message_link",         // 18
-            "attachments",          // 19
-            "ts",                   // 20
-            "author_icon",          // 21
-            "author_link",          // 22
-            "image_preview",        // 23
-            "fields",               // 24
-            "fallback",             // 25
-            "button_alignment",     // 26
-            "actions"               // 27
+            "title", // 0
+            "type", // 1
+            "description", // 2
+            "author_name", // 3
+            "text", // 4
+            "thumb_url", // 5
+            "color", // 6
+            "title_link", // 7
+            "title_link_download", // 8
+            "image_url", // 9
+            "image_type", // 10
+            "image_size", // 11
+            "video_url", // 12
+            "video_type", // 13
+            "video_size", // 14
+            "audio_url", // 15
+            "audio_type", // 16
+            "audio_size", // 17
+            "message_link", // 18
+            "attachments", // 19
+            "ts", // 20
+            "author_icon", // 21
+            "author_link", // 22
+            "image_preview", // 23
+            "fields", // 24
+            "fallback", // 25
+            "button_alignment", // 26
+            "actions" // 27
     )
 
     private val OPTIONS = JsonReader.Options.of(*NAMES)
@@ -61,34 +61,34 @@ class AttachmentAdapter(moshi: Moshi, private val logger: Logger) : JsonAdapter<
             return reader.nextNull<Attachment>()
         }
 
-        var title: String? = null                 // 0
-        var type: String? = null                  // 1
-        var description: String? = null           // 2
-        var authorName: String? = null            // 3
-        var text: String? = null                  // 4
-        var thumbUrl: String? = null              // 5
-        var color: Color? = null                  // 6
-        var titleLink: String? = null             // 7
-        var titleLinkDownload = false             // 8
-        var imageUrl: String? = null              // 9
-        var imageType: String? = null             // 10
-        var imageSize: Long? = null               // 11
-        var videoUrl: String? = null              // 12
-        var videoType: String? = null             // 13
-        var videoSize: Long? = null               // 14
-        var audioUrl: String? = null              // 15
-        var audioType: String? = null             // 16
-        var audioSize: Long? = null               // 17
-        var messageLink: String? = null           // 18
+        var title: String? = null // 0
+        var type: String? = null // 1
+        var description: String? = null // 2
+        var authorName: String? = null // 3
+        var text: String? = null // 4
+        var thumbUrl: String? = null // 5
+        var color: Color? = null // 6
+        var titleLink: String? = null // 7
+        var titleLinkDownload = false // 8
+        var imageUrl: String? = null // 9
+        var imageType: String? = null // 10
+        var imageSize: Long? = null // 11
+        var videoUrl: String? = null // 12
+        var videoType: String? = null // 13
+        var videoSize: Long? = null // 14
+        var audioUrl: String? = null // 15
+        var audioType: String? = null // 16
+        var audioSize: Long? = null // 17
+        var messageLink: String? = null // 18
         var attachments: List<Attachment>? = null // 19
-        var timestamp: Long? = null               // 20
-        var authorIcon: String? = null            // 21
-        var authorLink: String? = null            // 22
-        var imagePreview: String? = null          // 23
-        var fields: List<Field>? = null           // 24
-        var fallback: String? = null              // 25
-        var buttonAlignment: String? = null       // 26
-        var actions: List<Action>? = null         // 27
+        var timestamp: Long? = null // 20
+        var authorIcon: String? = null // 21
+        var authorLink: String? = null // 22
+        var imagePreview: String? = null // 23
+        var fields: List<Field>? = null // 24
+        var fallback: String? = null // 25
+        var buttonAlignment: String? = null // 26
+        var actions: List<Action>? = null // 27
 
         reader.beginObject()
         while (reader.hasNext()) {
