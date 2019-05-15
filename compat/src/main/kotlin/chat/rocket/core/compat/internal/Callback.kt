@@ -6,6 +6,7 @@ import chat.rocket.core.compat.Callback
 import kotlinx.coroutines.AbstractCoroutine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -13,6 +14,8 @@ import kotlinx.coroutines.newCoroutineContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.startCoroutine
 
+@ExperimentalCoroutinesApi
+@InternalCoroutinesApi
 @JvmOverloads
 fun <T> callback(
     context: CoroutineContext = Dispatchers.Default,
@@ -26,7 +29,7 @@ fun <T> callback(
     return Call(job)
 }
 
-@UseExperimental(InternalCoroutinesApi::class)
+@InternalCoroutinesApi
 private class CallbackCoroutine<in T>(
     parentContext: CoroutineContext,
     private val callback: Callback<T>

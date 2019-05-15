@@ -19,12 +19,8 @@ import org.hamcrest.CoreMatchers.`is` as isEqualTo
 
 class SpotlightTest {
     private lateinit var mockServer: DefaultMockServer
-
     private lateinit var sut: RocketChatClient
-
-    @Mock
-    private lateinit var tokenProvider: TokenRepository
-
+    @Mock private lateinit var tokenProvider: TokenRepository
     private val authToken = Token("userId", "authToken")
 
     @Before

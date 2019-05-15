@@ -20,19 +20,11 @@ import org.mockito.MockitoAnnotations
 import org.hamcrest.CoreMatchers.`is` as isEqualTo
 
 class MessagesTest {
-
     private lateinit var mockServer: DefaultMockServer
-
     private lateinit var sut: RocketChatClient
-
-    @Mock
-    private lateinit var tokenProvider: TokenRepository
-
+    @Mock private lateinit var tokenProvider: TokenRepository
     private val authToken = Token("userId", "authToken")
-
-    @Rule
-    @JvmField
-    val temporaryFolder = TemporaryFolder()
+    @Rule @JvmField val temporaryFolder = TemporaryFolder()
 
     @Before
     fun setup() {
