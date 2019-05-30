@@ -58,12 +58,7 @@ class ReactionsAdapter : JsonAdapter<Reactions>() {
             reactions.set(shortname, usernameList, nameList)
         }
 
-        if (reader.peek() == JsonReader.Token.END_OBJECT) {
-            reader.endObject()
-        }
-        if (reader.peek() == JsonReader.Token.END_OBJECT) {
-            reader.endObject()
-        }
+        reader.endObject()
         return reactions
     }
 
