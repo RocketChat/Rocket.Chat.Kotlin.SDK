@@ -23,21 +23,47 @@ class ReactionsAdapter : JsonAdapter<Reactions>() {
         }
         reader.beginObject()
         while (reader.hasNext()) {
-            val usernames = mutableListOf<String>()
-            val shortname = reader.nextName()
+            val usernameList = mutableListOf<String>()
+            val nameList = mutableListOf<String>()
+
+            val nextName = reader.nextName()
+            val shortname = if (nextName == "reactions") {
+                reader.beginObject()
+                reader.nextName()
+            } else {
+                nextName
+            }
+
             reader.beginObject()
             if (reader.nextName() == "usernames") {
                 reader.beginArray()
                 while (reader.hasNext()) {
                     val username = reader.nextString()
-                    usernames.add(username)
+                    usernameList.add(username)
                 }
                 reader.endArray()
             }
+            if (reader.peek() != JsonReader.Token.END_OBJECT) {
+                if (reader.nextName() == "names") {
+                    reader.beginArray()
+                    while (reader.hasNext()) {
+                        val name = reader.nextString()
+                        nameList.add(name)
+                    }
+                    reader.endArray()
+                }
+            }
+
             reader.endObject()
-            reactions[shortname] = usernames
+            reactions.set(shortname, usernameList, nameList)
         }
-        reader.endObject()
+
+        if (reader.peek() == JsonReader.Token.END_OBJECT) {
+            reader.endObject()
+        }
+        if (reader.peek() == JsonReader.Token.END_OBJECT) {
+            reader.endObject()
+        }
         return reactions
     }
 
@@ -48,24 +74,31 @@ class ReactionsAdapter : JsonAdapter<Reactions>() {
         } else {
             with(writer) {
                 beginObject()
+                name("reactions")
+                beginObject()
                 value.getShortNames().forEach {
-                    writeReaction(writer, it, value.getUsernames(it))
+                    writeReaction(writer, it, value.getUsernames(it), value.getNames(it))
                 }
+                endObject()
                 endObject()
             }
         }
     }
 
-    private fun writeReaction(writer: JsonWriter, shortname: String, usernames: List<String>?) {
+    private fun writeReaction(writer: JsonWriter, shortname: String, usernames: List<String>?, names: List<String>?) {
         with(writer) {
             name(shortname)
             beginObject()
             name("usernames")
             beginArray()
-            usernames?.forEach {
-                writer.value(it)
-            }
+            usernames?.forEach { writer.value(it) }
             endArray()
+            if (names != null && names.isNotEmpty()) {
+                name("names")
+                beginArray()
+                names.forEach { writer.value(it) }
+                endArray()
+            }
             endObject()
         }
     }

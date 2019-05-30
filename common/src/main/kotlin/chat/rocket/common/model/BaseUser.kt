@@ -40,3 +40,30 @@ fun userStatusOf(status: String): UserStatus {
         else -> UserStatus.Unknown(status)
     }
 }
+
+@FallbackSealedClass(name = "Unknown", fieldName = "rawAvatar")
+sealed class UserAvatar {
+    @Json(name = "upload")
+    class Upload : chat.rocket.common.model.UserAvatar()
+    @Json(name = "url")
+    class Url : chat.rocket.common.model.UserAvatar()
+    class Cleared : chat.rocket.common.model.UserAvatar()
+    class Unknown(val rawAvatar: String) : UserAvatar()
+
+    override fun toString(): String {
+        return when (this) {
+            is Upload -> "upload"
+            is Url -> "url"
+            else -> "cleared"
+        }
+    }
+}
+
+fun userAvatarOf(avatar: String): UserAvatar {
+    return when(avatar) {
+        "upload" -> UserAvatar.Upload()
+        "url" -> UserAvatar.Url()
+        "cleared" -> UserAvatar.Cleared()
+        else -> UserAvatar.Unknown(avatar)
+    }
+}

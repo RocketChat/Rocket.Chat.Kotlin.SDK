@@ -13,33 +13,13 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.hamcrest.CoreMatchers.`is` as isEqualTo
 
-const val REACTIONS = """
-{
-  ":hearts:": {
-    "usernames": [
-      "leonardo.aramaki"
-    ]
-  },
-  ":vulcan:": {
-    "usernames": [
-      "mr.spock"
-    ]
-  },
-  ":kotlin:": {
-    "usernames": [
-      "andrey.breslav",
-      "captain.underpants"
-    ]
-  }
-}
-"""
+const val REACTIONS_JSON_PAYLOAD = "{\"reactions\":{\":croissant:\":{\"usernames\":[\"test.user\",\"test.user2\"],\"names\":[\"Test User\",\"Test User 2\"]}, \":thumbsup:\":{\"usernames\":[\"test.user\",\"test.user2\"],\"names\":[\"Test User\",\"Test User 2\"]}}}"
+const val REACTIONS_JSON_PAYLOAD_WITHOUT_NAME = "{\"reactions\":{\":croissant:\":{\"usernames\":[\"test.user\"]}}}"
+const val REACTIONS_EMPTY_JSON_PAYLOAD = "[]"
 
-val REACTIONS_EMPTY = "[]"
 class ReactionsAdapterTest {
     lateinit var moshi: Moshi
-
-    @Mock
-    private lateinit var tokenProvider: TokenRepository
+    @Mock private lateinit var tokenProvider: TokenRepository
 
     @Before
     fun setup() {
@@ -59,34 +39,51 @@ class ReactionsAdapterTest {
     }
 
     @Test
-    fun `should deserialize JSON with reactions`() {
+    fun `should deserialize JSON with reactions (with names)`() {
         val adapter = moshi.adapter<Reactions>(Reactions::class.java)
-        val reactions = adapter.fromJson(REACTIONS)
-        assertThat(reactions!!.size, isEqualTo(3))
-        assertThat(reactions[":hearts:"]!!.size, isEqualTo(1))
-        assertThat(reactions[":hearts:"]!![0], isEqualTo("leonardo.aramaki"))
-        assertThat(reactions[":vulcan:"]!!.size, isEqualTo(1))
-        assertThat(reactions[":vulcan:"]!![0], isEqualTo("mr.spock"))
-        assertThat(reactions[":kotlin:"]!!.size, isEqualTo(2))
-        assertThat(reactions[":kotlin:"]!![0], isEqualTo("andrey.breslav"))
-        assertThat(reactions[":kotlin:"]!![1], isEqualTo("captain.underpants"))
-        assertThat(reactions.getShortNames().size, isEqualTo(3))
-        assertThat(reactions.getUsernames(":vulcan:")!!.size, isEqualTo(1))
-        assertThat(reactions.getUsernames(":kotlin:")!!.size, isEqualTo(2))
+        adapter.fromJson(REACTIONS_JSON_PAYLOAD)?.let { reactions ->
+            assertThat(reactions.size, isEqualTo(2))
+            assertThat(reactions[":croissant:"]?.first?.size, isEqualTo(2))
+            assertThat(reactions[":croissant:"]?.second?.size, isEqualTo(2))
+            assertThat(reactions[":croissant:"]?.first?.get(0), isEqualTo("test.user"))
+            assertThat(reactions[":croissant:"]?.second?.get(0), isEqualTo("Test User"))
+        }
+    }
+
+    @Test
+    fun `should deserialize JSON with reactions (without names)`() {
+        val adapter = moshi.adapter<Reactions>(Reactions::class.java)
+        adapter.fromJson(REACTIONS_JSON_PAYLOAD_WITHOUT_NAME)?.let { reactions ->
+            assertThat(reactions.size, isEqualTo(1))
+            assertThat(reactions[":croissant:"]?.first?.size, isEqualTo(1))
+            assertThat(reactions[":croissant:"]?.second?.size, isEqualTo(0))
+            assertThat(reactions[":croissant:"]?.first?.get(0), isEqualTo("test.user"))
+        }
+    }
+
+    @Test
+    fun `should serialize back to JSON string (with names)`() {
+        val adapter = moshi.adapter<Reactions>(Reactions::class.java)
+        val reactionsFromJson = adapter.fromJson(REACTIONS_JSON_PAYLOAD)
+        val reactionsToJson = adapter.toJson(reactionsFromJson)
+        val reactions = adapter.fromJson(reactionsToJson)
+        assertThat(reactions, isEqualTo(reactionsFromJson))
+    }
+
+    @Test
+    fun `should serialize back to JSON string (without names)`() {
+        val adapter = moshi.adapter<Reactions>(Reactions::class.java)
+        val reactionsFromJson = adapter.fromJson(REACTIONS_JSON_PAYLOAD_WITHOUT_NAME)
+        val reactionsToJson = adapter.toJson(reactionsFromJson)
+        val reactions = adapter.fromJson(reactionsToJson)
+        assertThat(reactions, isEqualTo(reactionsFromJson))
     }
 
     @Test
     fun `should deserialize empty reactions JSON`() {
         val adapter = moshi.adapter<Reactions>(Reactions::class.java)
-        val reactions = adapter.fromJson(REACTIONS_EMPTY)
-        assertThat(reactions!!.size, isEqualTo(0))
-    }
-
-    @Test
-    fun `should serialize back to JSON string`() {
-        val adapter = moshi.adapter<Reactions>(Reactions::class.java)
-        val reactions = adapter.fromJson(REACTIONS)
-        val reactionsJson = adapter.toJson(reactions)
-        assertThat(adapter.fromJson(reactionsJson), isEqualTo(reactions))
+        adapter.fromJson(REACTIONS_EMPTY_JSON_PAYLOAD)?.let { reactions ->
+            assertThat(reactions.size, isEqualTo(0))
+        }
     }
 }

@@ -28,13 +28,13 @@ data class Message(
     override val sender: SimpleUser? = null,
     @Json(name = "_updatedAt")
     @ISO8601Date
-    override val updatedAt: Long? = null,
+    val updatedAt: Long? = null,
     @ISO8601Date
-    override val editedAt: Long? = null,
-    override val editedBy: SimpleUser? = null,
+    val editedAt: Long? = null,
+    val editedBy: SimpleUser? = null,
     @Json(name = "alias")
-    override val senderAlias: String? = null,
-    override val avatar: String? = null,
+    val senderAlias: String? = null,
+    val avatar: String? = null,
     @Json(name = "t")
     val type: MessageType? = null,
     @JsonDefaultValueBoolean(false)
@@ -42,8 +42,8 @@ data class Message(
     @JsonDefaultValueBoolean(false)
     val parseUrls: Boolean = false,
     val urls: List<Url>? = null,
-    override val mentions: List<SimpleUser>? = null,
-    override val channels: List<SimpleRoom>? = null,
+    val mentions: List<SimpleUser>? = null,
+    val channels: List<SimpleRoom>? = null,
     val attachments: List<Attachment>? = null,
     @JsonDefaultValueBoolean(false)
     val pinned: Boolean = false,
@@ -51,7 +51,7 @@ data class Message(
     val reactions: Reactions? = null,
     val role: String? = null,
     @JsonDefaultValueBoolean(true)
-    override val synced: Boolean = true, // TODO: Remove after we have a db
+    val synced: Boolean = true, // TODO: Remove after we have a db
     val unread: Boolean? = null
 ) : BaseMessage
 

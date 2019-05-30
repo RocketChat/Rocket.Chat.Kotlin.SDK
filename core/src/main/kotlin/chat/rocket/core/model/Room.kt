@@ -20,7 +20,7 @@ data class Room(
     val topic: String?,
     val description: String?,
     val announcement: String?,
-    val lastMessage: Message?,
+    val lastMessage: LastMessage?,
     @JsonDefaultValueBoolean(false) val broadcast: Boolean,
     @JvmField val muted: List<String>? = null
 ) : BaseRoom

@@ -240,3 +240,42 @@ const val CREATE_DM_OK = """
     "success": true
 }
 """
+
+const val DIRECTORY_USERS_OK = "{\n" +
+        "    \"result\": [\n" +
+        "        {\n" +
+        "            \"_id\": \"jRca8kibJx8NkLJxt\",\n" +
+        "            \"createdAt\": \"2018-04-13T12:46:26.517Z\",\n" +
+        "            \"emails\": [\n" +
+        "                {\n" +
+        "                    \"address\": \"user.test.1523623548558@rocket.chat\",\n" +
+        "                    \"verified\": false\n" +
+        "                }\n" +
+        "            ],\n" +
+        "            \"name\": \"EditedRealNameuser.test.1523623548558\",\n" +
+        "            \"username\": \"editedusernameuser.test.1523623548558\"\n" +
+        "        }\n" +
+        "    ],\n" +
+        "    \"count\": 1,\n" +
+        "    \"offset\": 0,\n" +
+        "    \"total\": 1,\n" +
+        "    \"success\": true\n" +
+        "}"
+
+const val DIRECTORY_CHANNELS_OK = "{\n" +
+        "    \"result\": [\n" +
+        "        {\n" +
+        "            \"_id\": \"GENERAL\",\n" +
+        "            \"ts\": \"2018-05-15T19:10:54.689Z\",\n" +
+        "            \"name\": \"general\",\n" +
+        "            \"usernames\": [\n" +
+        "                \"rocketchat.internal.admin.test\",\n" +
+        "                \"editedusernameuser.test.1526941091574\"\n" +
+        "            ]\n" +
+        "        }\n" +
+        "    ],\n" +
+        "    \"count\": 1,\n" +
+        "    \"offset\": 2,\n" +
+        "    \"total\": 4,\n" +
+        "    \"success\": true\n" +
+        "}"
