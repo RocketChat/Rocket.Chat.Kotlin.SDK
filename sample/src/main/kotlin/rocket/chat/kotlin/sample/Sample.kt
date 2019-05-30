@@ -21,7 +21,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
 
-fun main(args: Array<String>) {
+fun main() {
 
     val logger = object : PlatformLogger {
         override fun debug(s: String) {
@@ -109,7 +109,6 @@ fun main(args: Array<String>) {
 //            delay(2000)
 //            client.setDefaultStatus(UserStatus.Away())
 //            client.setTypingStatus("GENERAL", "testing", true)
-            showFileList(client)
         }
 
         client.connect()
@@ -150,6 +149,7 @@ fun main(args: Array<String>) {
     }
 }
 
+/*
 suspend fun showFavoriteMessage(client: RocketChatClient) {
         val result = client.getFavoriteMessages("GENERAL", RoomType.Channel(), 0)
         println("favoriteMessages: $result")
@@ -159,6 +159,7 @@ suspend fun showFileList(client: RocketChatClient) {
         val result = client.getFiles("GENERAL", RoomType.Channel(), 0)
         println("Attachment from the File List: $result")
 }
+*/
 
 class SimpleTokenRepository : TokenRepository {
     private var savedToken: Token? = null
