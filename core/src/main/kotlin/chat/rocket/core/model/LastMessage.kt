@@ -9,7 +9,7 @@ import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
 data class LastMessage(
-    @Json(name = "_id") val id: String?, // The id of the last message
+    @Json(name = "_id") override val id: String?, // The id of the last message
     @Json(name = "rid") override val roomId: String?, // The room id of the last message
     @Json(name = "msg") override val message: String? = "", // The content of the last message
     @Json(name = "ts") @ISO8601Date override val timestamp: Long?, // The timestamp of the last message

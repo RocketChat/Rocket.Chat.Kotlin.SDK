@@ -15,7 +15,7 @@ import se.ansman.kotshi.JsonSerializable
 @JsonSerializable
 data class Message(
     @Json(name = "_id")
-    val id: String,
+    override val id: String,
     @Json(name = "rid")
     override val roomId: String,
     @JsonDefaultValueString("")
