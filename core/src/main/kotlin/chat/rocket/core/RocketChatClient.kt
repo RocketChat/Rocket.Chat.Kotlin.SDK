@@ -53,13 +53,13 @@ class RocketChatClient private constructor(
         .add(SettingsAdapter())
         .add(AttachmentAdapterFactory(logger))
         .add(RoomListAdapterFactory(logger))
+        .add(ReactionsAdapter())
         .add(MetaJsonAdapter.ADAPTER_FACTORY)
         .add(java.lang.Long::class.java, ISO8601Date::class.java, TimestampAdapter(CalendarISO8601Converter()))
         .add(Long::class.java, ISO8601Date::class.java, TimestampAdapter(CalendarISO8601Converter()))
         // XXX - MAKE SURE TO KEEP CommonJsonAdapterFactory and CoreJsonAdapterFactory as the latest Adapters...
         .add(CommonJsonAdapterFactory.INSTANCE)
         .add(CoreJsonAdapterFactory.INSTANCE)
-        .add(ReactionsAdapter())
         .build()
 
     internal lateinit var restUrl: HttpUrl

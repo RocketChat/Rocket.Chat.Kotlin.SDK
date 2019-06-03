@@ -279,3 +279,51 @@ const val DIRECTORY_CHANNELS_OK = "{\n" +
         "    \"total\": 4,\n" +
         "    \"success\": true\n" +
         "}"
+
+const val MESSAGE_WITH_REACTION = "        {\n" +
+        "            \"_id\": \"eJ5FZt8K8cSDSix2h\",\n" +
+        "            \"rid\": \"mSCEim3yGNb2rZhev\",\n" +
+        "            \"msg\": \"Team please review :slight_smile:\",\n" +
+        "            \"ts\": \"2019-05-30T11:16:22.879Z\",\n" +
+        "            \"u\": {\n" +
+        "                \"_id\": \"kC5buaCes844QLxYK\",\n" +
+        "                \"username\": \"Shailesh351\",\n" +
+        "                \"name\": \"Shailesh Baldaniya\"\n" +
+        "            },\n" +
+        "            \"_updatedAt\": \"2019-05-30T13:23:33.427Z\",\n" +
+        "            \"mentions\": [],\n" +
+        "            \"channels\": [],\n" +
+        "            \"reactions\": {\n" +
+        "                \":punch:\": {\n" +
+        "                    \"usernames\": [\n" +
+        "                        \"filipe.brito\"\n" +
+        "                    ]\n" +
+        "                },\n" +
+        "                \":thumbsup:\": {\n" +
+        "                    \"usernames\": [\n" +
+        "                        \"jaytat0\"\n" +
+        "                    ]\n" +
+        "                }\n" +
+        "            }\n" +
+        "        }"
+
+const val MESSAGE_WITHOUT_REACTION = "        {\n" +
+        "            \"_id\": \"Xo9cGh9Cq6RTB9bw2\",\n" +
+        "            \"rid\": \"mSCEim3yGNb2rZhev\",\n" +
+        "            \"msg\": \"Thanks for sending that PR @Shailesh351 We will review it soon! Thank you!\",\n" +
+        "            \"ts\": \"2019-05-30T12:34:02.371Z\",\n" +
+        "            \"u\": {\n" +
+        "                \"_id\": \"cBD6dHc7oBvGjkruM\",\n" +
+        "                \"username\": \"filipe.brito\",\n" +
+        "                \"name\": \"Filipe Brito\"\n" +
+        "            },\n" +
+        "            \"_updatedAt\": \"2019-05-30T12:34:02.398Z\",\n" +
+        "            \"mentions\": [\n" +
+        "                {\n" +
+        "                    \"_id\": \"kC5buaCes844QLxYK\",\n" +
+        "                    \"name\": \"Shailesh Baldaniya\",\n" +
+        "                    \"username\": \"Shailesh351\"\n" +
+        "                }\n" +
+        "            ],\n" +
+        "            \"channels\": []\n" +
+        "        }"
