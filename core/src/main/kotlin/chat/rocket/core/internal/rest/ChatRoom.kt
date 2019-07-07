@@ -6,7 +6,9 @@ import chat.rocket.common.model.User
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.model.ChatRoomAnnouncementPayload
 import chat.rocket.core.internal.model.ChatRoomDescriptionPayload
+import chat.rocket.core.internal.model.ChatRoomInvitePayload
 import chat.rocket.core.internal.model.ChatRoomJoinCodePayload
+import chat.rocket.core.internal.model.ChatRoomKickPayload
 import chat.rocket.core.internal.model.ChatRoomNamePayload
 import chat.rocket.core.internal.model.ChatRoomPayload
 import chat.rocket.core.internal.model.ChatRoomReadOnlyPayload
@@ -14,8 +16,8 @@ import chat.rocket.core.internal.model.ChatRoomUnreadPayload
 import chat.rocket.core.internal.model.ChatRoomTopicPayload
 import chat.rocket.core.internal.model.ChatRoomTypePayload
 import chat.rocket.core.internal.model.ChatRoomFavoritePayload
-import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.model.RoomIdPayload
+import chat.rocket.core.internal.RestResult
 import chat.rocket.core.model.ChatRoomRole
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.Room
@@ -253,6 +255,32 @@ suspend fun RocketChatClient.markAsUnread(roomId: String) {
     }
 }
 
+/**
+ * Adds a user to the chat room
+ *
+ * @param roomId The ID of the room.
+ * @param roomType The type of the room.
+ * @param userId userID of the user
+ *
+ * @return Whether the task was successful or not.
+ */
+suspend fun RocketChatClient.invite(
+    roomId: String,
+    roomType: RoomType,
+    userId: String
+): Boolean = withContext(Dispatchers.IO) {
+    val payload = ChatRoomInvitePayload(roomId, userId)
+    val adapter = moshi.adapter(ChatRoomInvitePayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "invite")).build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
+
+    return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
+}
+
 // TODO: Add doc.
 suspend fun RocketChatClient.joinChat(roomId: String): Boolean = withContext(Dispatchers.IO) {
     val payload = RoomIdPayload(roomId)
@@ -262,6 +290,33 @@ suspend fun RocketChatClient.joinChat(roomId: String): Boolean = withContext(Dis
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, "channels.join").build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
+
+    return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
+}
+
+
+/**
+ * Removes a user from the chat room
+ *
+ * @param roomId The ID of the room.
+ * @param roomType The type of the room.
+ * @param userId userID of the user
+ *
+ * @return Whether the task was successful or not.
+ */
+suspend fun RocketChatClient.kick(
+    roomId: String,
+    roomType: RoomType,
+    userId: String
+): Boolean = withContext(Dispatchers.IO) {
+    val payload = ChatRoomKickPayload(roomId, userId)
+    val adapter = moshi.adapter(ChatRoomKickPayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "kick")).build()
     val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
