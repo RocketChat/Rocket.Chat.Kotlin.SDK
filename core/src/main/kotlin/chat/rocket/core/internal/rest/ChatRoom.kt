@@ -100,7 +100,7 @@ suspend fun RocketChatClient.getMentions(
  * @param roomId The ID of the room.
  * @param roomType The type of the room.
  * @param offset The offset to paging which specifies the first entry to return from a collection.
- * 
+ *
  * @return The list of favorites messages of a chat room.
  */
 suspend fun RocketChatClient.getFavoriteMessages(
