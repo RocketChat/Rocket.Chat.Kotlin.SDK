@@ -17,8 +17,8 @@ import chat.rocket.core.internal.model.ForgotPasswordPayload
 import chat.rocket.core.internal.model.CasData
 import chat.rocket.core.internal.model.OauthData
 import com.squareup.moshi.Types
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.RequestBody
 
 /**
@@ -33,23 +33,24 @@ import okhttp3.RequestBody
  * @see [Token]
  * @see [chat.rocket.core.TokenRepository]
  */
-suspend fun RocketChatClient.login(username: String, password: String, pin: String? = null): Token = withContext(CommonPool) {
-    val payload = UsernameLoginPayload(username, password, pin)
-    val adapter = moshi.adapter(UsernameLoginPayload::class.java)
+suspend fun RocketChatClient.login(username: String, password: String, pin: String? = null): Token =
+    withContext(Dispatchers.IO) {
+        val payload = UsernameLoginPayload(username, password, pin)
+        val adapter = moshi.adapter(UsernameLoginPayload::class.java)
 
-    val payloadBody = adapter.toJson(payload)
-    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+        val payloadBody = adapter.toJson(payload)
+        val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
-    val url = requestUrl(restUrl, "login").build()
-    val request = requestBuilder(url).post(body).build()
+        val httpUrl = requestUrl(restUrl, "login").build()
+        val request = requestBuilder(httpUrl).post(body).build()
 
-    val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
-    val result = handleRestCall<RestResult<Token>>(request, type).result()
+        val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
+        val result = handleRestCall<RestResult<Token>>(request, type).result()
 
-    tokenRepository.save(this.url, result)
+        tokenRepository.save(url, result)
 
-    result
-}
+        result
+    }
 
 /**
  * Login with email and password.
@@ -63,20 +64,20 @@ suspend fun RocketChatClient.login(username: String, password: String, pin: Stri
  * @see [Token]
  * @see [chat.rocket.core.TokenRepository]
  */
-suspend fun RocketChatClient.loginWithEmail(email: String, password: String, pin: String? = null): Token = withContext(CommonPool) {
+suspend fun RocketChatClient.loginWithEmail(email: String, password: String, pin: String? = null): Token = withContext(Dispatchers.IO) {
     val payload = EmailLoginPayload(email, password, pin)
     val adapter = moshi.adapter(EmailLoginPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
-    val url = requestUrl(restUrl, "login").build()
-    val request = requestBuilder(url).post(body).build()
+    val httpUrl = requestUrl(restUrl, "login").build()
+    val request = requestBuilder(httpUrl).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
     val result = handleRestCall<RestResult<Token>>(request, type).result()
 
-    tokenRepository.save(this.url, result)
+    tokenRepository.save(url, result)
 
     result
 }
@@ -93,20 +94,20 @@ suspend fun RocketChatClient.loginWithEmail(email: String, password: String, pin
  * @see [Token]
  * @see [chat.rocket.core.TokenRepository]
  */
-suspend fun RocketChatClient.loginWithLdap(username: String, password: String): Token = withContext(CommonPool) {
+suspend fun RocketChatClient.loginWithLdap(username: String, password: String): Token = withContext(Dispatchers.IO) {
     val payload = LdapLoginPayload(true, username, password)
     val adapter = moshi.adapter(LdapLoginPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
-    val url = requestUrl(restUrl, "login").build()
-    val request = requestBuilder(url).post(body).build()
+    val httpUrl = requestUrl(restUrl, "login").build()
+    val request = requestBuilder(httpUrl).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
     val result = handleRestCall<RestResult<Token>>(request, type).result()
 
-    tokenRepository.save(this.url, result)
+    tokenRepository.save(url, result)
 
     result
 }
@@ -122,20 +123,20 @@ suspend fun RocketChatClient.loginWithLdap(username: String, password: String): 
  * @see [Token]
  * @see [chat.rocket.core.TokenRepository]
  */
-suspend fun RocketChatClient.loginWithCas(casCredential: String): Token = withContext(CommonPool) {
+suspend fun RocketChatClient.loginWithCas(casCredential: String): Token = withContext(Dispatchers.IO) {
     val payload = CasLoginPayload(CasData(casCredential))
     val adapter = moshi.adapter(CasLoginPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
-    val url = requestUrl(restUrl, "login").build()
-    val request = requestBuilder(url).post(body).build()
+    val httpUrl = requestUrl(restUrl, "login").build()
+    val request = requestBuilder(httpUrl).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
     val result = handleRestCall<RestResult<Token>>(request, type).result()
 
-    tokenRepository.save(this.url, result)
+    tokenRepository.save(url, result)
 
     result
 }
@@ -151,20 +152,20 @@ suspend fun RocketChatClient.loginWithCas(casCredential: String): Token = withCo
  * @see [Token]
  * @see [chat.rocket.core.TokenRepository]
  */
-suspend fun RocketChatClient.loginWithSaml(samlCredential: String): Token = withContext(CommonPool) {
+suspend fun RocketChatClient.loginWithSaml(samlCredential: String): Token = withContext(Dispatchers.IO) {
     val payload = SamlLoginPayload(true, samlCredential)
     val adapter = moshi.adapter(SamlLoginPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
-    val url = requestUrl(restUrl, "login").build()
-    val request = requestBuilder(url).post(body).build()
+    val httpUrl = requestUrl(restUrl, "login").build()
+    val request = requestBuilder(httpUrl).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
     val result = handleRestCall<RestResult<Token>>(request, type).result()
 
-    tokenRepository.save(this.url, result)
+    tokenRepository.save(url, result)
 
     result
 }
@@ -181,20 +182,20 @@ suspend fun RocketChatClient.loginWithSaml(samlCredential: String): Token = with
  * @see [Token]
  * @see [chat.rocket.core.TokenRepository]
  */
-suspend fun RocketChatClient.loginWithOauth(credentialToken: String, credentialSecret: String): Token = withContext(CommonPool) {
+suspend fun RocketChatClient.loginWithOauth(credentialToken: String, credentialSecret: String): Token = withContext(Dispatchers.IO) {
     val payload = OauthLoginPayload(OauthData(credentialToken, credentialSecret))
     val adapter = moshi.adapter(OauthLoginPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
-    val url = requestUrl(restUrl, "login").build()
-    val request = requestBuilder(url).post(body).build()
+    val httpUrl = requestUrl(restUrl, "login").build()
+    val request = requestBuilder(httpUrl).post(body).build()
 
     val type = Types.newParameterizedType(RestResult::class.java, Token::class.java)
     val result = handleRestCall<RestResult<Token>>(request, type).result()
 
-    tokenRepository.save(this.url, result)
+    tokenRepository.save(url, result)
 
     result
 }
@@ -218,7 +219,7 @@ suspend fun RocketChatClient.signup(
     name: String,
     username: String,
     password: String
-): User = withContext(CommonPool) {
+): User = withContext(Dispatchers.IO) {
     val payload = SignUpPayload(username, email, password, name)
     val adapter = moshi.adapter(SignUpPayload::class.java)
 

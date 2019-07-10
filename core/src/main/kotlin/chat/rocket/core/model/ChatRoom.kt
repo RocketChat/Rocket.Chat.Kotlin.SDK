@@ -9,12 +9,13 @@ import chat.rocket.core.internal.model.Subscription
 import chat.rocket.core.internal.realtime.subscribeRoomMessages
 import chat.rocket.core.internal.rest.history
 import chat.rocket.core.internal.rest.messages
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 data class ChatRoom(
     override val id: String,
     val subscriptionId: String,
+    val parentId: String?,
     override val type: RoomType,
     override val user: SimpleUser?,
     val status: UserStatus?,
@@ -37,7 +38,7 @@ data class ChatRoom(
     val archived: Boolean,
     val userMentions: Long?,
     val groupMentions: Long?,
-    val lastMessage: Message?,
+    val lastMessage: LastMessage?,
     val client: RocketChatClient,
     val broadcast: Boolean,
     @JvmField val muted: List<String>? = null
@@ -46,10 +47,12 @@ data class ChatRoom(
         fun create(room: Room, subscription: Subscription, client: RocketChatClient): ChatRoom {
             return ChatRoom(id = room.id,
                 subscriptionId = subscription.id,
+                parentId = subscription.parentId,
                 type = room.type,
                 user = room.user ?: subscription.user,
                 status = null,
-                name = room.name ?: subscription.name!!, // we guarantee on listSubscriptions() that it has a name
+                name = if (!subscription.parentId.isNullOrEmpty()) subscription.fullName!! else room.name
+                    ?: subscription.name!!, // we guarantee on listSubscriptions() that it has a name
                 fullName = room.fullName ?: subscription.fullName,
                 readonly = room.readonly,
                 updatedAt = room.updatedAt ?: subscription.updatedAt,
@@ -82,7 +85,7 @@ data class ChatRoom(
 suspend fun ChatRoom.messages(
     offset: Long = 0,
     count: Long = 50
-): PagedResult<List<Message>> = withContext(CommonPool) {
+): PagedResult<List<Message>> = withContext(Dispatchers.IO) {
     return@withContext client.messages(id, type, offset, count)
 }
 
@@ -90,7 +93,7 @@ suspend fun ChatRoom.history(
     count: Long = 50,
     oldest: String? = null,
     latest: String? = null
-): PagedResult<List<Message>> = withContext(CommonPool) {
+): PagedResult<List<Message>> = withContext(Dispatchers.IO) {
     return@withContext client.history(id, type, count, oldest, latest)
 }
 

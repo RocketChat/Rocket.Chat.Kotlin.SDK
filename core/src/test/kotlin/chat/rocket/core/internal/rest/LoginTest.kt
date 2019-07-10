@@ -12,7 +12,7 @@ import com.nhaarman.mockito_kotlin.check
 import com.nhaarman.mockito_kotlin.verify
 import com.squareup.moshi.JsonEncodingException
 import io.fabric8.mockwebserver.DefaultMockServer
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat

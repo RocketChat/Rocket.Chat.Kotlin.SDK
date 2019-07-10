@@ -27,11 +27,14 @@ import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room
 import chat.rocket.core.model.url.MetaJsonAdapter
 import com.squareup.moshi.Moshi
-import kotlinx.coroutines.experimental.channels.Channel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import okhttp3.HttpUrl
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import java.security.InvalidParameterException
+import kotlin.coroutines.CoroutineContext
 
 class RocketChatClient private constructor(
     internal val httpClient: OkHttpClient,
@@ -39,7 +42,10 @@ class RocketChatClient private constructor(
     userAgent: String,
     internal val tokenRepository: TokenRepository,
     internal val logger: Logger
-) {
+) : CoroutineScope {
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Default
+
     internal val moshi: Moshi = Moshi.Builder()
         .add(FallbackSealedClassJsonAdapter.ADAPTER_FACTORY)
         .add(RestResult.JsonAdapterFactory())
@@ -47,13 +53,13 @@ class RocketChatClient private constructor(
         .add(SettingsAdapter())
         .add(AttachmentAdapterFactory(logger))
         .add(RoomListAdapterFactory(logger))
+        .add(ReactionsAdapter())
         .add(MetaJsonAdapter.ADAPTER_FACTORY)
         .add(java.lang.Long::class.java, ISO8601Date::class.java, TimestampAdapter(CalendarISO8601Converter()))
         .add(Long::class.java, ISO8601Date::class.java, TimestampAdapter(CalendarISO8601Converter()))
         // XXX - MAKE SURE TO KEEP CommonJsonAdapterFactory and CoreJsonAdapterFactory as the latest Adapters...
         .add(CommonJsonAdapterFactory.INSTANCE)
         .add(CoreJsonAdapterFactory.INSTANCE)
-        .add(ReactionsAdapter())
         .build()
 
     internal lateinit var restUrl: HttpUrl

@@ -12,6 +12,7 @@ import se.ansman.kotshi.JsonSerializable
 @JsonSerializable
 data class Subscription(
     @Json(name = "rid") val roomId: String,
+    @Json(name = "prid") val parentId: String?, // Not empty if it is a discussion
     @Json(name = "_id") override val id: String,
     @Json(name = "t") override val type: RoomType,
     @Json(name = "u") override val user: SimpleUser?,

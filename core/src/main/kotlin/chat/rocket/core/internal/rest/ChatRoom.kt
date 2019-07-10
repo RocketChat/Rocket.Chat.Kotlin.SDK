@@ -6,7 +6,9 @@ import chat.rocket.common.model.User
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.model.ChatRoomAnnouncementPayload
 import chat.rocket.core.internal.model.ChatRoomDescriptionPayload
+import chat.rocket.core.internal.model.ChatRoomInvitePayload
 import chat.rocket.core.internal.model.ChatRoomJoinCodePayload
+import chat.rocket.core.internal.model.ChatRoomKickPayload
 import chat.rocket.core.internal.model.ChatRoomNamePayload
 import chat.rocket.core.internal.model.ChatRoomUserIgnorePayload
 import chat.rocket.core.internal.model.ChatRoomPayload
@@ -15,16 +17,16 @@ import chat.rocket.core.internal.model.ChatRoomUnreadPayload
 import chat.rocket.core.internal.model.ChatRoomTopicPayload
 import chat.rocket.core.internal.model.ChatRoomTypePayload
 import chat.rocket.core.internal.model.ChatRoomFavoritePayload
-import chat.rocket.core.internal.RestResult
 import chat.rocket.core.internal.model.RoomIdPayload
+import chat.rocket.core.internal.RestResult
 import chat.rocket.core.model.ChatRoomRole
 import chat.rocket.core.model.Message
 import chat.rocket.core.model.Room
 import chat.rocket.core.model.PagedResult
 import chat.rocket.core.model.attachment.GenericAttachment
 import com.squareup.moshi.Types
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.RequestBody
 
 /**
@@ -41,7 +43,7 @@ suspend fun RocketChatClient.getMembers(
     roomType: RoomType,
     offset: Long,
     count: Long
-): PagedResult<List<User>> = withContext(CommonPool) {
+): PagedResult<List<User>> = withContext(Dispatchers.IO) {
     val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "members"))
         .addQueryParameter("roomId", roomId)
         .addQueryParameter("offset", offset.toString())
@@ -71,7 +73,7 @@ suspend fun RocketChatClient.getMentions(
     roomId: String,
     offset: Long,
     count: Long
-): PagedResult<List<Message>> = withContext(CommonPool) {
+): PagedResult<List<Message>> = withContext(Dispatchers.IO) {
     val httpUrl = requestUrl(restUrl, "channels.getAllUserMentionsByChannel")
         .addQueryParameter("roomId", roomId)
         .addQueryParameter("offset", offset.toString())
@@ -102,8 +104,8 @@ suspend fun RocketChatClient.getFavoriteMessages(
     roomId: String,
     roomType: RoomType,
     offset: Int
-): PagedResult<List<Message>> = withContext(CommonPool) {
-    val userId = tokenRepository.get(this.url)?.userId
+): PagedResult<List<Message>> = withContext(Dispatchers.IO) {
+    val userId = tokenRepository.get(url)?.userId
 
     val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "messages"))
         .addQueryParameter("roomId", roomId)
@@ -134,7 +136,7 @@ suspend fun RocketChatClient.getPinnedMessages(
     roomId: String,
     roomType: RoomType,
     offset: Int? = 0
-): PagedResult<List<Message>> = withContext(CommonPool) {
+): PagedResult<List<Message>> = withContext(Dispatchers.IO) {
     val httpUrl = requestUrl(
         restUrl,
         getRestApiMethodNameByRoomType(roomType, "messages")
@@ -168,7 +170,7 @@ suspend fun RocketChatClient.getFiles(
     roomId: String,
     roomType: RoomType,
     offset: Int? = 0
-): PagedResult<List<GenericAttachment>> = withContext(CommonPool) {
+): PagedResult<List<GenericAttachment>> = withContext(Dispatchers.IO) {
     val httpUrl = requestUrl(
         restUrl,
         getRestApiMethodNameByRoomType(roomType, "files")
@@ -202,7 +204,7 @@ suspend fun RocketChatClient.getInfo(
     roomId: String,
     roomName: String?,
     roomType: RoomType
-): Room = withContext(CommonPool) {
+): Room = withContext(Dispatchers.IO) {
     val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "info"))
             .addQueryParameter("roomId", roomId)
             .addQueryParameter("roomName", roomName)
@@ -220,7 +222,7 @@ suspend fun RocketChatClient.getInfo(
  * @param roomId The ID of the room.
  */
 suspend fun RocketChatClient.markAsRead(roomId: String) {
-    withContext(CommonPool) {
+    withContext(Dispatchers.IO) {
         val payload = ChatRoomPayload(roomId)
         val adapter = moshi.adapter(ChatRoomPayload::class.java)
         val payloadBody = adapter.toJson(payload)
@@ -240,7 +242,7 @@ suspend fun RocketChatClient.markAsRead(roomId: String) {
  * @param roomId The ID of the room.
  */
 suspend fun RocketChatClient.markAsUnread(roomId: String) {
-    withContext(CommonPool) {
+    withContext(Dispatchers.IO) {
         val payload = ChatRoomUnreadPayload(roomId)
         val adapter = moshi.adapter(ChatRoomUnreadPayload::class.java)
         val payloadBody = adapter.toJson(payload)
@@ -254,8 +256,34 @@ suspend fun RocketChatClient.markAsUnread(roomId: String) {
     }
 }
 
+/**
+ * Adds a user to the chat room
+ *
+ * @param roomId The ID of the room.
+ * @param roomType The type of the room.
+ * @param userId userID of the user
+ *
+ * @return Whether the task was successful or not.
+ */
+suspend fun RocketChatClient.invite(
+    roomId: String,
+    roomType: RoomType,
+    userId: String
+): Boolean = withContext(Dispatchers.IO) {
+    val payload = ChatRoomInvitePayload(roomId, userId)
+    val adapter = moshi.adapter(ChatRoomInvitePayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "invite")).build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
+
+    return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
+}
+
 // TODO: Add doc.
-suspend fun RocketChatClient.joinChat(roomId: String): Boolean = withContext(CommonPool) {
+suspend fun RocketChatClient.joinChat(roomId: String): Boolean = withContext(Dispatchers.IO) {
     val payload = RoomIdPayload(roomId)
     val adapter = moshi.adapter(RoomIdPayload::class.java)
     val payloadBody = adapter.toJson(payload)
@@ -263,6 +291,33 @@ suspend fun RocketChatClient.joinChat(roomId: String): Boolean = withContext(Com
     val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
     val url = requestUrl(restUrl, "channels.join").build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
+
+    return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
+}
+
+
+/**
+ * Removes a user from the chat room
+ *
+ * @param roomId The ID of the room.
+ * @param roomType The type of the room.
+ * @param userId userID of the user
+ *
+ * @return Whether the task was successful or not.
+ */
+suspend fun RocketChatClient.kick(
+    roomId: String,
+    roomType: RoomType,
+    userId: String
+): Boolean = withContext(Dispatchers.IO) {
+    val payload = ChatRoomKickPayload(roomId, userId)
+    val adapter = moshi.adapter(ChatRoomKickPayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+
+    val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "kick")).build()
     val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
     return@withContext handleRestCall<BaseResult>(request, BaseResult::class.java).success
@@ -279,7 +334,7 @@ suspend fun RocketChatClient.joinChat(roomId: String): Boolean = withContext(Com
 suspend fun RocketChatClient.leaveChat(
     roomId: String,
     roomType: RoomType
-): Boolean = withContext(CommonPool) {
+): Boolean = withContext(Dispatchers.IO) {
     val payload = RoomIdPayload(roomId)
     val adapter = moshi.adapter(RoomIdPayload::class.java)
     val payloadBody = adapter.toJson(payload)
@@ -305,7 +360,7 @@ suspend fun RocketChatClient.rename(
     roomId: String,
     roomType: RoomType,
     newName: String
-): Boolean = withContext(CommonPool) {
+): Boolean = withContext(Dispatchers.IO) {
     val payload = ChatRoomNamePayload(roomId, newName)
     val adapter = moshi.adapter(ChatRoomNamePayload::class.java)
     val payloadBody = adapter.toJson(payload)
@@ -331,7 +386,7 @@ suspend fun RocketChatClient.setReadOnly(
     roomId: String,
     roomType: RoomType,
     readOnly: Boolean
-) = withContext(CommonPool) {
+) = withContext(Dispatchers.IO) {
     val payload = ChatRoomReadOnlyPayload(roomId, readOnly)
     val adapter = moshi.adapter(ChatRoomReadOnlyPayload::class.java)
     val payloadBody = adapter.toJson(payload)
@@ -357,7 +412,7 @@ suspend fun RocketChatClient.setType(
     roomId: String,
     roomType: RoomType,
     type: String
-) = withContext(CommonPool) {
+) = withContext(Dispatchers.IO) {
     val payload = ChatRoomTypePayload(roomId, type)
     val adapter = moshi.adapter(ChatRoomTypePayload::class.java)
     val payloadBody = adapter.toJson(payload)
@@ -383,7 +438,7 @@ suspend fun RocketChatClient.setJoinCode(
     roomId: String,
     roomType: RoomType,
     joinCode: String
-) = withContext(CommonPool) {
+) = withContext(Dispatchers.IO) {
     val payload = ChatRoomJoinCodePayload(roomId, joinCode)
     val adapter = moshi.adapter(ChatRoomJoinCodePayload::class.java)
     val payloadBody = adapter.toJson(payload)
@@ -409,7 +464,7 @@ suspend fun RocketChatClient.setTopic(
     roomId: String,
     roomType: RoomType,
     topic: String?
-): Boolean = withContext(CommonPool) {
+): Boolean = withContext(Dispatchers.IO) {
     val payload = ChatRoomTopicPayload(roomId, topic)
     val adapter = moshi.adapter(ChatRoomTopicPayload::class.java)
     val payloadBody = adapter.toJson(payload)
@@ -435,7 +490,7 @@ suspend fun RocketChatClient.setDescription(
     roomId: String,
     roomType: RoomType,
     description: String?
-): Boolean = withContext(CommonPool) {
+): Boolean = withContext(Dispatchers.IO) {
     val payload = ChatRoomDescriptionPayload(roomId, description)
     val adapter = moshi.adapter(ChatRoomDescriptionPayload::class.java)
     val payloadBody = adapter.toJson(payload)
@@ -461,7 +516,7 @@ suspend fun RocketChatClient.setAnnouncement(
     roomId: String,
     roomType: RoomType,
     announcement: String?
-): Boolean = withContext(CommonPool) {
+): Boolean = withContext(Dispatchers.IO) {
     val payload = ChatRoomAnnouncementPayload(roomId, announcement)
     val adapter = moshi.adapter(ChatRoomAnnouncementPayload::class.java)
     val payloadBody = adapter.toJson(payload)
@@ -487,7 +542,7 @@ suspend fun RocketChatClient.archive(
     roomId: String,
     roomType: RoomType,
     archiveRoom: Boolean
-) = withContext(CommonPool) {
+) = withContext(Dispatchers.IO) {
     val payload = RoomIdPayload(roomId)
     val adapter = moshi.adapter(RoomIdPayload::class.java)
     val payloadBody = adapter.toJson(payload)
@@ -514,7 +569,7 @@ suspend fun RocketChatClient.hide(
     roomId: String,
     roomType: RoomType,
     hideRoom: Boolean = true
-) = withContext(CommonPool) {
+) = withContext(Dispatchers.IO) {
     val payload = RoomIdPayload(roomId)
     val adapter = moshi.adapter(RoomIdPayload::class.java)
     val payloadBody = adapter.toJson(payload)
@@ -552,7 +607,7 @@ suspend fun RocketChatClient.show(
 suspend fun RocketChatClient.favorite(
     roomId: String,
     favorite: Boolean
-) = withContext(CommonPool) {
+) = withContext(Dispatchers.IO) {
     val payload = ChatRoomFavoritePayload(roomId, favorite)
     val adapter = moshi.adapter(ChatRoomFavoritePayload::class.java)
     val payloadBody = adapter.toJson(payload)
@@ -574,7 +629,7 @@ suspend fun RocketChatClient.favorite(
 suspend fun RocketChatClient.searchMessages(
     roomId: String,
     searchText: String
-): PagedResult<List<Message>> = withContext(CommonPool) {
+): PagedResult<List<Message>> = withContext(Dispatchers.IO) {
     val httpUrl = requestUrl(restUrl, "chat.search")
         .addQueryParameter("roomId", roomId)
         .addQueryParameter("searchText", searchText)
@@ -602,7 +657,7 @@ suspend fun RocketChatClient.searchMessages(
 suspend fun RocketChatClient.chatRoomRoles(
     roomType: RoomType,
     roomName: String
-): List<ChatRoomRole> = withContext(CommonPool) {
+): List<ChatRoomRole> = withContext(Dispatchers.IO) {
 
     val httpUrl = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "roles"))
         .addQueryParameter("roomName", roomName)

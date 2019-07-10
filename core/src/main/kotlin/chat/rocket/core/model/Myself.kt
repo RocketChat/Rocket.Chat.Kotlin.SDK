@@ -1,6 +1,7 @@
 package chat.rocket.core.model
 
 import chat.rocket.common.model.BaseUser
+import chat.rocket.common.model.UserAvatar
 import chat.rocket.common.model.UserStatus
 import com.squareup.moshi.Json
 import se.ansman.kotshi.JsonSerializable
@@ -14,6 +15,7 @@ data class Myself(
     val status: UserStatus?,
     val statusConnection: UserStatus?,
     val statusDefault: UserStatus?,
+    val avatarOrigin: UserAvatar?,
     val utcOffset: Float?,
     val emails: List<Email>?,
     val roles: List<String>?

@@ -7,11 +7,11 @@ import chat.rocket.core.internal.model.CommandPayload
 import chat.rocket.core.model.Command
 import chat.rocket.core.model.PagedResult
 import com.squareup.moshi.Types
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.RequestBody
 
-suspend fun RocketChatClient.commands(offset: Int = 0, count: Int = 0): PagedResult<List<Command>> = withContext(CommonPool) {
+suspend fun RocketChatClient.commands(offset: Int = 0, count: Int = 0): PagedResult<List<Command>> = withContext(Dispatchers.IO) {
     val httpUrl = requestUrl(restUrl, "commands.list")
             .addQueryParameter("offset", offset.toString())
             .addQueryParameter("count", count.toString())
@@ -24,7 +24,7 @@ suspend fun RocketChatClient.commands(offset: Int = 0, count: Int = 0): PagedRes
     return@withContext PagedResult<List<Command>>(result.result(), (result.total()) ?: 0, result.offset() ?: 0)
 }
 
-suspend fun RocketChatClient.runCommand(command: Command, roomId: String): Boolean = withContext(CommonPool) {
+suspend fun RocketChatClient.runCommand(command: Command, roomId: String): Boolean = withContext(Dispatchers.IO) {
     val httpUrl = requestUrl(restUrl, "commands.run")
             .build()
 
