@@ -1,16 +1,12 @@
 package chat.rocket.core.internal.rest
 
 import chat.rocket.common.model.RoomType
-import chat.rocket.common.model.BaseResult
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestResult
+import chat.rocket.core.internal.model.ChatRoomUserPayload
 import chat.rocket.core.internal.model.CreateDirectMessagePayload
 import chat.rocket.core.internal.model.CreateNewChannelPayload
 import chat.rocket.core.model.DirectMessage
-import chat.rocket.core.internal.model.ChatRoomUnreadPayload
-import chat.rocket.core.internal.model.ChatRoomUserPayload
-import chat.rocket.core.internal.model.ChatRoomIdUserPayload
-import chat.rocket.core.internal.model.ChatRoomUserIgnorePayload
 import chat.rocket.core.model.Room
 import com.squareup.moshi.Types
 import kotlinx.coroutines.Dispatchers
@@ -65,12 +61,20 @@ suspend fun RocketChatClient.createDirectMessage(username: String): DirectMessag
 
         return@withContext handleRestCall<RestResult<DirectMessage>>(request, type).result()
     }
- /* Add owner of a Channel/Group
- * @param roomId Id of the room.
- * @param roomType The type of the room.
+
+/**
+ * Add the owner of a chat room.
+ *
+ * @param roomId The room id.
+ * @param roomType The room type.
+ * @param userId The user id.
  */
-suspend fun RocketChatClient.addOwner(roomId: String ,roomType: RoomType, userId: String) { 
-    withContext(CommonPool) {
+suspend fun RocketChatClient.addOwner(
+    roomId: String,
+    roomType: RoomType,
+    userId: String
+) {
+    withContext(Dispatchers.IO) {
         val payload = ChatRoomUserPayload(roomId, userId)
         val adapter = moshi.adapter(ChatRoomUserPayload::class.java)
         val payloadBody = adapter.toJson(payload)
@@ -85,12 +89,18 @@ suspend fun RocketChatClient.addOwner(roomId: String ,roomType: RoomType, userId
 }
 
 /**
- * Add leader of a Channel/Group
- * @param roomId Id of the room.
- * @param roomType The type of the room.
+ * Adds the leader of a channel.
+
+ * @param roomId The room id.
+ * @param roomType The room type.
+ * @param userId The user id.
  */
-suspend fun RocketChatClient.addLeader(roomId: String ,roomType: RoomType, userId: String) { 
-    withContext(CommonPool) {
+suspend fun RocketChatClient.addLeader(
+    roomId: String,
+    roomType: RoomType,
+    userId: String
+) {
+    withContext(Dispatchers.IO) {
         val payload = ChatRoomUserPayload(roomId, userId)
         val adapter = moshi.adapter(ChatRoomUserPayload::class.java)
         val payloadBody = adapter.toJson(payload)
@@ -105,12 +115,18 @@ suspend fun RocketChatClient.addLeader(roomId: String ,roomType: RoomType, userI
 }
 
 /**
- * Add Moderator of a Channel/Group
- * @param roomId Id of the room.
- * @param roomType The type of the room.
+ * Adds the moderator of a channel.
+
+ * @param roomId The room id.
+ * @param roomType The room type.
+ * @param userId The user id.
  */
-suspend fun RocketChatClient.addModerator(roomId: String ,roomType: RoomType, userId: String) { 
-    withContext(CommonPool) {
+suspend fun RocketChatClient.addModerator(
+    roomId: String,
+    roomType: RoomType,
+    userId: String
+) {
+    withContext(Dispatchers.IO) {
         val payload = ChatRoomUserPayload(roomId, userId)
         val adapter = moshi.adapter(ChatRoomUserPayload::class.java)
         val payloadBody = adapter.toJson(payload)
@@ -125,82 +141,73 @@ suspend fun RocketChatClient.addModerator(roomId: String ,roomType: RoomType, us
 }
 
 /**
- * Remove Owner of a Channel/Group
- * @param roomId Id of the room.
- * @param roomType The type of the room.
+ * Removes the owner of a channel.
+ *
+ * @param roomId The room id.
+ * @param roomType The room type.
+ * @param userId The user id.
  */
-suspend fun RocketChatClient.removeOwner(roomId: String ,roomType: RoomType, userId: String) { 
-    withContext(CommonPool) {
-        val payload = ChatRoomUserPayload(roomId, userId)
-        val adapter = moshi.adapter(ChatRoomUserPayload::class.java)
-        val payloadBody = adapter.toJson(payload)
-        val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+suspend fun RocketChatClient.removeOwner(
+    roomId: String,
+    roomType: RoomType,
+    userId: String
+) = withContext(Dispatchers.IO) {
+    val payload = ChatRoomUserPayload(roomId, userId)
+    val adapter = moshi.adapter(ChatRoomUserPayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
-        val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "removeOwner")).build()
+    val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "removeOwner")).build()
 
-        val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
-        handleRestCall<Any>(request, Any::class.java)
-    }
+    handleRestCall<Any>(request, Any::class.java)
 }
 
 /**
- * Remove Leader of a Channel/Group
- * @param roomId Id of the room.
- * @param roomType The type of the room.
+ * Removes the leader of a channel.
+
+ * @param roomId The room id.
+ * @param roomType The room type.
+ * @param userId The user id.
  */
-suspend fun RocketChatClient.removeLeader(roomId: String ,roomType: RoomType, userId: String) { 
-    withContext(CommonPool) {
-        val payload = ChatRoomUserPayload(roomId, userId)
-        val adapter = moshi.adapter(ChatRoomUserPayload::class.java)
-        val payloadBody = adapter.toJson(payload)
-        val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+suspend fun RocketChatClient.removeLeader(
+    roomId: String,
+    roomType: RoomType,
+    userId: String
+) = withContext(Dispatchers.IO) {
+    val payload = ChatRoomUserPayload(roomId, userId)
+    val adapter = moshi.adapter(ChatRoomUserPayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
-        val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "removeLeader")).build()
+    val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "removeLeader")).build()
 
-        val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
-        handleRestCall<Any>(request, Any::class.java)
-    }
+    handleRestCall<Any>(request, Any::class.java)
 }
 
 /**
- * Remove Moderator of a Channel/Group
- * @param roomId Id of the room.
- * @param roomType The type of the room.
+ * Removes the moderator of a channel.
+ *
+ * @param roomId The room id.
+ * @param roomType The room type.
+ * @param userId The user id.
  */
-suspend fun RocketChatClient.removeModerator(roomId: String ,roomType: RoomType, userId: String) { 
-    withContext(CommonPool) {
-        val payload = ChatRoomUserPayload(roomId, userId)
-        val adapter = moshi.adapter(ChatRoomUserPayload::class.java)
-        val payloadBody = adapter.toJson(payload)
-        val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+suspend fun RocketChatClient.removeModerator(
+    roomId: String,
+    roomType: RoomType,
+    userId: String
+) = withContext(Dispatchers.IO) {
+    val payload = ChatRoomUserPayload(roomId, userId)
+    val adapter = moshi.adapter(ChatRoomUserPayload::class.java)
+    val payloadBody = adapter.toJson(payload)
+    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
 
-        val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "removeModerator")).build()
+    val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "removeModerator")).build()
 
-        val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
+    val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
-        handleRestCall<Any>(request, Any::class.java)
-    }
-}
-
-/**
- * Remove User of a Channel/Group
- * @param roomId Id of the room.
- * @param roomType The type of the room.
- * @param userId Id of user to remove from room.
- */
-suspend fun RocketChatClient.removeUser(roomId: String ,roomType: RoomType, userId: String) { 
-    withContext(CommonPool) {
-        val payload = ChatRoomUserPayload(roomId, userId)
-        val adapter = moshi.adapter(ChatRoomUserPayload::class.java)
-        val payloadBody = adapter.toJson(payload)
-        val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
-
-        val url = requestUrl(restUrl, getRestApiMethodNameByRoomType(roomType, "kick")).build()
-
-        val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
-
-        handleRestCall<Any>(request, Any::class.java)
-    }
+    handleRestCall<Any>(request, Any::class.java)
 }
