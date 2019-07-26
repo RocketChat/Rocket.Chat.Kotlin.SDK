@@ -154,6 +154,20 @@ class ChatRoomTest {
     }
 
     @Test
+    fun `invite() should succeed without throwing`() {
+        mockServer.expect()
+            .post()
+            .withPath("/api/v1/channels.invite")
+            .andReturn(200, SUCCESS)
+            .once()
+
+        runBlocking {
+            val result = sut.invite(roomId = "GENERAL", roomType = roomTypeOf(RoomType.CHANNEL), userId = "userId")
+            assertTrue(result)
+        }
+    }
+
+    @Test
     fun `joinChat() should succeed without throwing`() {
         mockServer.expect()
             .post()
@@ -163,6 +177,20 @@ class ChatRoomTest {
 
         runBlocking {
             val result = sut.joinChat(roomId = "GENERAL")
+            assertTrue(result)
+        }
+    }
+
+    @Test
+    fun `kick() should succeed without throwing`() {
+        mockServer.expect()
+            .post()
+            .withPath("/api/v1/channels.kick")
+            .andReturn(200, SUCCESS)
+            .once()
+
+        runBlocking {
+            val result = sut.kick(roomId = "GENERAL", roomType = roomTypeOf(RoomType.CHANNEL), userId = "userId")
             assertTrue(result)
         }
     }

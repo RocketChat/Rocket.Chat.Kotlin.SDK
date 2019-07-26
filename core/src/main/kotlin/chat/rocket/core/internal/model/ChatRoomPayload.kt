@@ -10,6 +10,15 @@ data class ChatRoomPayload(@Json(name = "rid") val roomId: String)
 data class ChatRoomUnreadPayload(val roomId: String)
 
 @JsonSerializable
+data class ChatRoomIdUserPayload(@Json(name = "rid") val roomId: String, val userId: String)
+
+@JsonSerializable
+data class ChatRoomUserIgnorePayload(@Json(name = "rid") val roomId: String, val userId: String, val ignore: Boolean)
+
+@JsonSerializable
+data class ChatRoomUserPayload(val roomId: String, val userId: String)
+
+@JsonSerializable
 data class ChatRoomNamePayload(val roomId: String, val name: String?)
 
 @JsonSerializable
@@ -28,7 +37,13 @@ data class ChatRoomReadOnlyPayload(val roomId: String, val readOnly: Boolean)
 data class ChatRoomTypePayload(val roomId: String, val type: String)
 
 @JsonSerializable
+data class ChatRoomInvitePayload(val roomId: String, val userId: String)
+
+@JsonSerializable
 data class ChatRoomJoinCodePayload(val roomId: String, val joinCode: String)
+
+@JsonSerializable
+data class ChatRoomKickPayload(val roomId: String, val userId: String)
 
 @JsonSerializable
 data class ChatRoomFavoritePayload(val roomId: String, val favorite: Boolean)

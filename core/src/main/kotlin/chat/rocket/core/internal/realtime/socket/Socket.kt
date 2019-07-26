@@ -175,7 +175,9 @@ class Socket(
             return
         }
 
-        reschedulePing(message.type)
+        message.type?.let {
+            reschedulePing(message.type)
+        }
 
         when (currentState) {
             is State.Connecting -> {
