@@ -163,7 +163,7 @@ suspend fun RocketChatClient.setAvatar(
     val body = MultipartBody.Builder()
         .setType(MultipartBody.FORM)
         .addFormDataPart(
-            "image", fileName,
+            "image", Regex("[^A-Za-z0-9 ]").replace(fileName, ""),
             InputStreamRequestBody(MediaType.parse(mimeType), inputStreamProvider)
         )
         .build()
