@@ -413,7 +413,7 @@ class CustomEmojiTest {
     fun `getCustomEmojis() should return list of custom emojis`() {
         mockServer.expect()
             .get()
-            .withPath("/api/v1/emoji-custom")
+            .withPath("/api/v1/emoji-custom.list")
             .andReturn(200, EMOJI_CUSTOM_OK)
             .once()
 
