@@ -8,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 suspend fun RocketChatClient.getCustomEmojis(): List<CustomEmoji> = withContext(Dispatchers.IO) {
-    val url = requestUrl(restUrl, "emoji-custom").build()
+    val url = requestUrl(restUrl, "emoji-custom.list").build()
 
     val request = requestBuilderForAuthenticatedMethods(url).get().build()
 
