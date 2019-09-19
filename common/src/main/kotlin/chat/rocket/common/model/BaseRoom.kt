@@ -5,7 +5,7 @@ import com.squareup.moshi.Json
 
 interface BaseRoom {
     val id: String
-    val type: RoomType
+    val type: RoomType?
     val fullName: String?
     val user: SimpleUser?
     val readonly: Boolean?

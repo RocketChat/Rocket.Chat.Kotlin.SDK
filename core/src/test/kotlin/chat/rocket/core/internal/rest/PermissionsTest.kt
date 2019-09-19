@@ -4,9 +4,11 @@ import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
+import chat.rocket.core.createRocketChatClient
 import io.fabric8.mockwebserver.DefaultMockServer
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
+import org.hamcrest.CoreMatchers.`is` as isEqualTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
 import org.junit.Before
@@ -14,7 +16,6 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
-import org.hamcrest.CoreMatchers.`is` as isEqualTo
 
 class PermissionsTest {
 
@@ -35,7 +36,7 @@ class PermissionsTest {
         mockServer.start()
 
         val client = OkHttpClient()
-        sut = RocketChatClient.create {
+        sut = createRocketChatClient {
             httpClient = client
             restUrl = mockServer.url("/")
             userAgent = "Rocket.Chat.Kotlin.SDK"

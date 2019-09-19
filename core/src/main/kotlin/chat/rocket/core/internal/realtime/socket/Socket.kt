@@ -15,6 +15,8 @@ import chat.rocket.core.model.Message
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room
 import com.squareup.moshi.JsonAdapter
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -30,8 +32,6 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.coroutines.CoroutineContext
 
 const val PING_INTERVAL = 15000L
 
@@ -308,7 +308,7 @@ class Socket(
         parentJob.cancel()
     }
 
-    override fun onOpen(webSocket: WebSocket, response: Response?) {
+    override fun onOpen(webSocket: WebSocket, response: Response) {
         readJob = launch {
             for (message in processingChannel!!) {
                 processIncomingMessage(message)
@@ -318,43 +318,41 @@ class Socket(
         send(CONNECT_MESSAGE)
     }
 
-    override fun onFailure(webSocket: WebSocket, throwable: Throwable?, response: Response?) {
-        logger.warn { "Socket.onFailure(). THROWABLE MESSAGE: ${throwable?.message} -  RESPONSE MESSAGE: ${response?.message()}" }
+    override fun onFailure(webSocket: WebSocket, throwable: Throwable, response: Response?) {
+        logger.warn { "Socket.onFailure(). THROWABLE MESSAGE: ${throwable.message} -  RESPONSE MESSAGE: ${response?.message}" }
         throwable?.printStackTrace()
         setState(State.Disconnected())
         close()
         startReconnection()
     }
 
-    override fun onClosing(webSocket: WebSocket, code: Int, reason: String?) {
+    override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
         logger.warn { "Socket.onClosing() called. Received CODE = $code - Received REASON = $reason" }
         setState(State.Disconnecting())
         startReconnection()
     }
-    override fun onClosed(webSocket: WebSocket, code: Int, reason: String?) {
+    override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
         logger.warn { "Socket.onClosed() called. Received CODE = $code - Received REASON = $reason" }
         setState(State.Disconnected())
         close()
         startReconnection()
     }
 
-    override fun onMessage(webSocket: WebSocket, text: String?) {
+    override fun onMessage(webSocket: WebSocket, text: String) {
         logger.warn { "Socket.onMessage(). Received TEXT = $text for processing channel = $processingChannel" }
-        text?.let {
             messagesReceived++
             if (!parentJob.isActive) {
                 logger.debug { "Parent job: $parentJob" }
             }
             launch {
-                if (processingChannel == null || processingChannel?.isFull == true || processingChannel?.isClosedForSend == true) {
-                    logger.debug { "processing channel is in trouble... $processingChannel - full ${processingChannel?.isFull} - closedForSend ${processingChannel?.isClosedForSend}" }
+                if (processingChannel == null || processingChannel?.isClosedForSend == true) {
+                    logger.debug { "processing channel is in trouble... $processingChannel - closedForSend ${processingChannel?.isClosedForSend}" }
                 }
-                processingChannel?.send(it)
+                processingChannel?.send(text)
             }
-        }
     }
 
-    override fun onMessage(webSocket: WebSocket, bytes: ByteString?) {
+    override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
         logger.warn { "Socket.onMessage() called. Received ByteString message: $bytes" }
     }
 }

@@ -6,6 +6,7 @@ import chat.rocket.core.compat.Callback
 import kotlinx.coroutines.AbstractCoroutine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -13,6 +14,7 @@ import kotlinx.coroutines.newCoroutineContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.startCoroutine
 
+@ExperimentalCoroutinesApi
 @JvmOverloads
 fun <T> callback(
     context: CoroutineContext = Dispatchers.Default,
@@ -36,11 +38,11 @@ private class CallbackCoroutine<in T>(
         callback.onSuccess(value)
     }
 
-    override fun onCompletedExceptionally(exception: Throwable) {
-        if (exception is RocketChatException) {
-            callback.onError(exception)
+    override fun onCancelled(cause: Throwable, handled: Boolean) {
+        if (cause is RocketChatException) {
+            callback.onError(cause)
         } else {
-            callback.onError(RocketChatException(exception.message ?: "Unknown Error", exception))
+            callback.onError(RocketChatException(cause.message ?: "Unknown Error", cause))
         }
     }
 }

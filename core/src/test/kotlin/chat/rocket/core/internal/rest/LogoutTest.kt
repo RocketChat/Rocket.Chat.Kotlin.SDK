@@ -5,9 +5,11 @@ import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
+import chat.rocket.core.createRocketChatClient
 import io.fabric8.mockwebserver.DefaultMockServer
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
+import org.hamcrest.CoreMatchers.`is` as isEqualTo
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
@@ -16,17 +18,11 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import org.hamcrest.CoreMatchers.`is` as isEqualTo
 
 class LogoutTest {
-
     private lateinit var mockServer: DefaultMockServer
-
     private lateinit var sut: RocketChatClient
-
-    @Mock
-    private lateinit var tokenProvider: TokenRepository
-
+    @Mock private lateinit var tokenProvider: TokenRepository
     private val authToken = Token("userId", "authToken")
 
     @Before
@@ -37,7 +33,7 @@ class LogoutTest {
         mockServer.start()
 
         val client = OkHttpClient()
-        sut = RocketChatClient.create {
+        sut = createRocketChatClient {
             httpClient = client
             restUrl = mockServer.url("/")
             userAgent = "Rocket.Chat.Kotlin.SDK"

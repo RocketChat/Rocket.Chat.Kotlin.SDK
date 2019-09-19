@@ -11,13 +11,13 @@ import chat.rocket.common.util.NoOpLogger
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.common.util.RealLogger
 import chat.rocket.common.util.ifNull
-import chat.rocket.core.internal.RestResult
-import chat.rocket.core.internal.RestMultiResult
-import chat.rocket.core.internal.SettingsAdapter
 import chat.rocket.core.internal.AttachmentAdapterFactory
-import chat.rocket.core.internal.RoomListAdapterFactory
 import chat.rocket.core.internal.CoreJsonAdapterFactory
 import chat.rocket.core.internal.ReactionsAdapter
+import chat.rocket.core.internal.RestMultiResult
+import chat.rocket.core.internal.RestResult
+import chat.rocket.core.internal.RoomListAdapterFactory
+import chat.rocket.core.internal.SettingsAdapter
 import chat.rocket.core.internal.model.Subscription
 import chat.rocket.core.internal.realtime.socket.Socket
 import chat.rocket.core.internal.realtime.socket.model.State
@@ -27,14 +27,18 @@ import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Room
 import chat.rocket.core.model.url.MetaJsonAdapter
 import com.squareup.moshi.Moshi
+import java.security.InvalidParameterException
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import okhttp3.HttpUrl
-import okhttp3.MediaType
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
-import java.security.InvalidParameterException
-import kotlin.coroutines.CoroutineContext
+
+val CONTENT_TYPE_JSON = "application/json; charset=utf-8".toMediaTypeOrNull()
+fun createRocketChatClient(init: RocketChatClient.Builder.() -> Unit) = RocketChatClient.Builder(init).build()
 
 class RocketChatClient private constructor(
     internal val httpClient: OkHttpClient,
@@ -77,7 +81,7 @@ class RocketChatClient private constructor(
         url = sanitizeUrl(baseUrl)
         agent = userAgent
 
-        HttpUrl.parse(url)?.let {
+        url.toHttpUrlOrNull()?.let {
             restUrl = it
         }.ifNull {
             throw InvalidParameterException("You must pass a valid HTTP or HTTPS URL")
@@ -108,12 +112,6 @@ class RocketChatClient private constructor(
         builder.userAgent,
         builder.tokenRepository,
         if (builder.enableLogger) RealLogger(builder.platformLogger, builder.restUrl) else NoOpLogger)
-
-    companion object {
-        val CONTENT_TYPE_JSON = MediaType.parse("application/json; charset=utf-8")
-
-        fun create(init: Builder.() -> Unit) = Builder(init).build()
-    }
 
     class Builder private constructor() {
 

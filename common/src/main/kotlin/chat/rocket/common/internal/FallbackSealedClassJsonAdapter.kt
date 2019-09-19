@@ -114,8 +114,8 @@ class FallbackSealedClassJsonAdapter<T>(private val classType: Class<T>,
         /**
          * Builds an adapter that can process sealed classes annotated with [FallbackSealedClass].
          */
-        val ADAPTER_FACTORY: JsonAdapter.Factory = JsonAdapter.Factory { type, annotations, moshi ->
-            if (!annotations.isEmpty()) return@Factory null
+        val ADAPTER_FACTORY: Factory = Factory { type, annotations, moshi ->
+            if (annotations.isNotEmpty()) return@Factory null
 
             val rawType = Types.getRawType(type)
             val annotation = rawType.getAnnotation(FallbackSealedClass::class.java) ?: return@Factory null

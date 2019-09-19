@@ -16,10 +16,10 @@ data class ChatRoom(
     override val id: String,
     val subscriptionId: String,
     val parentId: String?,
-    override val type: RoomType,
+    override val type: RoomType?,
     override val user: SimpleUser?,
     val status: UserStatus?,
-    val name: String,
+    val name: String?,
     override val fullName: String?,
     override val readonly: Boolean? = false,
     override val updatedAt: Long?,
@@ -29,18 +29,18 @@ data class ChatRoom(
     val description: String?,
     val announcement: String?,
     @get:JvmName("isDefault")
-    val default: Boolean = false,
-    val favorite: Boolean = false,
-    val open: Boolean,
-    val alert: Boolean,
-    val unread: Long,
+    val default: Boolean? = false,
+    val favorite: Boolean? = false,
+    val open: Boolean?,
+    val alert: Boolean?,
+    val unread: Long?,
     val roles: List<String>?,
-    val archived: Boolean,
+    val archived: Boolean?,
     val userMentions: Long?,
     val groupMentions: Long?,
     val lastMessage: LastMessage?,
     val client: RocketChatClient,
-    val broadcast: Boolean,
+    val broadcast: Boolean?,
     @JvmField val muted: List<String>? = null
 ) : BaseRoom {
     companion object {
@@ -85,16 +85,16 @@ data class ChatRoom(
 suspend fun ChatRoom.messages(
     offset: Long = 0,
     count: Long = 50
-): PagedResult<List<Message>> = withContext(Dispatchers.IO) {
-    return@withContext client.messages(id, type, offset, count)
+): PagedResult<List<Message>>? = withContext(Dispatchers.IO) {
+    return@withContext type?.let { client.messages(id, it, offset, count) }
 }
 
 suspend fun ChatRoom.history(
     count: Long = 50,
     oldest: String? = null,
     latest: String? = null
-): PagedResult<List<Message>> = withContext(Dispatchers.IO) {
-    return@withContext client.history(id, type, count, oldest, latest)
+): PagedResult<List<Message>>? = withContext(Dispatchers.IO) {
+    return@withContext type?.let { client.history(id, it, count, oldest, latest) }
 }
 
 fun ChatRoom.subscribeMessages(callback: (Boolean, String) -> Unit): String {

@@ -13,24 +13,27 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
-    compile project (':common')
+    implementation project (':common')
 
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}"
-    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutine}"
+    implementation  "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutine}"
 
-    compile "se.ansman.kotshi:api:${versions.kotshi}"
+    implementation "se.ansman.kotshi:api:${versions.kotshi}"
     kapt "se.ansman.kotshi:compiler:${versions.kotshi}"
+
+    implementation "com.squareup.okhttp3:okhttp:${versions.okhttp}"
 
     compileOnly 'org.json:json:20090211'
     compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
 
-    testCompile "org.jetbrains.kotlin:kotlin-test-junit:${versions.kotlin}"
-    testCompile "org.jetbrains.kotlin:kotlin-reflect:${versions.kotlin}"
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.12.0'
-    testCompile 'org.assertj:assertj-core:3.8.0'
-    testCompile "com.nhaarman:mockito-kotlin-kt1.1:1.5.0"
-    testCompile 'com.github.luciofm:mockwebserver:852ce0b657'
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:${versions.kotlin}"
+    testImplementation "org.jetbrains.kotlin:kotlin-reflect:${versions.kotlin}"
+    testImplementation "org.junit.jupiter:junit-jupiter:${versions.junit}"
+    testImplementation "org.mockito:mockito-core:${versions.mockitoCore}"
+    testImplementation "org.assertj:assertj-core:${versions.assertj}"
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:${versions.mockitoKotlin}"
+    testImplementation "com.squareup.okhttp3:mockwebserver:${versions.okhttpMockWebServer}"
+    testImplementation "io.fabric8:mockwebserver:${versions.mockWebServer}"
 }
 
 compileKotlin {

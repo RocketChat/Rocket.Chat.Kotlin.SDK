@@ -1,20 +1,25 @@
 package chat.rocket.core.internal.rest
 
+import chat.rocket.common.util.CalendarISO8601Converter
 import chat.rocket.core.RocketChatClient
-import chat.rocket.core.internal.RestResult
+import chat.rocket.core.internal.RestMultiResult
 import chat.rocket.core.model.CustomEmoji
+import chat.rocket.core.model.Removed
 import com.squareup.moshi.Types
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
-suspend fun RocketChatClient.getCustomEmojis(): List<CustomEmoji> = withContext(Dispatchers.IO) {
-    val url = requestUrl(restUrl, "emoji-custom.list").build()
+suspend fun RocketChatClient.getCustomEmojis(timestamp: Long? = null): RestMultiResult<List<CustomEmoji>, List<Removed>> {
+    val urlBuilder = requestUrl(restUrl, "emoji-custom.list")
+    timestamp?.let {
+        val date = CalendarISO8601Converter().fromTimestamp(timestamp)
+        urlBuilder.addQueryParameter("updatedSince", date)
+    }
 
-    val request = requestBuilderForAuthenticatedMethods(url).get().build()
+    val request = requestBuilderForAuthenticatedMethods(urlBuilder.build()).get().build()
 
     val type = Types.newParameterizedType(
-        RestResult::class.java,
-        Types.newParameterizedType(List::class.java, CustomEmoji::class.java)
+        RestMultiResult::class.java,
+        Types.newParameterizedType(List::class.java, CustomEmoji::class.java),
+        Types.newParameterizedType(List::class.java, Removed::class.java)
     )
-    return@withContext handleRestCall<RestResult<List<CustomEmoji>>>(request, type).result()
+    return handleRestCall(request, type)
 }
