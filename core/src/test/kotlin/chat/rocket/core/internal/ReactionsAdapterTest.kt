@@ -1,19 +1,19 @@
 package chat.rocket.core.internal
 
 import chat.rocket.common.util.PlatformLogger
-import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
+import chat.rocket.core.createRocketChatClient
 import chat.rocket.core.internal.rest.MESSAGE_WITHOUT_REACTION
 import chat.rocket.core.internal.rest.MESSAGE_WITH_REACTION
 import chat.rocket.core.model.Message
 import com.squareup.moshi.Moshi
 import okhttp3.OkHttpClient
+import org.hamcrest.CoreMatchers.`is` as isEqualTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
-import org.hamcrest.CoreMatchers.`is` as isEqualTo
 
 class ReactionsAdapterTest {
     lateinit var moshi: Moshi
@@ -25,7 +25,7 @@ class ReactionsAdapterTest {
 
         // Just to initialize Moshi
         val client = OkHttpClient()
-        val rocket = RocketChatClient.create {
+        val rocket = createRocketChatClient {
             httpClient = client
             restUrl = "http://8.8.8.8"
             userAgent = "Rocket.Chat.Kotlin.SDK"

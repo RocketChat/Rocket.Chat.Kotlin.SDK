@@ -51,8 +51,8 @@ private fun Socket.processUserDataStream(json: JSONObject, id: String) {
             logger.debug { "Parent job: $parentJob" }
         }
         launch(parentJob) {
-            if (userDataChannel.isFull || userDataChannel.isClosedForSend) {
-                logger.debug { "User Data channel is in trouble... $userDataChannel - full ${userDataChannel.isFull} - closedForSend ${userDataChannel.isClosedForSend}" }
+            if (userDataChannel.isClosedForSend) {
+                logger.debug { "User Data channel is in trouble... $userDataChannel - closedForSend ${userDataChannel.isClosedForSend}" }
             }
             userDataChannel.send(myself)
         }
@@ -76,8 +76,8 @@ private fun Socket.processActiveUsersStream(json: JSONObject, id: String) {
         if (parentJob == null || !parentJob!!.isActive) {
             logger.debug { "Parent job: $parentJob" }
         }
-        if (activeUsersChannel.isFull || activeUsersChannel.isClosedForSend) {
-            logger.debug { "Active Users channel is in trouble... $activeUsersChannel - full ${activeUsersChannel.isFull} - closedForSend ${activeUsersChannel.isClosedForSend}" }
+        if (activeUsersChannel.isClosedForSend) {
+            logger.debug { "Active Users channel is in trouble... $activeUsersChannel - closedForSend ${activeUsersChannel.isClosedForSend}" }
         }
         launch(parentJob) { activeUsersChannel.send(user) }
     }

@@ -1,11 +1,11 @@
 package chat.rocket.core.internal.rest
 
-import okio.Okio
 import java.io.IOException
-import okio.BufferedSink
+import java.io.InputStream
 import okhttp3.MediaType
 import okhttp3.RequestBody
-import java.io.InputStream
+import okio.BufferedSink
+import okio.source
 
 class InputStreamRequestBody(
     private val contentType: MediaType?,
@@ -24,7 +24,7 @@ class InputStreamRequestBody(
     @Throws(IOException::class)
     override fun writeTo(sink: BufferedSink) {
         inputStreamProvider().use { inputStream ->
-            Okio.source(inputStream!!).use { source ->
+            inputStream?.source()?.use { source ->
                 sink.writeAll(source)
             }
         }

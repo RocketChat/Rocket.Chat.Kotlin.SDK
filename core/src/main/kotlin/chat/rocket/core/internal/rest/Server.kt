@@ -20,15 +20,15 @@ suspend fun RocketChatClient.serverInfo(): ServerInfo = withContext(Dispatchers.
     val request = requestBuilder(url).get().build()
 
     val response = handleRequest(request)
-    val responseUrl = response.request().url()
-    val redirected = responseUrl != request.url()
+    val responseUrl = response.request.url
+    val redirected = responseUrl != request.url
     val info = handleResponse<ServerInfoResponse>(response, ServerInfoResponse::class.java)
 
     return@withContext ServerInfo(info.version, responseUrl.baseUrl(), redirected)
 }
 
 private fun HttpUrl.baseUrl(): HttpUrl {
-    val segments = pathSegments()
+    val segments = pathSegments
     val info = segments.indexOf("info")
     val api = segments.indexOf("api")
 

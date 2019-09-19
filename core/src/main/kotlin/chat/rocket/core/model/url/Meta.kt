@@ -1,9 +1,9 @@
 package chat.rocket.core.model.url
 
-import com.squareup.moshi.Moshi
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import se.ansman.kotshi.JsonSerializable
 

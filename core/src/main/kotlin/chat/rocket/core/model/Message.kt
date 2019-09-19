@@ -8,15 +8,13 @@ import chat.rocket.common.model.SimpleUser
 import chat.rocket.core.model.attachment.Attachment
 import chat.rocket.core.model.url.Url
 import com.squareup.moshi.Json
-import se.ansman.kotshi.JsonDefaultValueBoolean
-import se.ansman.kotshi.JsonDefaultValueString
 import se.ansman.kotshi.JsonSerializable
 
 @JsonSerializable
 data class Message(
     @Json(name = "_id") override val id: String,
     @Json(name = "rid") override val roomId: String,
-    @JsonDefaultValueString("") @Json(name = "msg") override val message: String = "",
+    @Json(name = "msg") override val message: String = "",
     @Json(name = "ts") @ISO8601Date override val timestamp: Long,
     @Json(name = "u") override val sender: SimpleUser? = null,
     @Json(name = "_updatedAt") @ISO8601Date val updatedAt: Long? = null,
@@ -25,17 +23,17 @@ data class Message(
     @Json(name = "alias") val senderAlias: String? = null,
     val avatar: String? = null,
     @Json(name = "t") val type: MessageType? = null,
-    @JsonDefaultValueBoolean(false) val groupable: Boolean = false,
-    @JsonDefaultValueBoolean(false) val parseUrls: Boolean = false,
+    val groupable: Boolean = false,
+    val parseUrls: Boolean = false,
     val urls: List<Url>? = null,
     val mentions: List<SimpleUser>? = null,
     val channels: List<SimpleRoom>? = null,
     val attachments: List<Attachment>? = null,
-    @JsonDefaultValueBoolean(false) val pinned: Boolean = false,
+    val pinned: Boolean = false,
     val starred: List<SimpleUser>? = null,
     val reactions: Reactions? = null,
     val role: String? = null,
-    @JsonDefaultValueBoolean(true) val synced: Boolean = true, // TODO: Remove after we have a db
+    val synced: Boolean = true, // TODO: Remove after we have a db
     val unread: Boolean? = null
 ) : BaseMessage
 

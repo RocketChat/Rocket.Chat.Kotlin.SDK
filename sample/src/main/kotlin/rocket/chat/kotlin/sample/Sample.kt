@@ -1,22 +1,30 @@
 package rocket.chat.kotlin.sample
 
 import chat.rocket.common.RocketChatException
-import chat.rocket.common.model.RoomType
 import chat.rocket.common.model.ServerInfo
 import chat.rocket.common.model.Token
 import chat.rocket.common.util.PlatformLogger
-import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
 import chat.rocket.core.compat.Callback
 import chat.rocket.core.compat.serverInfo
-import chat.rocket.core.internal.realtime.*
-import chat.rocket.core.internal.realtime.socket.model.State
+import chat.rocket.core.createRocketChatClient
 import chat.rocket.core.internal.realtime.socket.connect
-import chat.rocket.core.internal.rest.*
+import chat.rocket.core.internal.realtime.socket.model.State
+import chat.rocket.core.internal.realtime.subscribeActiveUsers
+import chat.rocket.core.internal.realtime.subscribeRooms
+import chat.rocket.core.internal.realtime.subscribeSubscriptions
+import chat.rocket.core.internal.realtime.subscribeTypingStatus
+import chat.rocket.core.internal.realtime.subscribeUserData
+import chat.rocket.core.internal.rest.chatRooms
+import chat.rocket.core.internal.rest.login
+import chat.rocket.core.internal.rest.permissions
 import chat.rocket.core.model.history
 import chat.rocket.core.model.messages
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
@@ -45,7 +53,7 @@ fun main() {
         .readTimeout(15, TimeUnit.SECONDS)
         .build()
 
-    val client = RocketChatClient.create {
+    val client = createRocketChatClient {
         httpClient = okHttpClient
         restUrl = "https://your-server.rocket.chat"
         userAgent = "Rocket.Chat.Kotlin.SDK"
@@ -63,12 +71,12 @@ fun main() {
             for (status in statusChannel) {
                 logger.debug("CHANGING STATUS TO: $status")
                 if (status is State.Connected) {
-                        logger.debug("Connected!")
-                        client.subscribeSubscriptions { _, _ -> }
-                        client.subscribeRooms { _, _ -> }
-                        client.subscribeUserData { _, _ -> }
-                        client.subscribeActiveUsers { _, _ ->  }
-                        client.subscribeTypingStatus("GENERAL") {_, _ ->  }
+                    logger.debug("Connected!")
+                    client.subscribeSubscriptions { _, _ -> }
+                    client.subscribeRooms { _, _ -> }
+                    client.subscribeUserData { _, _ -> }
+                    client.subscribeActiveUsers { _, _ -> }
+                    client.subscribeTypingStatus("GENERAL") { _, _ -> }
                 }
             }
         }
@@ -104,7 +112,7 @@ fun main() {
         }
 
         launch {
-//            delay(10000)
+            //            delay(10000)
 //            client.setTemporaryStatus(UserStatus.Online())
 //            delay(2000)
 //            client.setDefaultStatus(UserStatus.Away())

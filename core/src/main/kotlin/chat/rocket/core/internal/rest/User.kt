@@ -8,25 +8,25 @@ import chat.rocket.common.util.CalendarISO8601Converter
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.internal.RestMultiResult
 import chat.rocket.core.internal.RestResult
-import chat.rocket.core.internal.model.Subscription
-import chat.rocket.core.internal.model.UserPayload
-import chat.rocket.core.internal.model.UserPayloadData
 import chat.rocket.core.internal.model.OwnBasicInformationPayload
 import chat.rocket.core.internal.model.OwnBasicInformationPayloadData
 import chat.rocket.core.internal.model.PasswordPayload
+import chat.rocket.core.internal.model.Subscription
+import chat.rocket.core.internal.model.UserPayload
+import chat.rocket.core.internal.model.UserPayloadData
 import chat.rocket.core.model.ChatRoom
 import chat.rocket.core.model.Myself
 import chat.rocket.core.model.Removed
-import chat.rocket.core.model.UserRole
 import chat.rocket.core.model.Room
+import chat.rocket.core.model.UserRole
 import com.squareup.moshi.Types
+import java.io.InputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
-import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
-import java.io.InputStream
+import okhttp3.RequestBody.Companion.toRequestBody
 
 /**
  * Returns the current logged user information, useful to check if the Token from TokenProvider
@@ -63,7 +63,7 @@ suspend fun RocketChatClient.updateProfile(
     val adapter = moshi.adapter(UserPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
-    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+    val body = payloadBody.toRequestBody(MEDIA_TYPE_JSON)
 
     val httpUrl = requestUrl(restUrl, "users.update").build()
     val request = requestBuilderForAuthenticatedMethods(httpUrl).post(body).build()
@@ -94,7 +94,7 @@ suspend fun RocketChatClient.updateOwnBasicInformation(
     val adapter = moshi.adapter(OwnBasicInformationPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
-    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+    val body = payloadBody.toRequestBody(MEDIA_TYPE_JSON)
 
     val httpUrl = requestUrl(restUrl, "users.updateOwnBasicInfo").build()
     val request = requestBuilderForAuthenticatedMethods(httpUrl).post(body).build()
@@ -115,7 +115,7 @@ suspend fun RocketChatClient.deleteOwnAccount(password: String): Boolean {
     val adapter = moshi.adapter(PasswordPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
-    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+    val body = payloadBody.toRequestBody(MEDIA_TYPE_JSON)
 
     val httpUrl = requestUrl(restUrl, "users.deleteOwnAccount").build()
     val request = requestBuilderForAuthenticatedMethods(httpUrl).post(body).build()
@@ -135,7 +135,7 @@ suspend fun RocketChatClient.resetAvatar(userId: String): Boolean {
     val adapter = moshi.adapter(UserPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
-    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+    val body = payloadBody.toRequestBody(MEDIA_TYPE_JSON)
 
     val httpUrl = requestUrl(restUrl, "users.resetAvatar").build()
     val request = requestBuilderForAuthenticatedMethods(httpUrl).post(body).build()
@@ -164,7 +164,7 @@ suspend fun RocketChatClient.setAvatar(
         .setType(MultipartBody.FORM)
         .addFormDataPart(
             "image", Regex("[^A-Za-z0-9 ]").replace(fileName, ""),
-            InputStreamRequestBody(MediaType.parse(mimeType), inputStreamProvider)
+            InputStreamRequestBody(mimeType.toMediaTypeOrNull(), inputStreamProvider)
         )
         .build()
 
@@ -186,7 +186,7 @@ suspend fun RocketChatClient.setAvatar(avatarUrl: String): Boolean {
     val adapter = moshi.adapter(UserPayload::class.java)
 
     val payloadBody = adapter.toJson(payload)
-    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+    val body = payloadBody.toRequestBody(MEDIA_TYPE_JSON)
 
     val httpUrl = requestUrl(restUrl, "users.setAvatar").build()
     val request = requestBuilderForAuthenticatedMethods(httpUrl).post(body).build()

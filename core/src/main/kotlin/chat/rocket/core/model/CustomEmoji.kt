@@ -7,8 +7,8 @@ import se.ansman.kotshi.JsonSerializable
 @JsonSerializable
 data class CustomEmoji(
     @Json(name = "_id") val id: String,
-    val name: String,
-    val aliases: List<String> = emptyList(),
-    val extension: String,
-    @Json(name = "_updatedAt") @ISO8601Date val updatedAt: Long
+    val name: String?,
+    val aliases: List<String>? = emptyList(),
+    val extension: String?,
+    @Json(name = "_updatedAt") @ISO8601Date val updatedAt: Long?
 )

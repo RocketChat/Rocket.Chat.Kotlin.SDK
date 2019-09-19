@@ -16,14 +16,16 @@ import chat.rocket.core.model.PagedResult
 import chat.rocket.core.model.ReadReceipt
 import chat.rocket.core.model.attachment.Attachment
 import com.squareup.moshi.Types
+import java.io.File
+import java.io.InputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.FormBody
-import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import java.io.File
-import java.io.InputStream
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 /**
  * Sends a new message with the given message id.
@@ -52,7 +54,7 @@ suspend fun RocketChatClient.sendMessage(
     val adapter = moshi.adapter(SendMessagePayload::class.java)
     val payloadBody = adapter.toJson(payload)
 
-    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+    val body = payloadBody.toRequestBody(MEDIA_TYPE_JSON)
 
     val url = requestUrl(restUrl, "chat.sendMessage").build()
     val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
@@ -84,7 +86,7 @@ suspend fun RocketChatClient.postMessage(
     val adapter = moshi.adapter(PostMessagePayload::class.java)
     val payloadBody = adapter.toJson(payload)
 
-    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+    val body = payloadBody.toRequestBody(MEDIA_TYPE_JSON)
 
     val url = requestUrl(restUrl, "chat.postMessage").build()
     val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
@@ -107,7 +109,7 @@ suspend fun RocketChatClient.updateMessage(roomId: String, messageId: String, te
         val adapter = moshi.adapter(PostMessagePayload::class.java)
         val payloadBody = adapter.toJson(payload)
 
-        val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+        val body = payloadBody.toRequestBody(MEDIA_TYPE_JSON)
 
         val url = requestUrl(restUrl, "chat.update").build()
         val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
@@ -133,7 +135,7 @@ suspend fun RocketChatClient.deleteMessage(
     val adapter = moshi.adapter(DeletePayload::class.java)
     val payloadBody = adapter.toJson(payload)
 
-    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+    val body = payloadBody.toRequestBody(MEDIA_TYPE_JSON)
 
     val url = requestUrl(restUrl, "chat.delete").build()
     val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
@@ -222,7 +224,7 @@ suspend fun RocketChatClient.toggleReaction(messageId: String, emoji: String): B
     val payload = ReactionPayload(messageId, emoji)
     val adapter = moshi.adapter(ReactionPayload::class.java)
     val payloadBody = adapter.toJson(payload)
-    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+    val body = payloadBody.toRequestBody(MEDIA_TYPE_JSON)
 
     val request = requestBuilderForAuthenticatedMethods(url).post(body).build()
 
@@ -250,7 +252,7 @@ suspend fun RocketChatClient.uploadFile(
             .setType(MultipartBody.FORM)
             .addFormDataPart(
                 "file", file.name,
-                RequestBody.create(MediaType.parse(mimeType), file)
+                file.asRequestBody(mimeType.toMediaTypeOrNull())
             )
             .addFormDataPart("msg", msg)
             .addFormDataPart("description", description)
@@ -273,7 +275,7 @@ suspend fun RocketChatClient.uploadFile(
             .setType(MultipartBody.FORM)
             .addFormDataPart(
                 "file", fileName,
-                InputStreamRequestBody(MediaType.parse(mimeType), inputStreamProvider)
+                InputStreamRequestBody(mimeType.toMediaTypeOrNull(), inputStreamProvider)
             )
             .addFormDataPart("msg", msg)
             .addFormDataPart("description", description)
@@ -389,7 +391,7 @@ suspend fun RocketChatClient.reportMessage(
     val adapter = moshi.adapter(MessageReportPayload::class.java)
     val payloadBody = adapter.toJson(payload)
 
-    val body = RequestBody.create(MEDIA_TYPE_JSON, payloadBody)
+    val body = payloadBody.toRequestBody(MEDIA_TYPE_JSON)
 
     val url = requestUrl(restUrl, "chat.reportMessage").build()
     val request = requestBuilderForAuthenticatedMethods(url).post(body).build()

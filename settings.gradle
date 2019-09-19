@@ -2,6 +2,4 @@ rootProject.name = 'rocket.chat.kotlin.sdk'
 include 'core'
 include 'common'
 include 'compat'
-include 'rxjava'
 include 'sample'
-

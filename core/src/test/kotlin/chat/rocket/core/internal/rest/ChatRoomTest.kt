@@ -7,7 +7,9 @@ import chat.rocket.common.model.roomTypeOf
 import chat.rocket.common.util.PlatformLogger
 import chat.rocket.core.RocketChatClient
 import chat.rocket.core.TokenRepository
+import chat.rocket.core.createRocketChatClient
 import io.fabric8.mockwebserver.DefaultMockServer
+import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.junit.Before
@@ -15,7 +17,6 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
-import kotlin.test.assertTrue
 
 class ChatRoomTest {
     private lateinit var mockServer: DefaultMockServer
@@ -35,7 +36,7 @@ class ChatRoomTest {
         mockServer.start()
 
         val client = OkHttpClient()
-        sut = RocketChatClient.create {
+        sut = createRocketChatClient {
             httpClient = client
             restUrl = mockServer.url("/")
             userAgent = "Rocket.Chat.Kotlin.SDK"
